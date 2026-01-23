@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&display=swap');
+
+
+@layer base {
+  body {
+    font-family: "Lato", sans-serif, ;
+  }
+}
+
+.bg-blue {
+  background: #233a95;
+}
+
+.header-wrapper .top-strip {
+  padding: 8px 0px;
+}
+
+.header-wrapper .top-strip p {
+  font-size: 12px;
+  color: white;
+  font-weight: 700;
+}
+
+.header-wrapper .header {
+  padding: 15px 0px;
+}
+
+.logo-wrapper img {
+  width: 164px;
+}
+
+.menu-link {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #202435;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.5rem 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.menu-link:hover {
+  color: white;
+  background-color: #4f39f6;
+}
+
+.slick-prev,
+.slick-next {
+  z-index: 40 !important;
+  right: 27px !important;
+  width: 36px;
+  height: 36px;
+
+}
+
+.slick-prev {
+  left: 7px !important;
+}
+
+/* Arrow icon */
+.slick-prev:before,
+.slick-next:before {
+  font-size: 40px !important;
+  color: black !important;
+  opacity: 1;
+  width: 36px;
+
+}
+
+/* Hover effect */
+/* .slick-prev:hover,
+.slick-next:hover {
+  background: #f3f4f6 !important; /* light gray */
+@keyframes slow-zoom {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+.animate-slow-zoom {
+  animation: slow-zoom 20s infinite alternate ease-in-out;
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+}
+
+
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}

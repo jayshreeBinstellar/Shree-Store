@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --font-sans: "Outfit", sans-serif;
+        --font-serif: "Inter", sans-serif;
+    }
+
+    body {
+        @apply bg-gray-50 text-gray-900 font-sans;
+        margin: 0;
+        display: flex;
+        min-width: 320px;
+        min-height: 100vh;
+    }
+}
+
+#root {
+    width: 100%;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db;
+}

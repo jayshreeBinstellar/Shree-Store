@@ -789,13 +789,13 @@ exports.getTransactionLogs = catchAsync(async (req, res) => {
     const query = `
         SELECT order_id, user_id, total_amount, payment_id, payment_method, status, created_at
         FROM orders
-        WHERE payment_id IS NOT NULL OR status = 'Paid' OR status = 'Delivered'
+        WHERE payment_id IS NOT NULL OR status = 'paid' OR status = 'Delivered'
         ORDER BY created_at DESC
         LIMIT $1 OFFSET $2
     `;
     const countQuery = `
         SELECT COUNT(*) FROM orders
-        WHERE payment_id IS NOT NULL OR status = 'Paid' OR status = 'Delivered'
+        WHERE payment_id IS NOT NULL OR status = 'paid' OR status = 'Delivered'
     `;
 
     const result = await pool.query(query, [parseInt(limit), parseInt(offset)]);
@@ -874,7 +874,7 @@ exports.syncStripeTransaction = catchAsync(async (req, res) => {
 
         const result = await pool.query(
             `UPDATE orders 
-             SET status = 'Paid',
+             SET status = 'paid',
                  payment_method = $1,
                  receipt_url = $2,
                  payment_raw = $3,

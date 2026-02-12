@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import MuiPagination from "../Pagination";
 
-const ActivityLogs = ({ logs, total, page, limit, totalPages, onPageChange }) => {
+const ActivityLogs = ({ logs, total, currentPage, limit, totalPages, onPageChange, itemsPerPage, itemsTotal }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [sortConfig, setSortConfig] = useState({ key: "created_at", direction: "desc" });
     const [filterAction, setFilterAction] = useState("");
@@ -67,21 +67,22 @@ const ActivityLogs = ({ logs, total, page, limit, totalPages, onPageChange }) =>
                     <h3 className="text-lg font-black text-gray-900 uppercase tracking-widest">Audit Activity Logs</h3>
 
                     {/* Filter and Search Section */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {/* Search */}
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+                        {/* Search - Left */}
                         <input
                             type="text"
                             placeholder="Search by admin, action, or IP..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full md:w-80 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
 
-                        {/* Action Filter */}
+                        {/* Action Filter - Right */}
                         <select
                             value={filterAction}
                             onChange={(e) => setFilterAction(e.target.value)}
-                            className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full md:w-60 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         >
                             <option value="">All Actions</option>
                             {uniqueActions.map(action => (
@@ -89,13 +90,8 @@ const ActivityLogs = ({ logs, total, page, limit, totalPages, onPageChange }) =>
                             ))}
                         </select>
 
-                        {/* Info Badge */}
-                        <div className="flex items-center justify-end px-4 py-2 bg-indigo-50 rounded-lg">
-                            <span className="text-sm font-semibold text-indigo-700">
-                                {filteredAndSortedLogs.length} of {total} logs • Page {page}/{totalPages}
-                            </span>
-                        </div>
                     </div>
+
                 </div>
             </div>
 
@@ -129,7 +125,7 @@ const ActivityLogs = ({ logs, total, page, limit, totalPages, onPageChange }) =>
                             <tr key={log.log_id} className="hover:bg-gray-50/50 transition-colors">
                                 <td className="px-8 py-4 font-bold text-gray-900">{log.admin_name || "Unknown"}</td>
                                 <td className="px-8 py-4">
-                                    <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm font-semibold">
+                                    <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold">
                                         {log.action}
                                     </span>
                                 </td>
@@ -150,9 +146,11 @@ const ActivityLogs = ({ logs, total, page, limit, totalPages, onPageChange }) =>
             {/* Pagination */}
             {totalPages > 1 && (
                 <MuiPagination
-                    page={page}
+                    currentPage={currentPage}
                     totalPages={totalPages}
                     onPageChange={onPageChange}
+                    itemsPerPage={itemsPerPage}
+                    itemsTotal={itemsTotal}
                 />
             )}
         </div>
@@ -160,3 +158,7 @@ const ActivityLogs = ({ logs, total, page, limit, totalPages, onPageChange }) =>
 };
 
 export default ActivityLogs;
+
+
+
+

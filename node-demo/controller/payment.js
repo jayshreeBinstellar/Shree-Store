@@ -201,11 +201,11 @@ const processSuccessfulPayment = async (session) => {
     // 2. Deserialize Items
     const orderItems = JSON.parse(items);
 
-    // 3. Insert Order (Directly as PAID)
+    // 3. Insert Order (Directly as paid)
     const insertOrderQuery = `
             INSERT INTO orders 
             (user_id, subtotal, tax_amount, shipping_fee, discount_amount, coupon_id, shipping_id, total_amount, status, address_id, created_at, payment_id, payment_method)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'Paid', $9, NOW(), $10, 'Stripe')
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'paid', $9, NOW(), $10, 'Stripe')
             RETURNING order_id
         `;
 
@@ -331,7 +331,7 @@ exports.verifyPayment = catchAsync(async (req, res) => {
       return res.status(400).json({ status: "error", message: "Payment not completed" });
     }
 
-    console.log(`[verifyPayment] Session Paid. Processing Order Creation...`);
+    console.log(`[verifyPayment] Session paid. Processing Order Creation...`);
     const result = await processSuccessfulPayment(session);
 
     res.status(200).json({

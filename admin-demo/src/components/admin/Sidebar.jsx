@@ -54,7 +54,7 @@ const Sidebar = () => {
                 </span>
             </div>
 
-            <nav className="flex flex-col gap-2 overflow-y-auto pr-2 custom-scrollbar">
+            <nav className="flex flex-col gap-1 overflow-y-auto pr-2 custom-scrollbar">
                 <SidebarItem to="/" icon={Squares2X2Icon} label="Dashboard" />
                 <SidebarItem to="/orders" icon={ClipboardDocumentListIcon} label="Orders" />
                 <SidebarItem to="/products" icon={PlusIcon} label="Products" />
@@ -70,13 +70,13 @@ const Sidebar = () => {
                 <SidebarItem to="/settings" icon={Cog6ToothIcon} label="Settings" />
             </nav>
 
-            <div className="mt-auto bg-gray-50 rounded-3xl p-4 hidden lg:block border border-gray-100">
+            {/* <div className="mt-auto bg-gray-50 rounded-3xl p-4 hidden lg:block border border-gray-100">
                 <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Build Status</p>
                 <div className="flex items-center gap-2">
                     <div className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse"></div>
                     <span className="text-sm font-bold text-gray-700">v2.1 Stable</span>
                 </div>
-            </div>
+            </div> */}
         </aside>
     );
 };

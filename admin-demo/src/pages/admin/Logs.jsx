@@ -10,13 +10,13 @@ const Logs = () => {
     const [paginationData, setPaginationData] = useState({
         total: 0,
         page: 1,
-        limit: 20,
+        limit: 10,
         totalPages: 1
     });
 
     const fetchLogs = async (page = 1) => {
         try {
-            const data = await AdminService.getLogs(page, 20);
+            const data = await AdminService.getLogs(page, 10);
             if (data.status === "success") {
                 setLogs(data.logs);
                 setPaginationData({
@@ -57,11 +57,11 @@ const Logs = () => {
 
     return <ActivityLogs
         logs={logs}
-        total={paginationData.total}
-        page={paginationData.page}
-        limit={paginationData.limit}
+        currentPage={currentPage}
         totalPages={paginationData.totalPages}
         onPageChange={handlePageChange}
+        itemsTotal={paginationData.total}
+        itemsPerPage={paginationData.limit}
     />;
 };
 

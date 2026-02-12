@@ -83,7 +83,7 @@ const Categories = () => {
             }
             fetchCategories();
             handleCloseModal();
-        } catch (err) { 
+        } catch (err) {
             console.error(err);
             alert('Failed to save category');
         } finally {

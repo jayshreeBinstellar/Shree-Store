@@ -559,7 +559,7 @@ exports.verifyPayment = catchAsync(async (req, res) => {
         if (orderRes.rows.length === 0) throw new Error("Order not found");
         const order = orderRes.rows[0];
 
-        if (order.status === 'Paid') {
+        if (order.status === 'paid') {
             await client.query('ROLLBACK');
             return res.status(200).json({ status: "success", message: "Order already paid" });
         }
@@ -567,12 +567,12 @@ exports.verifyPayment = catchAsync(async (req, res) => {
         // 2. Get Order Items
         const itemsRes = await client.query("SELECT * FROM order_items WHERE order_id = $1", [orderId]);
         const orderItems = itemsRes.rows;
-        
+
         await finalizeOrder(client, orderId, userId, order.coupon_id);
 
         // 4. Update Order Status
         await client.query(
-            "UPDATE orders SET status = 'Paid', payment_id = $1, payment_method = $2 WHERE order_id = $3",
+            "UPDATE orders SET status = 'paid', payment_id = $1, payment_method = $2 WHERE order_id = $3",
             [paymentId || 'TEST_PAYMENT', paymentMethod || 'Card', orderId]
         );
 

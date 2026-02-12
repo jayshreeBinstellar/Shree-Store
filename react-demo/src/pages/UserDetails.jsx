@@ -252,7 +252,7 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                                                         onClick={() => handleOpenInvoice(order)}
                                                         title="Click to view Invoice"
                                                     >
-                                                        <td className="py-8 ">
+                                                        <td className="p-4 ">
                                                             <div className="flex flex-col">
                                                                 <span className="font-black text-gray-900 mb-2 truncate max-w-37.5">{order.id}</span>
                                                                 <span className="text-xs text-gray-400 font-bold mb-4">{order.date}</span>
@@ -275,7 +275,7 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                                                                 </div>
                                                             </div>
                                                         </td>
-                                                        <td className="py-8">
+                                                        <td className="p-4">
                                                             <div className={`flex flex-col ${order.status?.toLowerCase() === 'delivered' ? 'gap-2' : 'gap-1'}`}>
                                                                 <span className={`w-fit px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${order.status?.toLowerCase() === 'delivered' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
                                                                     }`}>
@@ -288,7 +288,7 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                                                                 )}
                                                             </div>
                                                         </td>
-                                                        <td className="py-8 font-black text-gray-900 text-right text-lg">
+                                                        <td className="p-4 font-black text-gray-900 text-right text-lg">
                                                             {order.total}
                                                         </td>
                                                     </tr>

@@ -38,7 +38,7 @@ const DashboardOverview = ({ stats, chartData, categoryData, topProducts }) => {
             </div>
 
             {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
                     <h3 className="text-lg font-black text-gray-900 mb-6 uppercase tracking-widest">Revenue Trends</h3>
                     <div className="h-80">
@@ -80,7 +80,7 @@ const DashboardOverview = ({ stats, chartData, categoryData, topProducts }) => {
                         </ResponsiveContainer>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Top Products Section */}
             <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden">

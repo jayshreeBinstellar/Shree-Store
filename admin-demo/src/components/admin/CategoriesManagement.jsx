@@ -1,7 +1,9 @@
 import React from "react";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 
-const CategoriesManagement = ({ categories, onEdit, onDelete, onAddClick }) => {
+
+
+const CategoriesManagement = ({ categories, onEdit, onDelete, onAddClick, isLoading = false }) => {
     return (
         <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
@@ -44,6 +46,7 @@ const CategoriesManagement = ({ categories, onEdit, onDelete, onAddClick }) => {
                     </tbody>
                 </table>
             </div>
+
         </div>
     );
 };

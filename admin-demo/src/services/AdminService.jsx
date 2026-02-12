@@ -110,9 +110,14 @@ export const bulkAddProducts = async (products) => {
     });
 };
 
-export const getCategories = async () => {
+export const getCategories = async (page = 1, limit = 10, search = '') => {
+    const params = new URLSearchParams({
+        page,
+        limit,
+        ...(search && { search })
+    });
     return await APIManager.getRequest({
-        path: API_ENDPOINT.GET_CATEGORIES,
+        path: `${API_ENDPOINT.GET_CATEGORIES}?${params}`,
         token: true
     });
 };

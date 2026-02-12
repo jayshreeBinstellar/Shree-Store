@@ -2,9 +2,9 @@ import React from "react";
 import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
 import MuiPagination from "../Pagination";
 
-const CustomersManagement = ({ 
-    customers, 
-    onToggleBlock, 
+const CustomersManagement = ({
+    customers,
+    onToggleBlock,
     onUpdateRole,
     currentPage = 1,
     totalPages = 1,
@@ -15,14 +15,15 @@ const CustomersManagement = ({
     return (
         <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden flex flex-col">
             <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                <h3 className="text-lg font-black text-gray-900 uppercase tracking-widest">User Directory</h3>
+                <h3 className="text-lg font-black text-gray-900 uppercase tracking-widest">Customers Details</h3>
                 <span className="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold uppercase tracking-widest">{totalCustomers} Accounts</span>
             </div>
             <div className="overflow-x-auto flex-1">
                 <table className="w-full text-left">
                     <thead>
                         <tr className="bg-gray-50/50">
-                            <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">Customer</th>
+                            <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">Customer Name</th>
+                            <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">Email</th>
                             <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">Role</th>
                             <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">Status</th>
                             <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">Action</th>
@@ -34,8 +35,10 @@ const CustomersManagement = ({
                                 <td className="px-8 py-4">
                                     <div className="flex flex-col">
                                         <span className="font-bold text-gray-900">{user.full_name}</span>
-                                        <span className="text-xs text-gray-400">{user.email}</span>
                                     </div>
+                                </td>
+                                <td className="px-8 py-4">
+                                    <span className="font-bold text-gray-900">{user.email}</span>
                                 </td>
                                 <td className="px-8 py-4">
                                     <select

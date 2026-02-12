@@ -55,6 +55,12 @@ export const getShippingOptions = async () => {
     });
 };
 
+export const getStoreSettings = async () => {
+    return await APIManager.getRequest({
+        path: '/shop/settings', 
+    });
+};
+
 export const validateCoupon = async (data) => {
     return await APIManager.postRequest({
         path: API_ENDPOINT.VALIDATE_COUPON,

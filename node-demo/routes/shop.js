@@ -11,7 +11,8 @@ router.get('/products/:id', shopController.getProductById);
 router.get('/products/:id/related', shopController.getRelatedProducts);
 router.post('/checkout', verifyToken, paymentController.createCheckoutSession);
 router.post('/orders', verifyToken, shopController.createOrder);
-router.post('/orders/verify-payment', verifyToken, shopController.verifyPayment);
+// Modified to use paymentController.verifyPayment for Stripe integration
+router.post('/orders/verify-payment', verifyToken, paymentController.verifyPayment);
 router.get('/orders/history', verifyToken, shopController.getOrderHistory);
 
 // Reviews
@@ -20,6 +21,8 @@ router.get('/products/:id/reviews', shopController.getProductReviews);
 
 router.get('/categories', commonController.getCategories);
 router.get('/banners', shopController.getBanners);
+// Store Settings
+router.get('/settings', commonController.getStoreSettings);
 
 // Wishlist
 router.get('/wishlist', verifyToken, shopController.getWishlist);

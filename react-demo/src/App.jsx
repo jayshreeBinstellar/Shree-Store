@@ -6,13 +6,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Main from './layout/Main';
 import { ProtectedRoute } from './context/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
-import { createContext, useEffect, useState } from 'react';
 import { CartProvider } from './context/CartContext';
 import { useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { getCountries } from './services/CommonService';
+import { SettingsProvider } from './context/SettingsContext';
 
-const MyContext = createContext();
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -26,35 +24,11 @@ function ScrollToTop() {
 
 function App() {
 
-  const [country, setCountry] = useState([]);
-  const countryList = async () => {
-    try {
-      const data = await getCountries();
-
-      const countries = data.map(
-        (item) => item.name.common
-      );
-      setCountry(countries);
-      // console.log(countries);
-    } catch (error) {
-      console.log(error, "error");
-
-    }
-  }
-
-  useEffect(() => {
-    countryList();
-  }, [])
-
-  const values = {
-    country
-  }
-
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <ScrollToTop/>
-        <MyContext.Provider value={values}>
+      <SettingsProvider>
+        <BrowserRouter>
+          <ScrollToTop />
           <CartProvider>
             <Routes>
               <Route path='/main/*' element={
@@ -65,12 +39,10 @@ function App() {
               <Route path='*' element={<Auth />} />
             </Routes>
           </CartProvider>
-        </MyContext.Provider>
-      </BrowserRouter>
+        </BrowserRouter>
+      </SettingsProvider>
     </AuthProvider>
   );
 }
 
 export default App;
-
-export { MyContext }

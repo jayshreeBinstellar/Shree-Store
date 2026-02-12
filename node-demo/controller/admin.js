@@ -1,7 +1,9 @@
 const pool = require('../db');
 const catchAsync = require('../utils/catchAsync');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { logActivity, getIpAddress } = require('../utils/auditLogger');
 
-//this APi for get sales stats
+//this APi for get stats for dashboard
 exports.getSalesStats = catchAsync(async (req, res) => {
     const query = `
         SELECT 
@@ -107,6 +109,7 @@ exports.addProduct = catchAsync(async (req, res) => {
         "INSERT INTO products (title, description, price, old_price, thumbnail, stock, category, images, rating) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 0) RETURNING *",
         [title, description, price, old_price, thumbnail, stock, category, images || []]
     );
+    await logActivity(req.user.id, 'Created Product', getIpAddress(req), { product_id: result.rows[0].product_id, title: result.rows[0].title });
     res.status(201).json({ status: "success", product: result.rows[0] });
 });
 
@@ -125,6 +128,7 @@ exports.bulkAddProducts = catchAsync(async (req, res) => {
             inserted.push(res.rows[0]);
         }
         await client.query('COMMIT');
+        await logActivity(req.user.id, 'Bulk Added Products', getIpAddress(req), { count: inserted.length });
         res.status(201).json({ status: "success", count: inserted.length });
     } catch (error) {
         await client.query('ROLLBACK');
@@ -143,6 +147,9 @@ exports.updateProduct = catchAsync(async (req, res) => {
         "UPDATE products SET title = $1, description = $2, price = $3, old_price = $4, thumbnail = $5, stock = $6, category = $7, images = $8 WHERE product_id = $9 RETURNING *",
         [title, description, price, old_price, thumbnail, stock, category, images || [], id]
     );
+    if (result.rows.length > 0) {
+        await logActivity(req.user.id, 'Updated Product', getIpAddress(req), { product_id: id, title: title });
+    }
     if (result.rows.length === 0) {
         return res.status(404).json({ message: "Product not found" });
     }
@@ -156,6 +163,7 @@ exports.deleteProduct = catchAsync(async (req, res) => {
     if (result.rows.length === 0) {
         return res.status(404).json({ message: "Product not found" });
     }
+    await logActivity(req.user.id, 'Deleted Product', getIpAddress(req), { product_id: id });
     res.status(200).json({ status: "success", message: "Product deleted" });
 });
 
@@ -166,6 +174,9 @@ exports.toggleProductStatus = catchAsync(async (req, res) => {
         "UPDATE products SET is_active = NOT is_active WHERE product_id = $1 RETURNING *",
         [id]
     );
+    if (result.rows.length > 0) {
+        await logActivity(req.user.id, 'Toggled Product Status', getIpAddress(req), { product_id: id, status: result.rows[0].is_active });
+    }
     res.status(200).json({ status: "success", product: result.rows[0] });
 });
 
@@ -173,14 +184,10 @@ exports.toggleProductStatus = catchAsync(async (req, res) => {
 exports.softDeleteProduct = catchAsync(async (req, res) => {
     const { id } = req.params;
     await pool.query("UPDATE products SET is_soft_deleted = TRUE WHERE product_id = $1", [id]);
+    await logActivity(req.user.id, 'Archived Product', getIpAddress(req), { product_id: id });
     res.status(200).json({ status: "success", message: "Product moved to archive" });
 });
 
-//this APi for get store settings in admin panel
-exports.getStoreSettings = catchAsync(async (req, res) => {
-    const result = await pool.query("SELECT * FROM store_settings LIMIT 1");
-    res.status(200).json({ status: "success", settings: result.rows[0] });
-});
 
 //this APi for update store settings in admin panel
 exports.updateStoreSettings = catchAsync(async (req, res) => {
@@ -194,6 +201,7 @@ exports.updateStoreSettings = catchAsync(async (req, res) => {
             RETURNING *`,
         [store_name, currency, currency_symbol, tax_percent, contact_email, contact_phone, address]
     );
+    await logActivity(req.user.id, 'Updated Store Settings', getIpAddress(req), req.body);
     res.status(200).json({ status: "success", settings: result.rows[0] });
 });
 
@@ -270,6 +278,7 @@ exports.updateOrderStatus = catchAsync(async (req, res) => {
     if (result.rows.length === 0) {
         return res.status(404).json({ message: "Order not found" });
     }
+    await logActivity(req.user.id, 'Updated Order Status', getIpAddress(req), { order_id: id, status });
     res.status(200).json({ status: "success", order: result.rows[0] });
 });
 
@@ -339,6 +348,9 @@ exports.toggleUserBlock = catchAsync(async (req, res) => {
         "UPDATE users SET is_blocked = NOT is_blocked WHERE user_id = $1 RETURNING *",
         [id]
     );
+    if (result.rows.length > 0) {
+        await logActivity(req.user.id, 'Toggled User Block', getIpAddress(req), { target_user_id: id, is_blocked: result.rows[0].is_blocked });
+    }
     res.status(200).json({ status: "success", customer: result.rows[0] });
 });
 
@@ -351,6 +363,9 @@ exports.updateUserRole = catchAsync(async (req, res) => {
         "UPDATE users SET role = $1, is_admin = $2 WHERE user_id = $3 RETURNING *",
         [role, isAdmin, id]
     );
+    if (result.rows.length > 0) {
+        await logActivity(req.user.id, 'Updated User Role', getIpAddress(req), { target_user_id: id, role });
+    }
     res.status(200).json({ status: "success", user: result.rows[0] });
 });
 
@@ -389,6 +404,7 @@ exports.addCategory = catchAsync(async (req, res) => {
         "INSERT INTO categories (name, slug, parent_id, sort_order) VALUES ($1, $2, $3, $4) RETURNING *",
         [name, slug, parent_id || null, sort_order || 0]
     );
+    await logActivity(req.user.id, 'Created Category', getIpAddress(req), { category: name });
     res.status(201).json({ status: "success", category: result.rows[0] });
 });
 
@@ -400,6 +416,7 @@ exports.updateCategory = catchAsync(async (req, res) => {
         "UPDATE categories SET name = $1, slug = $2, parent_id = $3, sort_order = $4, is_active = $5 WHERE category_id = $6 RETURNING *",
         [name, slug, parent_id || null, sort_order || 0, is_active, id]
     );
+    await logActivity(req.user.id, 'Updated Category', getIpAddress(req), { category_id: id, name });
     res.status(200).json({ status: "success", category: result.rows[0] });
 });
 
@@ -407,6 +424,7 @@ exports.updateCategory = catchAsync(async (req, res) => {
 exports.deleteCategory = catchAsync(async (req, res) => {
     const { id } = req.params;
     await pool.query("DELETE FROM categories WHERE category_id = $1", [id]);
+    await logActivity(req.user.id, 'Deleted Category', getIpAddress(req), { category_id: id });
     res.status(200).json({ status: "success", message: "Category deleted" });
 });
 
@@ -455,6 +473,7 @@ exports.addCoupon = catchAsync(async (req, res) => {
         "INSERT INTO coupons (code, type, value, min_cart_value, expiry_date, usage_limit) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
         [code, discount_type, discount_value, min_order_value, expiry_date, usage_limit || 100]
     );
+    await logActivity(req.user.id, 'Created Coupon', getIpAddress(req), { code });
     res.status(201).json({ status: "success", coupon: result.rows[0] });
 });
 
@@ -462,6 +481,7 @@ exports.addCoupon = catchAsync(async (req, res) => {
 exports.deleteCoupon = catchAsync(async (req, res) => {
     const { id } = req.params;
     await pool.query("DELETE FROM coupons WHERE coupon_id = $1", [id]);
+    await logActivity(req.user.id, 'Deleted Coupon', getIpAddress(req), { coupon_id: id });
     res.status(200).json({ status: "success", message: "Coupon deleted" });
 });
 
@@ -494,6 +514,7 @@ exports.addBanner = catchAsync(async (req, res) => {
         "INSERT INTO banners (title, description, image_url, position, display_order, is_active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
         [title, description, image_url, position, display_order || 0, is_active !== false]
     );
+    await logActivity(req.user.id, 'Created Banner', getIpAddress(req), { title });
     res.status(201).json({ status: "success", banner: result.rows[0] });
 });
 
@@ -501,6 +522,7 @@ exports.addBanner = catchAsync(async (req, res) => {
 exports.deleteBanner = catchAsync(async (req, res) => {
     const { id } = req.params;
     await pool.query("DELETE FROM banners WHERE banner_id = $1", [id]);
+    await logActivity(req.user.id, 'Deleted Banner', getIpAddress(req), { banner_id: id });
     res.status(200).json({ status: "success", message: "Banner deleted" });
 });
 
@@ -522,6 +544,7 @@ exports.updateBanner = catchAsync(async (req, res) => {
         return res.status(404).json({ status: "error", message: "Banner not found" });
     }
 
+    await logActivity(req.user.id, 'Updated Banner', getIpAddress(req), { banner_id: id, title });
     res.status(200).json({ status: "success", banner: result.rows[0] });
 });
 
@@ -639,10 +662,24 @@ exports.getTickets = catchAsync(async (req, res) => {
 exports.updateTicketStatus = catchAsync(async (req, res) => {
     const { id } = req.params;
     const { status, reply } = req.body;
-    const result = await pool.query(
-        "UPDATE support_tickets SET status = $1, admin_reply = $2, updated_at = NOW() WHERE ticket_id = $3 RETURNING *",
-        [status, reply || null, id]
-    );
+
+    let result;
+    if (reply) {
+        result = await pool.query(
+            "UPDATE support_tickets SET status = $1, message = CONCAT(message, E'\n\n--- Admin Reply: ' || NOW()::text || ' ---\n' || $2), updated_at = NOW() WHERE ticket_id = $3 RETURNING *",
+            [status, reply, id]
+        );
+    } else {
+        result = await pool.query(
+            "UPDATE support_tickets SET status = $1, updated_at = NOW() WHERE ticket_id = $2 RETURNING *",
+            [status, id]
+        );
+    }
+
+    if (result.rows.length === 0) {
+        return res.status(404).json({ status: "error", message: "Ticket not found" });
+    }
+    await logActivity(req.user.id, reply ? 'Replied to Ticket' : 'Updated Ticket Status', getIpAddress(req), { ticket_id: id, status });
     res.status(200).json({ status: "success", ticket: result.rows[0] });
 });
 
@@ -697,6 +734,7 @@ exports.updateReviewStatus = catchAsync(async (req, res) => {
         "UPDATE reviews SET status = $1, admin_reply = $2 WHERE review_id = $3 RETURNING *",
         [status, reply || null, id]
     );
+    await logActivity(req.user.id, reply ? 'Replied to Review' : 'Updated Review Status', getIpAddress(req), { review_id: id, status });
     res.status(200).json({ status: "success", review: result.rows[0] });
 });
 
@@ -707,6 +745,7 @@ exports.addShippingOption = catchAsync(async (req, res) => {
         "INSERT INTO shipping_options (name, cost, estimated_days) VALUES ($1, $2, $3) RETURNING *",
         [name, cost, estimated_days]
     );
+    await logActivity(req.user.id, 'Added Shipping Option', getIpAddress(req), { name, cost });
     res.status(201).json({ status: "success", option: result.rows[0] });
 });
 
@@ -718,6 +757,7 @@ exports.updateShippingOption = catchAsync(async (req, res) => {
         "UPDATE shipping_options SET name = $1, cost = $2, estimated_days = $3 WHERE shipping_id = $4 RETURNING *",
         [name, cost, estimated_days, id]
     );
+    await logActivity(req.user.id, 'Updated Shipping Option', getIpAddress(req), { shipping_id: id, name });
     res.status(200).json({ status: "success", option: result.rows[0] });
 });
 
@@ -725,6 +765,7 @@ exports.updateShippingOption = catchAsync(async (req, res) => {
 exports.deleteShippingOption = catchAsync(async (req, res) => {
     const { id } = req.params;
     await pool.query("DELETE FROM shipping_options WHERE shipping_id = $1", [id]);
+    await logActivity(req.user.user_id, 'Deleted Shipping Option', getIpAddress(req), { shipping_id: id });
     res.status(200).json({ status: "success", message: "Shipping option deleted" });
 });
 
@@ -736,6 +777,7 @@ exports.updateOrderShipping = catchAsync(async (req, res) => {
         "UPDATE orders SET tracking_number = $1, shipping_carrier = $2, status = $3 WHERE order_id = $4 RETURNING *",
         [tracking_number, shipping_carrier, status, id]
     );
+    await logActivity(req.user.user_id, 'Updated Order Shipping', getIpAddress(req), { order_id: id, tracking_number });
     res.status(200).json({ status: "success", order: result.rows[0] });
 });
 
@@ -768,4 +810,98 @@ exports.getTransactionLogs = catchAsync(async (req, res) => {
         limit: parseInt(limit),
         totalPages: Math.ceil(totalTransactions / limit)
     });
+});
+
+exports.getStripePaymentDetails = catchAsync(async (req, res) => {
+    const { paymentId } = req.params;
+
+    if (!paymentId || paymentId === 'PENDING' || paymentId === 'TEST_PAYMENT') {
+        return res.status(400).json({ status: "error", message: "Invalid or missing Payment ID" });
+    }
+
+    try {
+        // Retrieve the PaymentIntent from Stripe
+        const paymentIntent = await stripe.paymentIntents.retrieve(paymentId);
+
+        // Retrieve the latest charge to get receipt URL and other details
+        let charge = null;
+        if (paymentIntent.latest_charge) {
+            charge = await stripe.charges.retrieve(paymentIntent.latest_charge);
+        }
+
+        res.status(200).json({
+            status: "success",
+            payment: paymentIntent,
+            charge: charge
+        });
+    } catch (error) {
+        console.error("Stripe Fetch Error:", error);
+        return res.status(400).json({ status: "error", message: error.message });
+    }
+});
+
+exports.syncStripeTransaction = catchAsync(async (req, res) => {
+    const { paymentId, orderId } = req.body;
+
+    if (!paymentId) {
+        return res.status(400).json({ status: "error", message: "Payment ID is required" });
+    }
+
+    try {
+        const paymentIntent = await stripe.paymentIntents.retrieve(paymentId);
+
+        let receiptUrl = null;
+        let paymentMethodType = 'card';
+
+        if (paymentIntent.latest_charge) {
+            const charge = await stripe.charges.retrieve(paymentIntent.latest_charge);
+            receiptUrl = charge.receipt_url;
+            paymentMethodType = charge.payment_method_details?.type || 'card';
+        }
+
+        // Update Order directly if orderId is provided, otherwise just return info
+        if (!orderId) {
+            return res.status(400).json({
+                status: "error",
+                message: "Order ID is required to sync transaction to an order",
+                scannedPayment: {
+                    paymentId,
+                    amount: paymentIntent.amount / 100,
+                    status: paymentIntent.status
+                }
+            });
+        }
+
+        const result = await pool.query(
+            `UPDATE orders 
+             SET status = 'Paid',
+                 payment_method = $1,
+                 receipt_url = $2,
+                 payment_raw = $3,
+                 payment_id = $4
+             WHERE order_id = $5 
+             RETURNING *`,
+            [
+                paymentMethodType,
+                receiptUrl,
+                JSON.stringify(paymentIntent),
+                paymentId,
+                orderId
+            ]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ status: "error", message: "Order not found or update failed" });
+        }
+
+        res.status(200).json({
+            status: "success",
+            message: "Transaction synced to order successfully",
+            order: result.rows[0]
+        });
+
+    } catch (error) {
+        console.error("Sync Error:", error);
+        return res.status(400).json({ status: "error", message: error.message });
+    }
 });

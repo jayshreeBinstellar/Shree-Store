@@ -3,6 +3,7 @@ const adminController = require('../controller/admin');
 const commonController = require('../controller/common');
 const verifyToken = require('../middleware/token');
 const isAdmin = require('../middleware/admin');
+const upload = require('../middleware/upload');
 const router = express.Router();
 
 // Apply both middlewares to all admin routes
@@ -46,23 +47,9 @@ router.get('/banners', adminController.getBanners);
 router.post('/banners', adminController.addBanner);
 router.put('/banners/:id', adminController.updateBanner);
 router.delete('/banners/:id', adminController.deleteBanner);
-router.post('/upload-banner-image', (req, res, next) => {
-    req.upload(req, res, (err) => {
-        if (err) {
-            return res.status(400).json({ status: "error", message: err.message });
-        }
-        next();
-    });
-}, adminController.uploadBannerImage);
+router.post('/upload-banner-image', upload.single('image'), adminController.uploadBannerImage);
 
-router.post('/upload-product-image', (req, res, next) => {
-    req.upload(req, res, (err) => {
-        if (err) {
-            return res.status(400).json({ status: "error", message: err.message });
-        }
-        next();
-    });
-}, adminController.uploadProductImage);
+router.post('/upload-product-image', upload.single('image'), adminController.uploadProductImage);
 
 // Support
 router.get('/tickets', adminController.getTickets);
@@ -81,9 +68,11 @@ router.delete('/shipping-options/:id', adminController.deleteShippingOption);
 
 // Payments
 router.get('/transactions', adminController.getTransactionLogs);
+router.get('/payments/:paymentId/stripe', adminController.getStripePaymentDetails);
+router.post('/payments/sync', adminController.syncStripeTransaction);
 
 // Settings
-router.get('/settings', adminController.getStoreSettings);
-router.put('/settings', adminController.updateStoreSettings);   
+router.get('/settings', commonController.getStoreSettings);
+router.put('/settings', adminController.updateStoreSettings);
 
 module.exports = router;

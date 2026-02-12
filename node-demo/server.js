@@ -5,10 +5,17 @@ const multer = require("multer");
 
 const app = express();
 
+// DEBUG LOGGING MIDDLEWARE - Add this very first
+app.use((req, res, next) => {
+  console.log(`[SERVER] Incoming Request: ${req.method} ${req.url}`);
+  next();
+});
+
 const paymentController = require('./controller/payment');
 
+// Webhook needs raw body
 app.post('/webhook', express.raw({ type: 'application/json' }), paymentController.webhook);
-
+app.set('trust proxy', true);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

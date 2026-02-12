@@ -8,6 +8,7 @@ import CategoryPage from './pages/CategoryPage'
 import Contact from './pages/Contact'
 import UserDetails from './pages/UserDetails'
 import Support from './pages/Support'
+import PaymentSuccess from './pages/PaymentSuccess'
 
 const routes = [
   {
@@ -77,7 +78,7 @@ const routes = [
           routeName="footwear"
           category="mens-shoes"
         />
-      },  
+      },
       {
         path: 'grocery',
         name: 'grocery',
@@ -113,7 +114,7 @@ const routes = [
         name: 'about',
         element: <About />
       },
-         {
+      {
         path: 'support',
         name: 'support',
         element: <Support />
@@ -127,6 +128,11 @@ const routes = [
         path: 'account',
         name: 'account',
         element: <UserDetails />
+      },
+      {
+        path: 'payment-success',
+        name: 'payment-success',
+        element: <PaymentSuccess />
       }
     ]
 

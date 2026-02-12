@@ -1,6 +1,7 @@
 const pool = require('../db');
 const catchAsync = require('../utils/catchAsync');
 const couponUtils = require('../utils/couponUtils');
+const { finalizeOrder } = require('../utils/orderLifecycle');
 
 exports.getProducts = catchAsync(async (req, res) => {
     const {
@@ -126,7 +127,7 @@ exports.createOrder = catchAsync(async (req, res) => {
 
     const client = await pool.connect();
 
-    try {   
+    try {
         await client.query('BEGIN');
 
         // 1. Validate items
@@ -566,38 +567,14 @@ exports.verifyPayment = catchAsync(async (req, res) => {
         // 2. Get Order Items
         const itemsRes = await client.query("SELECT * FROM order_items WHERE order_id = $1", [orderId]);
         const orderItems = itemsRes.rows;
+        
+        await finalizeOrder(client, orderId, userId, order.coupon_id);
 
-        // 3. Deduct Stock (Strict Check)
-        for (const item of orderItems) {
-            const stockRes = await client.query("SELECT stock, title FROM products WHERE product_id = $1 FOR UPDATE", [item.product_id]);
-            if (stockRes.rows.length === 0) throw new Error(`Product ${item.product_id} not found`);
-
-            const currentStock = stockRes.rows[0].stock;
-            if (currentStock < item.quantity) {
-                throw new Error(`Insufficient stock for product: ${stockRes.rows[0].title}. Payment received but order verification failed.`);
-                // In real world: Trigger a refund here.
-            }
-
-            await client.query("UPDATE products SET stock = stock - $1 WHERE product_id = $2", [item.quantity, item.product_id]);
-        }
-
-        // 4. Increment Coupon Usage
-        if (order.coupon_id) {
-            console.log(`[verifyPayment] Incrementing coupon usage - coupon_id: ${order.coupon_id}`);
-            await client.query("UPDATE coupons SET used_count = used_count + 1 WHERE coupon_id = $1", [order.coupon_id]);
-            console.log(`[verifyPayment] Coupon usage incremented successfully`);
-        } else {
-            console.log(`[verifyPayment] No coupon associated with order ${orderId}`);
-        }
-
-        // 5. Update Order Status
+        // 4. Update Order Status
         await client.query(
             "UPDATE orders SET status = 'Paid', payment_id = $1, payment_method = $2 WHERE order_id = $3",
             [paymentId || 'TEST_PAYMENT', paymentMethod || 'Card', orderId]
         );
-
-        // 6. Clear User Cart
-        await client.query("DELETE FROM cart WHERE user_id = $1", [userId]);
 
         await client.query('COMMIT');
 

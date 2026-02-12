@@ -3,8 +3,10 @@ import LocalPhoneIcon from '@mui/icons-material/LocalPhone'
 import EmailIcon from '@mui/icons-material/Email'
 import PlaceIcon from '@mui/icons-material/Place'
 import { Button } from '@mui/material'
+import { useSettings } from '../context/SettingsContext'
 
 export const ContactInfoCard = ({ type = 'support' }) => {
+    const { settings } = useSettings();
     return (
         <div className="space-y-12 py-4">
             <div className="space-y-8">
@@ -14,7 +16,7 @@ export const ContactInfoCard = ({ type = 'support' }) => {
                     </div>
                     <div>
                         <h4 className="font-bold text-gray-900">Phone Support</h4>
-                        <p className="text-gray-600">+1 (555) 000-0000</p>
+                        <p className="text-gray-600">{settings?.contact_phone || '+1 (555) 000-0000'}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-6">
@@ -23,7 +25,7 @@ export const ContactInfoCard = ({ type = 'support' }) => {
                     </div>
                     <div>
                         <h4 className="font-bold text-gray-900">Email Us</h4>
-                        <p className="text-gray-600">{type === 'support' ? 'support@grocerystore.com' : 'support@bacola.com'}</p>
+                        <p className="text-gray-600">{settings?.contact_email || (type === 'support' ? 'support@grocerystore.com' : 'support@bacola.com')}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-6">
@@ -32,7 +34,7 @@ export const ContactInfoCard = ({ type = 'support' }) => {
                     </div>
                     <div>
                         <h4 className="font-bold text-gray-900">Visit Us</h4>
-                        <p className="text-gray-600">{type === 'support' ? '123 Main Street, City, Country 12345' : '123 E-Commerce Way, Digital City, 90210'}</p>
+                        <p className="text-gray-600">{settings?.address || (type === 'support' ? '123 Main Street, City, Country 12345' : '123 E-Commerce Way, Digital City, 90210')}</p>
                     </div>
                 </div>
             </div>

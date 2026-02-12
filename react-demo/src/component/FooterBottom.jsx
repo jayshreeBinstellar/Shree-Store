@@ -3,7 +3,10 @@ import FacebookOutlinedIcon from "@mui/icons-material/FacebookOutlined";
 import TwitterIcon from "@mui/icons-material/Twitter";
 import InstagramIcon from "@mui/icons-material/Instagram";
 
+import { useSettings } from '../context/SettingsContext';
+
 const FooterBottom = () => {
+  const { settings } = useSettings();
   return (
     <div className=" py-4  border-t border-gray-200">
       <div className="container mx-auto px-4">
@@ -13,7 +16,7 @@ const FooterBottom = () => {
           <div className="text-sm text-gray-600 text-center lg:text-left">
             <p>
               Copyright 2026 © All rights reserved.
-              Powered by @Shree.
+              Powered by @{settings?.store_name || 'Shree'}.
             </p>
           </div>
 

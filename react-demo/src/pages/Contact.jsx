@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { Button, Alert } from '@mui/material'
 import BannerCarousel from '../component/BannerCarousel'
 import { getBanners } from '../services/ShopService'
@@ -44,9 +45,17 @@ const Contact = () => {
                 {/* Header Section */}
                 <div className="text-center max-w-3xl mx-auto mb-20">
                     <h1 className="text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">Get in Touch</h1>
-                    <p className="text-gray-600 text-lg leading-relaxed">
+                    <p className="text-gray-600 text-lg leading-relaxed mb-8">
                         Have a question or need assistance? Our dedicated team is here to help you find exactly what you need.
                     </p>
+                    <Button
+                        component={Link}
+                        to="/main/support"
+                        variant="contained"
+                        className="bg-indigo-600! hover:bg-indigo-700! py-3! px-8! rounded-full! font-bold! shadow-lg! transform hover:scale-105 transition-all"
+                    >
+                        Open Support Ticket
+                    </Button>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
@@ -82,50 +91,6 @@ const Contact = () => {
                         </form>
                     </div>
 
-                    {/* Information */}
-                    {/* <div className="space-y-12 py-4">
-                        <div className="space-y-8">
-                            <div className="flex items-center gap-6">
-                                <div className="bg-indigo-100 p-4 rounded-2xl "><LocalPhoneIcon/></div>
-                                <div>
-                                    <h4 className="font-bold text-gray-900">Phone Support</h4>
-                                    <p className="text-gray-600">+1 (555) 000-0000</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-6">
-                                <div className="bg-indigo-100 p-4 rounded-2xl"><EmailIcon/></div>
-                                <div>
-                                    <h4 className="font-bold text-gray-900">Email Us</h4>
-                                    <p className="text-gray-600">support@bacola.com</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-6">
-                                <div className="bg-indigo-100 p-4 rounded-2xl"><PlaceIcon/></div>
-                                <div>
-                                    <h4 className="font-bold text-gray-900">Visit Us</h4>
-                                    <p className="text-gray-600">123 E-Commerce Way, Digital City, 90210</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-gray-900 p-10 rounded-3xl text-white">
-                            <h4 className="text-2xl font-bold mb-4">Customer Support Hours</h4>
-                            <div className="space-y-2 opacity-80">
-                                <div className="flex justify-between border-b border-white/10 pb-2">
-                                    <span>Mon - Fri</span>
-                                    <span>9:00 AM - 8:00 PM</span>
-                                </div>
-                                <div className="flex justify-between border-b border-white/10 pb-2">
-                                    <span>Saturday</span>
-                                    <span>10:00 AM - 4:00 PM</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Sunday</span>
-                                    <span>Closed</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div> */}
                     <ContactInfoCard type="contact" />
                 </div>
             </div>

@@ -1,17 +1,14 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, {useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import Logo from "../assets/images/logo.png";
-import LocationDropdown from "./LocationDropdown";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
 import SearchInput from "./SearchInput";
 import Navigation from "./Navigation";
-import { MyContext } from "../App";
 import { useAuth } from "../context/AuthContext";
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import { useSettings } from "../context/SettingsContext";
 const Navbar = ({ onSearch, onOpenCart, cartCount }) => {
-  const context = useContext(MyContext);
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const { settings } = useSettings();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -26,12 +23,6 @@ const Navbar = ({ onSearch, onOpenCart, cartCount }) => {
     <div className={`sticky top-0 z-100 transition-all duration-300 ${scrolled ? "bg-white/80 backdrop-blur-xl shadow-lg py-1" : "bg-white py-2"
       }`}>
       <header className="w-full">
-        {/* TOP BAR - Optional, can keep for deals */}
-        {/* <div className={`transition-all duration-300 overflow-hidden ${scrolled ? 'h-0' : 'h-6'} bg-gray-100 flex items-center justify-center`}>
-          <p className="text-[9px] text-gray-600 font-bold uppercase tracking-[0.2em]">
-            <LocalShippingIcon/> Free shipping on all orders over $75
-          </p>
-        </div> */}
 
         <div className="container mx-auto px-4 mt-2">
           <div className="flex items-center justify-between gap-8">
@@ -39,16 +30,14 @@ const Navbar = ({ onSearch, onOpenCart, cartCount }) => {
             <div className="shrink-0">
               <NavLink to="/main/dashboard" className="flex items-center gap-2 group">
                 <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md">
-                  <span className="text-white font-black text-xl italic">S</span>
+                  <span className="text-white font-black text-xl italic">{settings?.store_name?.charAt(0) || 'S'}</span>
                 </div>
                 <div className="hidden sm:block">
-                  <h1 className="text-lg font-black text-gray-900 tracking-tighter">Shree</h1>
+                  <h1 className="text-lg font-black text-gray-900 tracking-tighter">{settings?.store_name || 'Shree'}</h1>
                   <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest -mt-1">Organic Market</p>
                 </div>
               </NavLink>
             </div>
-
-            <LocationDropdown />
 
             {/* SEARCH */}
             <div className="flex-1 max-w-2xl hidden md:block">

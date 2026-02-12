@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     Squares2X2Icon, ClipboardDocumentListIcon, PlusIcon, TagIcon,
     PhotoIcon, TicketIcon, UsersIcon, StarIcon, TruckIcon,
@@ -6,6 +6,7 @@ import {
     ShoppingBagIcon
 } from "@heroicons/react/24/outline";
 import { NavLink } from "react-router-dom";
+import { getSettings } from "../../services/AdminService";
 
 const SidebarItem = ({ to, icon: Icon, label }) => (
     <NavLink
@@ -26,6 +27,22 @@ const SidebarItem = ({ to, icon: Icon, label }) => (
 );
 
 const Sidebar = () => {
+    const [storeName, setStoreName] = useState('GROCERYPRO');
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await getSettings();
+                if (res.status === 'success' && res.settings && res.settings.store_name) {
+                    setStoreName(res.settings.store_name);
+                }
+            } catch (error) {
+                console.error("Failed to load settings in sidebar", error);
+            }
+        };
+        fetchSettings();
+    }, []);
+
     return (
         <aside className="w-80 bg-white border-r border-gray-100 flex flex-col p-8 sticky top-0 h-screen">
             <div className="flex items-center gap-3 mb-12 px-2">
@@ -33,7 +50,7 @@ const Sidebar = () => {
                     <ShoppingBagIcon className="h-6 w-6 text-white" />
                 </div>
                 <span className="text-xl font-black text-gray-900 hidden lg:block tracking-tighter uppercase">
-                    GROCERY<span className="text-indigo-600">PRO</span>
+                    {storeName}
                 </span>
             </div>
 
@@ -49,7 +66,7 @@ const Sidebar = () => {
                 <SidebarItem to="/shipping" icon={TruckIcon} label="Shipping" />
                 <SidebarItem to="/payments" icon={CreditCardIcon} label="Payments" />
                 <SidebarItem to="/support" icon={LifebuoyIcon} label="Support" />
-                {/* <SidebarItem to="/logs" icon={DocumentTextIcon} label="Audit Logs" /> */}
+                <SidebarItem to="/logs" icon={DocumentTextIcon} label="Audit Logs" />
                 <SidebarItem to="/settings" icon={Cog6ToothIcon} label="Settings" />
             </nav>
 

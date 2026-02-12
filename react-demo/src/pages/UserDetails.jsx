@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AddressManager from "../component/AddressManager";
 import OrderStatusTimeline from "../component/OrderStatusTimeline";
+import PaymentModal from "../component/PaymentModal";
 import { getProfile, getOrders, getWishlist } from "../services/UserService";
 
 
@@ -25,6 +26,10 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
     const [loading, setLoading] = useState(true);
     const [wishlist, setWishlist] = useState([]);
     const { cart } = useCart();
+
+    // Invoice Modal State
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
 
 
     useEffect(() => {
@@ -50,7 +55,8 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                         date: new Date(order.created_at).toLocaleDateString(),
                         status: order.status,
                         total: `$${order.total_amount}`,
-                        items: order.items || []
+                        items: order.items || [],
+                        raw: order // Store full object for invoice
                     })));
                 }
 
@@ -77,6 +83,11 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
     };
 
     const [activeTab, setActiveTab] = useState("orders");
+
+    const handleOpenInvoice = (order) => {
+        setSelectedOrder(order.raw);
+        setIsInvoiceOpen(true);
+    };
 
 
     if (loading) return (
@@ -236,7 +247,11 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                                             </thead>
                                             <tbody className="divide-y divide-gray-50">
                                                 {orderHistory.map((order) => (
-                                                    <tr key={order.id} className="group hover:bg-gray-50/50 transition-all">
+                                                    <tr key={order.id}
+                                                        className="group hover:bg-gray-50/50 transition-all cursor-pointer"
+                                                        onClick={() => handleOpenInvoice(order)}
+                                                        title="Click to view Invoice"
+                                                    >
                                                         <td className="py-8 ">
                                                             <div className="flex flex-col">
                                                                 <span className="font-black text-gray-900 mb-2 truncate max-w-37.5">{order.id}</span>
@@ -247,7 +262,10 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                                                                     {order.items.map((item, idx) => (
                                                                         <div
                                                                             key={idx}
-                                                                            onClick={() => onViewDetails(item.product_id, order.status?.toLowerCase() === 'delivered')}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation(); // Don't trigger modal
+                                                                                onViewDetails(item.product_id, order.status?.toLowerCase() === 'delivered')
+                                                                            }}
                                                                             className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center p-1 cursor-pointer hover:border-indigo-600 transition-all hover:scale-110"
                                                                             title={item.title}
                                                                         >
@@ -282,7 +300,10 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                                     {/* Mobile Cards */}
                                     <div className="md:hidden space-y-6">
                                         {orderHistory.map((order) => (
-                                            <div key={order.id} className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
+                                            <div key={order.id}
+                                                className="bg-gray-50 p-6 rounded-3xl border border-gray-100"
+                                                onClick={() => handleOpenInvoice(order)}
+                                            >
                                                 <div className="flex justify-between items-start mb-4">
                                                     <div>
                                                         <h4 className="font-black text-gray-900">{order.id}</h4>
@@ -366,6 +387,14 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                     </div>
                 </div>
             </div>
+
+            {/* INVOICE MODAL */}
+            <PaymentModal
+                open={isInvoiceOpen}
+                onClose={() => setIsInvoiceOpen(false)}
+                order={selectedOrder}
+            />
+
         </div>
     );
 };

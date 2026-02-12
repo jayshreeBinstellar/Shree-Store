@@ -12,6 +12,16 @@ export default defineConfig({
         target: 'http://192.168.0.134:3001',
         changeOrigin: true,
         secure: false
+      },
+      '/shop': {
+        target: 'http://192.168.0.134:3001',
+        changeOrigin: true,
+        secure: false
+      },
+      '/uploads': {
+        target: 'http://192.168.0.134:3001',
+        changeOrigin: true,
+        secure: false
       }
     }
   }

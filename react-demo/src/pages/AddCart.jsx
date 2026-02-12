@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { getAddresses } from "../services/UserService";
-import { checkout, getShippingOptions, validateCoupon } from "../services/ShopService";
+import { checkout, getShippingOptions, validateCoupon, getStoreSettings } from "../services/ShopService"; // Import getStoreSettings
 import { useCart } from "../context/CartContext";
 
 
-const AddCart = ({ onClose, onCartUpdate }) => { // onCartUpdate is now optional/redundant but kept for compat
+const AddCart = ({ onClose, onCartUpdate }) => {
   const { cart, removeItem, updateItem } = useCart();
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -14,9 +14,8 @@ const AddCart = ({ onClose, onCartUpdate }) => { // onCartUpdate is now optional
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponMsg, setCouponMsg] = useState({ type: '', text: '' });
+  const [taxRate, setTaxRate] = useState(0.18); // Default state
   const revalidatingRef = useRef(false);
-
-
 
   useEffect(() => {
     // Lock scroll when cart opens
@@ -28,11 +27,20 @@ const AddCart = ({ onClose, onCartUpdate }) => { // onCartUpdate is now optional
     };
   }, []);
 
-  // useEffect(() => {
-  // }, []); 
-
   useEffect(() => {
-    // Cart is now managed by context
+    // Fetch tax rate from settings
+    const fetchSettings = async () => {
+      try {
+        const res = await getStoreSettings();
+        if (res.status === 'success' && res.settings) {
+          setTaxRate(parseFloat(res.settings.tax_percent) / 100);
+        }
+      } catch (error) {
+        console.error("Failed to fetch store settings:", error);
+      }
+    };
+    fetchSettings();
+
     const fetchAddresses = async () => {
       const token = localStorage.getItem("token");
       if (token) {
@@ -55,8 +63,6 @@ const AddCart = ({ onClose, onCartUpdate }) => { // onCartUpdate is now optional
         const data = await getShippingOptions();
         if (data.status === 'success') {
           setShippingOptions(data.options);
-          // Default to first option (e.g. Standard) or Free if available?
-          // Let's default to the first one.
           if (data.options.length > 0) {
             setSelectedShippingId(data.options[0].shipping_id);
           }
@@ -67,24 +73,6 @@ const AddCart = ({ onClose, onCartUpdate }) => { // onCartUpdate is now optional
     };
     fetchShipping();
   }, []);
-
-
-
-
-  // const handleRemove = (id) => {
-  //   removeItem(id);
-  // };
-
-  // const handleQtyChange = (id, type) => {
-  //   const item = cart.find(i => i.id === id);
-  //   if (!item) return;
-
-  //   let newQty = type === "inc" ? item.qty + 1 : item.qty - 1;
-  //   if (newQty < 1) newQty = 1;
-
-  //   updateItem(id, newQty);
-  // };
-
 
   const subtotal = useMemo(
     () => cart.reduce((sum, i) => sum + i.price * i.qty, 0),
@@ -103,7 +91,7 @@ const AddCart = ({ onClose, onCartUpdate }) => { // onCartUpdate is now optional
   const cartTotal = subtotal - baseDiscount;
 
   // Calculate Shipping Cost
-  const selectedShippingOption = shippingOptions.find(o => o.shipping_id == selectedShippingId); // using loose equality for string/number match
+  const selectedShippingOption = shippingOptions.find(o => o.shipping_id == selectedShippingId);
   const shippingCost = selectedShippingOption ? parseFloat(selectedShippingOption.cost) : 0;
 
   // Calculate Coupon Discount
@@ -121,35 +109,6 @@ const AddCart = ({ onClose, onCartUpdate }) => { // onCartUpdate is now optional
   }, [cart]);
 
   const lastValidatedCartRef = useRef("");
-
-  // const payableAmount = Math.max(0, subtotal - baseDiscount + shippingCost - couponDiscount);
-
-  // const handleApplyCoupon = async () => {
-  //   setCouponMsg({ type: '', text: '' });
-  //   if (!couponCode.trim()) return;
-
-  //   try {
-  //     const res = await validateCoupon({
-  //       code: couponCode,
-  //       cartItems: cart,
-  //       cartTotal: cartTotal
-  //     });
-
-  //     if (res.status === 'success' && res.valid) {
-  //       setAppliedCoupon(res.coupon);
-  //       setCouponMsg({ type: 'success', text: `Coupon applied: ${res.coupon.description}` });
-  //     } else {
-  //       setAppliedCoupon(null);
-  //       setCouponMsg({ type: 'error', text: res.message || 'Invalid Coupon' });
-  //     }
-  //   } catch (err) {
-  //     setAppliedCoupon(null);
-
-  //     setCouponMsg({ type: 'error', text: err?.message || 'Error applying coupon' });
-  //   }
-  // };
-
-
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
 
@@ -181,75 +140,6 @@ const AddCart = ({ onClose, onCartUpdate }) => { // onCartUpdate is now optional
     }
   };
 
-
-  // const handleCheckout = async () => {
-  //   const token = localStorage.getItem("token");
-  //   if (!token) {
-  //     alert("Please login to place an order");
-  //     return;
-  //   }
-
-  //   if (addresses.length > 0 && !selectedAddress) {
-  //     alert("Please select a delivery address");
-  //     return;
-  //   }
-
-  //   try {
-  //     // Call Stripe checkout endpoint
-  //     const data = await checkout({
-  //       items: cart,
-  //       addressId: selectedAddress,
-  //       couponCode: appliedCoupon ? appliedCoupon.code : null,
-  //       shippingId: selectedShippingId
-  //     });
-
-  //     if (data.url) {
-  //       // Clear cart first or wait for success? 
-  //       // Better wait for success, but since we redirect, we should at least prepare for it.
-  //       // Actually, Stripe creates a session, we redirect there.
-  //       window.location.href = data.url;
-  //     } else {
-  //       alert(data.error || "Failed to create checkout session");
-  //     }
-  //   } catch (error) {
-  //     console.error("Checkout error:", error);
-  //     alert("An error occurred during checkout");
-  //   }
-  // };
-
-  // Re-validate applied coupon when cart changes
-  // useEffect(() => {
-  //   if (appliedCoupon && cart.length > 0 && !revalidatingRef.current) {
-  //     revalidatingRef.current = true;
-  //     const revalidateCoupon = async () => {
-  //       try {
-  //         const currentCartTotal = subtotal - baseDiscount;
-  //         const res = await validateCoupon({
-  //           code: appliedCoupon.code,
-  //           cartItems: cart,
-  //           cartTotal: currentCartTotal
-  //         });
-
-  //         if (res.status === 'success' && res.valid) {
-  //           setAppliedCoupon(res.coupon);
-  //           setCouponMsg({ type: 'success', text: `Coupon re-applied: ${res.coupon.description}` });
-  //         } else {
-  //           setAppliedCoupon(null);
-  //           setCouponCode('');
-  //           setCouponMsg({ type: 'error', text: res.message || 'Coupon no longer valid' });
-  //         }
-  //       } catch (err) {
-  //         setAppliedCoupon(null);
-  //         setCouponCode('');
-  //         setCouponMsg({ type: 'error', text: err?.message || 'Error re-validating coupon' });
-  //       } finally {
-  //         revalidatingRef.current = false;
-  //       }
-  //     };
-
-  //     revalidateCoupon();
-  //   }
-  // }, [cart, appliedCoupon, subtotal, baseDiscount]);
 
   useEffect(() => {
     if (!appliedCoupon) return;
@@ -292,14 +182,14 @@ const AddCart = ({ onClose, onCartUpdate }) => { // onCartUpdate is now optional
   }, [cartSignature, cartTotal]);
 
   useEffect(() => {
-  if (!couponMsg.text) return;
+    if (!couponMsg.text) return;
 
-  const timer = setTimeout(() => {
-    setCouponMsg({ type: "", text: "" });
-  }, 3000);
+    const timer = setTimeout(() => {
+      setCouponMsg({ type: "", text: "" });
+    }, 3000);
 
-  return () => clearTimeout(timer);
-}, [couponMsg.text]);
+    return () => clearTimeout(timer);
+  }, [couponMsg.text]);
 
   // Automatically remove coupon when input is cleared
   useEffect(() => {
@@ -334,6 +224,11 @@ const AddCart = ({ onClose, onCartUpdate }) => { // onCartUpdate is now optional
 
     if (data?.url) window.location.href = data.url;
   };
+
+  const taxableAmount = Math.max(0, subtotal - baseDiscount - couponDiscount);
+  const taxAmount = taxableAmount * taxRate;
+  const totalPayable = taxableAmount + taxAmount + shippingCost;
+
 
   return (
     <div className="fixed inset-0 z-1000 flex justify-end overflow-hidden">
@@ -562,15 +457,15 @@ const AddCart = ({ onClose, onCartUpdate }) => { // onCartUpdate is now optional
               </div>
 
               <div className="flex justify-between items-center text-gray-500 px-1.5">
-                <span className="text-[9px] font-bold uppercase tracking-widest">Tax (18%)</span>
-                <span className="text-sm font-bold">${((Math.max(0, subtotal - baseDiscount - couponDiscount)) * 0.18).toFixed(2)}</span>
+                <span className="text-[9px] font-bold uppercase tracking-widest">Tax ({(taxRate * 100).toFixed(0)}%)</span>
+                <span className="text-sm font-bold">${taxAmount.toFixed(2)}</span>
               </div>
 
 
               <div className="pt-2 border-t border-gray-200 flex justify-between items-center">
                 <span className="text-base font-black text-gray-900 uppercase tracking-tighter">Payable</span>
                 <span className="text-xl font-black text-indigo-600 tracking-tighter">
-                  ${(Math.max(0, subtotal - baseDiscount - couponDiscount) * 1.18 + shippingCost).toFixed(2)}
+                  ${totalPayable.toFixed(2)}
                 </span>
               </div>
             </div>

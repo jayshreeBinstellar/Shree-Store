@@ -21,8 +21,8 @@ const TransactionsLog = ({ transactions }) => {
                     <tbody className="divide-y divide-gray-50">
                         {transactions.length > 0 ? transactions.map((tx) => (
                             <tr key={tx.transaction_id} className="hover:bg-gray-50/50 transition-colors">
-                                <td className="px-8 py-4 font-black text-gray-900 text-xs">TX-{tx.payment_id.length > 10
-                                    ? `${tx.payment_id.slice(0, 10)}...`
+                                <td className="px-8 py-4 font-black text-gray-900 text-xs">{tx.payment_id.length > 30
+                                    ? `${tx.payment_id.slice(0, 30)}...`
                                     : tx.payment_id}</td>
                                 <td className="px-8 py-4 font-bold text-indigo-600">#{tx.order_id}</td>
                                 <td className="px-8 py-4 text-center font-black text-emerald-600">${Number(tx.total_amount).toFixed(2)}</td>

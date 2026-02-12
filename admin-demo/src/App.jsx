@@ -15,7 +15,7 @@ import Reviews from "./pages/admin/Reviews";
 import Shipping from "./pages/admin/Shipping";
 import Payments from "./pages/admin/Payments";
 import Support from "./pages/admin/Support";
-// import Logs from "./pages/admin/Logs";
+import Logs from "./pages/admin/Logs";
 import Settings from "./pages/admin/Settings";
 
 const ProtectedRoute = ({ children }) => {
@@ -50,7 +50,7 @@ function App() {
                         <Route path="shipping" element={<Shipping />} />
                         <Route path="payments" element={<Payments />} />
                         <Route path="support" element={<Support />} />
-                        {/* <Route path="logs" element={<Logs />} /> */}
+                        <Route path="logs" element={<Logs />} />
                         <Route path="settings" element={<Settings />} />
                     </Route>
                 </Routes>

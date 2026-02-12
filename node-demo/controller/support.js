@@ -3,9 +3,9 @@ const catchAsync = require('../utils/catchAsync');
 
 // User creates a support ticket
 exports.createTicket = catchAsync(async (req, res) => {
-     const user_id = req.user.id; 
+    const user_id = req.user.id;
     const { subject, message, priority = 'Medium' } = req.body;
-    
+
 
     if (!subject || !message) {
         return res.status(400).json({ status: "error", message: "Subject and message are required" });
@@ -27,7 +27,7 @@ exports.createTicket = catchAsync(async (req, res) => {
 
 // Get user's support tickets
 exports.getUserTickets = catchAsync(async (req, res) => {
-    const { user_id } = req.user;
+    const user_id = req.user.id;
     const { page = 1, limit = 10, status } = req.query;
     const offset = (page - 1) * limit;
 
@@ -63,7 +63,7 @@ exports.getUserTickets = catchAsync(async (req, res) => {
 // Get single ticket details
 exports.getTicketDetails = catchAsync(async (req, res) => {
     const { ticket_id } = req.params;
-    const { user_id } = req.user;
+    const user_id = req.user.id;
 
     const result = await pool.query(
         `SELECT t.*, u.full_name, u.email 
@@ -86,7 +86,7 @@ exports.getTicketDetails = catchAsync(async (req, res) => {
 // Add reply/comment to ticket
 exports.addTicketReply = catchAsync(async (req, res) => {
     const { ticket_id } = req.params;
-    const { user_id } = req.user;
+    const user_id = req.user.id;
     const { reply_text, is_admin = false } = req.body;
 
     if (!reply_text) {
@@ -108,10 +108,13 @@ exports.addTicketReply = catchAsync(async (req, res) => {
         return res.status(403).json({ status: "error", message: "Unauthorized" });
     }
 
+    // Determine sender label
+    const senderLabel = is_admin ? 'Admin' : 'User';
+
     // Update ticket with reply
     const replyResult = await pool.query(
-        `UPDATE support_tickets SET message = CONCAT(message, E'\n\n--- Admin Reply: ' || NOW()::text || ' ---\n' || $1), updated_at = NOW() WHERE ticket_id = $2 RETURNING *`,
-        [reply_text, ticket_id]
+        `UPDATE support_tickets SET message = CONCAT(message, E'\n\n--- ' || $3 || ' Reply: ' || NOW()::text || ' ---\n' || $1), updated_at = NOW() WHERE ticket_id = $2 RETURNING *`,
+        [reply_text, ticket_id, senderLabel]
     );
 
     res.status(201).json({
@@ -124,7 +127,7 @@ exports.addTicketReply = catchAsync(async (req, res) => {
 // Get ticket replies/conversation
 exports.getTicketReplies = catchAsync(async (req, res) => {
     const { ticket_id } = req.params;
-    const { user_id } = req.user;
+    const user_id = req.user.id;
 
     // Verify user owns this ticket
     const ticketCheck = await pool.query(
@@ -142,7 +145,7 @@ exports.getTicketReplies = catchAsync(async (req, res) => {
 
     // Return the ticket with message content
     const result = await pool.query(
-        `SELECT ticket_id, message, updated_at FROM support_tickets WHERE ticket_id = $1`,
+        `SELECT ticket_id, message, admin_reply, updated_at FROM support_tickets WHERE ticket_id = $1`,
         [ticket_id]
     );
 
@@ -155,7 +158,7 @@ exports.getTicketReplies = catchAsync(async (req, res) => {
 // Close ticket
 exports.closeTicket = catchAsync(async (req, res) => {
     const { ticket_id } = req.params;
-    const { user_id } = req.user;
+    const user_id = req.user.id;
 
     // Verify user owns this ticket
     const ticketCheck = await pool.query(
@@ -186,7 +189,7 @@ exports.closeTicket = catchAsync(async (req, res) => {
 // Reopen ticket
 exports.reopenTicket = catchAsync(async (req, res) => {
     const { ticket_id } = req.params;
-    const { user_id } = req.user;
+    const user_id = req.user.id;
 
     const ticketCheck = await pool.query(
         `SELECT user_id FROM support_tickets WHERE ticket_id = $1`,

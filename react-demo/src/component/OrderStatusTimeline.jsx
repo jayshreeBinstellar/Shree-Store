@@ -26,7 +26,6 @@ const OrderStatusTimeline = ({ status }) => {
 
                 {steps.map((step, index) => {
                     const isCompleted = index <= activeIndex;
-                    const isActive = index === activeIndex;
 
                     return (
                         <div key={step} className="relative z-10 flex flex-col items-center gap-1">

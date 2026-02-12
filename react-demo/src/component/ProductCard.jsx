@@ -17,7 +17,7 @@ const ProductCard = ({ product, isLiked, onToggleLike, onViewDetails }) => {
                                 ? product.thumbnail
                                 : `${BASE_URL}${product.thumbnail}`
                             : "/no-image.png"
-                    }   
+                    }
                     alt={product.title}
                     className="w-full h-full   object-cover  mix-blend-multiply transition-transform duration-700 group-hover:scale-115"
                 />
@@ -41,7 +41,7 @@ const ProductCard = ({ product, isLiked, onToggleLike, onViewDetails }) => {
                 {/* Badge */}
                 {(product.discount || product.old_price) && (
                     <div className="absolute top-1 left-1 bg-red-600 text-white px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider shadow-sm">
-                        {product.discount || `-${Math.round(((product.old_price - product.price) / product.old_price) * 100)}%`}
+                        {product.discount || `${Math.round(((product.old_price - product.price) / product.old_price) * 100)}%`}
                     </div>
                 )}
             </div>
@@ -65,16 +65,6 @@ const ProductCard = ({ product, isLiked, onToggleLike, onViewDetails }) => {
                         <span className="text-gray-400 line-through text-xs font-medium">${product.old_price}</span>
                     )}
                 </div>
-
-                {/* <Button
-                    fullWidth
-                    variant="contained"
-                    startIcon={<LocalMall className="w-4 h-4" />}
-                    onClick={() => onViewDetails && onViewDetails(id)}
-                    className="bg-indigo-600! hover:bg-indigo-700! rounded-xl! py-4! text-sm! font-bold normal-case transition-all duration-300 shadow-none active:scale-95"
-                >
-                    Quick Add
-                </Button> */}
             </div>
         </div>
     );

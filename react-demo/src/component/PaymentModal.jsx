@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Box } from "@mui/material";
 import { ShoppingBagIcon, PrinterIcon } from "@heroicons/react/24/outline";
-import { getSettings } from "../../services/AdminService";
+import { useSettings } from "../context/SettingsContext";
 
 const Row = ({ label, children, negative }) => (
     <div className={`flex justify-between text-sm ${negative ? 'text-rose-600' : 'text-gray-700'}`}>
@@ -10,28 +10,23 @@ const Row = ({ label, children, negative }) => (
     </div>
 )
 
-const InvoiceModal = ({ open, onClose, order }) => {
+const PaymentModal = ({ open, onClose, order }) => {
+    const { settings } = useSettings();
     const [taxRate, setTaxRate] = useState(18); // Default fallback
-    const [storeName, setStoreName] = useState('GROCERYPRO');
 
     useEffect(() => {
-        if (open) {
-            const fetchSettings = async () => {
-                try {
-                    const res = await getSettings();
-                    if (res.status === 'success' && res.settings) {
-                        setTaxRate(Number(res.settings.tax_percent));
-                        if (res.settings.store_name) {
-                            setStoreName(res.settings.store_name);
-                        }
-                    }
-                } catch (error) {
-                    console.error("Failed to load invoice settings", error);
-                }
-            };
-            fetchSettings();
+        if (settings?.tax_percent) {
+            setTaxRate(Number(settings.tax_percent));
         }
-    }, [open]);
+    }, [settings]);
+
+    // Add safe checks since order object might be partial from UserDetails
+    const items = order?.items || [];
+    const subtotal = order?.subtotal || items.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
+    const taxAmount = order?.tax_amount || 0;
+    const totalAmount = order?.total_amount || 0;
+    const shippingFee = order?.shipping_fee || 0;
+    const discountAmount = order?.discount_amount || 0;
 
     return (
         <Modal open={open} onClose={onClose}>
@@ -55,8 +50,8 @@ const InvoiceModal = ({ open, onClose, order }) => {
                     className="
                         flex-1
                         overflow-y-auto
-                        p-5
-                        space-y-5
+                        p-8
+                        space-y-6
                         scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent
                         print:overflow-visible print:p-0
                     "
@@ -69,7 +64,7 @@ const InvoiceModal = ({ open, onClose, order }) => {
                                 <ShoppingBagIcon className="h-7 w-7 text-white" />
                             </div>
                             <h2 className="text-2xl font-black tracking-tight uppercase">
-                                {storeName}
+                                {settings?.store_name || 'GROCERYPRO'}
                             </h2>
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">
                                 Official Invoice
@@ -78,21 +73,21 @@ const InvoiceModal = ({ open, onClose, order }) => {
 
                         <div className="text-right">
                             <h3 className="text-2xl font-black text-gray-900 tracking-tight">
-                                #INV-{order?.order_id}
+                                {order?.order_id || "#INV-000"}
                             </h3>
                             <p className="text-sm font-semibold text-gray-500 mt-1">
-                                {new Date(order?.created_at).toLocaleDateString()}
+                                {order?.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}
                             </p>
                         </div>
                     </div>
 
                     {/* BILLING INFO */}
-                    <div className="grid grid-cols-2 gap-4 border-y border-gray-100 py-4">
+                    <div className="grid grid-cols-2 gap-4 border-y border-gray-100 py-6">
                         <div>
                             <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">
                                 Billed To
                             </p>
-                            <p className="font-bold text-gray-900 text-lg">{order?.full_name}</p>
+                            <p className="font-bold text-gray-900 text-lg">{order?.full_name || 'Customer'}</p>
                             <p className="text-sm text-gray-500">{order?.email}</p>
                         </div>
 
@@ -102,10 +97,8 @@ const InvoiceModal = ({ open, onClose, order }) => {
                             </p>
                             <span
                                 className={`inline-block px-4 py-1 rounded-full text-[11px] font-black uppercase
-              ${order?.status === 'Paid'
-                                        ? 'bg-emerald-50 text-emerald-600'
-                                        : 'bg-gray-100 text-gray-600'
-                                    }`}
+              ${order?.status === 'Paid' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-600'}`
+                                }
                             >
                                 {order?.status === 'Paid'
                                     ? `Paid • ${order?.payment_method || 'Stripe'}`
@@ -131,33 +124,41 @@ const InvoiceModal = ({ open, onClose, order }) => {
                         </thead>
 
                         <tbody className="divide-y divide-gray-100">
-                            {order?.items?.map((item, idx) => (
+                            {items.map((item, idx) => (
                                 <tr key={idx}>
                                     <td className="py-4">
-                                        <p className="font-semibold text-gray-900">{item.title}</p>
-
-                                        {item.discount > 0 && (
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <span className="text-xs text-gray-400 line-through">
-                                                    ${Number(item.price).toFixed(2)}
-                                                </span>
-                                                <span className="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-black uppercase">
-                                                    −{item.discount}%
-                                                </span>
+                                        <div className="flex items-center gap-3">
+                                            {item.thumbnail && (
+                                                <div className="w-10 h-10 rounded-lg bg-gray-50 p-1 border border-gray-100 shrink-0 hidden sm:block">
+                                                    <img src={item.thumbnail} alt="" className="w-full h-full object-contain mix-blend-multiply" />
+                                                </div>
+                                            )}
+                                            <div>
+                                                <p className="font-semibold text-gray-900 text-sm">{item.title}</p>
+                                                {Number(item.discount) > 0 && (
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <span className="text-xs text-gray-400 line-through">
+                                                            ${Number(item.price).toFixed(2)}
+                                                        </span>
+                                                        <span className="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-black uppercase">
+                                                            −{Number(item.discount)}%
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
+                                        </div>
                                     </td>
 
-                                    <td className="text-center font-semibold text-gray-500">
+                                    <td className="text-center font-semibold text-gray-500 text-sm">
                                         {item.quantity}
                                     </td>
 
                                     <td className="text-right">
-                                        <p className="font-bold text-gray-900">
-                                            ${((item.effective_price || item.price) * item.quantity).toFixed(2)}
+                                        <p className="font-bold text-gray-900 text-sm">
+                                            ${((Number(item.effective_price) || Number(item.price)) * item.quantity).toFixed(2)}
                                         </p>
                                         <p className="text-xs text-gray-400">
-                                            ${Number(item.effective_price || item.price).toFixed(2)} / ea
+                                            ${Number(Number(item.effective_price) || Number(item.price)).toFixed(2)} / ea
                                         </p>
                                     </td>
                                 </tr>
@@ -168,21 +169,18 @@ const InvoiceModal = ({ open, onClose, order }) => {
                     {/* TOTALS */}
                     <div className="bg-gray-50 rounded-2xl p-6 space-y-2">
                         <Row label="Subtotal">
-                            ${order?.items?.reduce(
-                                (s, i) => s + Number(i.price) * i.quantity,
-                                0
-                            ).toFixed(2)}
+                            ${Number(subtotal).toFixed(2)}
                         </Row>
 
-                        {order?.items?.some(i => i.discount > 0) && (
+                        {items.some(i => Number(i.discount) > 0) && (
                             <Row label="Item Savings" negative>
                                 -$
-                                {order?.items
-                                    ?.reduce(
+                                {items
+                                    .reduce(
                                         (s, i) =>
                                             s +
                                             (Number(i.price) -
-                                                Number(i.effective_price || i.price)) *
+                                                (Number(i.effective_price) || Number(i.price))) *
                                             i.quantity,
                                         0
                                     )
@@ -190,33 +188,33 @@ const InvoiceModal = ({ open, onClose, order }) => {
                             </Row>
                         )}
 
-                        {Number(order?.discount_amount) > 0 && (
-                            <Row label={`Coupon (${order?.coupon_code})`} negative>
-                                -${Number(order?.discount_amount).toFixed(2)}
+                        {Number(discountAmount) > 0 && (
+                            <Row label={`Coupon (${order?.coupon_code || 'Applied'})`} negative>
+                                -${Number(discountAmount).toFixed(2)}
                             </Row>
                         )}
 
                         <Row label="Shipping">
-                            {Number(order?.shipping_fee) > 0
-                                ? `$${Number(order?.shipping_fee).toFixed(2)}`
+                            {Number(shippingFee) > 0
+                                ? `$${Number(shippingFee).toFixed(2)}`
                                 : 'Free'}
                         </Row>
 
                         <Row label={`Tax (${taxRate}%)`}>
-                            ${Number(order?.tax_amount).toFixed(2)}
+                            ${Number(taxAmount).toFixed(2)}
                         </Row>
 
                         <div className="flex justify-between items-center pt-4 border-t border-gray-900">
                             <span className="text-lg font-black">Grand Total</span>
                             <span className="text-2xl font-black text-indigo-600">
-                                ${Number(order?.total_amount).toFixed(2)}
+                                ${Number(totalAmount).toFixed(2)}
                             </span>
                         </div>
                     </div>
                 </div>
 
                 {/* FOOTER */}
-                <div className="bg-gray-50 px-4 py-4 flex justify-between items-center print:hidden">
+                <div className="bg-gray-50 px-8 py-5 flex justify-between items-center print:hidden border-t border-gray-100">
                     <p className="text-xs text-gray-400 italic">
                         This invoice is system-generated and digitally verified.
                     </p>
@@ -224,15 +222,15 @@ const InvoiceModal = ({ open, onClose, order }) => {
                     <div className="flex gap-3">
                         <button
                             onClick={onClose}
-                            className="px-6 py-3 rounded-xl font-bold text-gray-500 hover:bg-gray-100"
+                            className="px-6 py-2.5 rounded-xl font-bold text-gray-500 hover:bg-gray-100 transition-colors"
                         >
                             Close
                         </button>
                         <button
                             onClick={() => window.print()}
-                            className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-700"
+                            className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-100"
                         >
-                            <PrinterIcon className="h-5 w-5" />
+                            <PrinterIcon className="h-4 w-4" />
                             Print
                         </button>
                     </div>
@@ -243,4 +241,4 @@ const InvoiceModal = ({ open, onClose, order }) => {
     );
 };
 
-export default InvoiceModal;
+export default PaymentModal;

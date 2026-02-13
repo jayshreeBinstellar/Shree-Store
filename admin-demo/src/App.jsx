@@ -17,6 +17,7 @@ import Payments from "./pages/admin/Payments";
 import Support from "./pages/admin/Support";
 import Logs from "./pages/admin/Logs";
 import Settings from "./pages/admin/Settings";
+import { Toaster } from "react-hot-toast";
 
 const ProtectedRoute = ({ children }) => {
     const { token, isAdmin, loading } = useAuth();
@@ -30,6 +31,7 @@ const ProtectedRoute = ({ children }) => {
 function App() {
     return (
         <AuthProvider>
+            <Toaster position="top-right" />
             <Router>
                 <Routes>
                     <Route path="/login" element={<Login />} />

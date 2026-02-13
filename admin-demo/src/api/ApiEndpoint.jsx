@@ -21,6 +21,7 @@ const API_ENDPOINT = {
 
     // Customers
     GET_CUSTOMERS: "/admin/customers",
+    ADD_CUSTOMER: "/admin/customers",
     UPDATE_CUSTOMER_ROLE: (id) => `/admin/customers/${id}/role`,
     TOGGLE_CUSTOMER_BLOCK: (id) => `/admin/customers/${id}/block`,
 

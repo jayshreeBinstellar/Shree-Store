@@ -4,6 +4,7 @@ import * as AdminService from '../../services/AdminService';
 import ProductsManagement from '../../components/admin/ProductsManagement';
 import ProductModal from '../../components/admin/ProductModal';
 import BulkImportModal from '../../components/admin/BulkImportModal';
+import { toast } from 'react-hot-toast';
 
 const Products = () => {
     const [products, setProducts] = useState([]);
@@ -92,11 +93,13 @@ const Products = () => {
         try {
             const productsList = JSON.parse(bulkJson);
             await AdminService.bulkAddProducts(productsList);
-            alert("Bulk products added successfully!");
+            toast.success("Bulk products added successfully!");
             setIsBulkModalOpen(false);
             setBulkJson("");
             fetchProducts(1);
-        } catch (err) { alert("Check your JSON format: " + err.message); }
+        } catch (err) {
+            toast.error("Check your JSON format: " + err.message);
+        }
     };
 
     if (loading) return (

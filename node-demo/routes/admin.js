@@ -25,6 +25,7 @@ router.put('/orders/:id/shipping', adminController.updateOrderShipping);
 
 // Customer Management
 router.get('/customers', adminController.getAllCustomers);
+router.post('/customers', adminController.addCustomer);
 router.put('/customers/:id/block', adminController.toggleUserBlock);
 router.put('/customers/:id/role', adminController.updateUserRole);
 

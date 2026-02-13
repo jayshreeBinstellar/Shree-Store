@@ -101,7 +101,6 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
 
     if (!user) return null;
 
-    const likedCount = Object.keys(liked).filter(key => liked[key]).length;
 
     return (
         <div className="bg-[#f8fafc] min-h-screen py-10 md:py-20">
@@ -180,7 +179,7 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                             >
                                 <div className="relative z-10">
                                     <p className="text-gray-400 font-bold text-[10px] md:text-xs uppercase tracking-[0.2em]">Favorites</p>
-                                    <h3 className="text-3xl md:text-4xl font-black text-gray-900 group-hover:text-indigo-600 transition-colors mt-1">{likedCount}</h3>
+                                    <h3 className="text-3xl md:text-4xl font-black text-gray-900 group-hover:text-indigo-600 transition-colors mt-1"> {wishlist.length}</h3>
                                 </div>
                                 <div className="w-12 h-12 md:w-16 md:h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform relative z-10">
                                     <HeartIcon className="w-6 h-6 md:w-8 md:h-8 fill-rose-500" />

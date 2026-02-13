@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Box } from "@mui/material";
 import * as AdminService from "../../services/AdminService";
+import { toast } from "react-hot-toast";
 
 const ProductModal = ({
     open,
@@ -32,7 +33,7 @@ const ProductModal = ({
                 if (uploadResult.status === "success") {
                     thumbnailUrl = uploadResult.imageUrl;
                 } else {
-                    alert("Failed to upload image");
+                    toast.error("Failed to upload image");
                     setUploading(false);
                     return;
                 }
@@ -43,9 +44,10 @@ const ProductModal = ({
 
             // Call the original handleSubmit with updated data
             await handleSubmit(e, updatedFormData);
+            toast.success(editingProduct ? "Product updated!" : "Product launched!");
         } catch (error) {
             console.error("Upload error:", error);
-            alert("Failed to upload image");
+            toast.error("Failed to upload image or save product");
         } finally {
             setUploading(false);
         }

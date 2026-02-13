@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import * as AdminService from '../../services/AdminService';
 import SupportDesk from '../../components/admin/SupportDesk';
 import TicketModal from '../../components/admin/TicketModal';
+import { toast } from 'react-hot-toast';
 
 const Support = () => {
     const [tickets, setTickets] = useState([]);
@@ -49,15 +50,17 @@ const Support = () => {
 
     const handleTicketReply = async () => {
         if (!replyText.trim()) return;
-        
+
         try {
             setModalLoading(true);
             await AdminService.updateTicketStatus(selectedTicket.ticket_id, "Resolved", replyText);
+            toast.success("Reply sent and ticket resolved");
             setReplyText("");
             setIsTicketModalOpen(false);
             fetchTickets(currentFilter);
-        } catch (err) { 
-            console.error(err); 
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to send reply");
         } finally {
             setModalLoading(false);
         }
@@ -67,10 +70,12 @@ const Support = () => {
         try {
             setModalLoading(true);
             await AdminService.updateTicketStatus(selectedTicket.ticket_id, newStatus, "");
+            toast.success(`Ticket status marked as ${newStatus}`);
             setSelectedTicket(prev => ({ ...prev, status: newStatus }));
             fetchTickets(currentFilter);
         } catch (err) {
             console.error(err);
+            toast.error("Failed to update status");
         } finally {
             setModalLoading(false);
         }
@@ -96,10 +101,10 @@ const Support = () => {
                 isLoading={loading}
             />
             <TicketModal
-                open={isTicketModalOpen} 
+                open={isTicketModalOpen}
                 onClose={() => setIsTicketModalOpen(false)}
-                ticket={selectedTicket} 
-                replyText={replyText} 
+                ticket={selectedTicket}
+                replyText={replyText}
                 setReplyText={setReplyText}
                 onReply={handleTicketReply}
                 onStatusChange={handleStatusChange}

@@ -13,7 +13,7 @@ import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
 
 
-import Categories from "./Categories";
+// import Categories from "./Categories";
 
 const Navigation = () => {
     const [open, setOpen] = useState(false);
@@ -27,63 +27,58 @@ const Navigation = () => {
         { name: "Groceries", to: "/main/grocery", icon: LocalGroceryStoreOutlinedIcon },
         { name: "Beauty", to: "/main/beauty", icon: ArticleOutlinedIcon },
         { name: "Shop", to: "/main/products", icon: LocalMallOutlinedIcon },
-        { name: "Contact", to: "/main/contact", icon: ContactMailOutlinedIcon },    
+        { name: "Contact", to: "/main/contact", icon: ContactMailOutlinedIcon },
     ];
 
     return (
-        <nav className="header py-4 border-b">
-            <div className="container mx-auto px-4">
-                <div className="grid grid-cols-12 items-center gap-4">
+        <nav className="header py-4 border-b bg-white">
+            <div className="max-w-7xl mx-auto px-4 lg:px-8 xl:px-12">
 
-                    {/* Categories */}
-                    <div className="col-span-6 lg:col-span-2">
-                        <Categories />
-                    </div>
+                <div className="flex items-center justify-between lg:justify-center">
 
-                    {/* Desktop Menu */}
-                    <div className="hidden lg:flex col-span-10 justify-end">
-                        <ul className="flex items-center gap-6 text-[16px] uppercase">
-                            {menuItems.map((item) => (
-                                <li key={item.name}>
-                                    <NavLink
-                                        to={item.to}
-                                        className={({ isActive }) =>
-                                            `menu-link flex items-center gap-2 px-3 py-2 rounded-md transition
-                                            ${isActive
-                                            ? "bg-indigo-700 text-white!"
-                                            : "text-gray-700 hover:bg-indigo-700"}`
-                                        }
-                                    >
-                                        <item.icon
-                                            className={({ isActive }) =>
-                                                isActive ? "text-white" : "text-indigo-600"
-                                            }
-                                        />
-                                        <span>{item.name}</span>
-                                    </NavLink>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Mobile Menu Button */}
-                    <div className="flex justify-end col-span-6 lg:hidden">
+                    {/* Mobile Button */}
+                    <div className="lg:hidden">
                         <button
                             onClick={() => setOpen(!open)}
-                            className="p-2 rounded-md border"
+                            className="p-2 rounded-md border hover:bg-gray-100 transition"
                         >
                             {open ? <CloseOutlinedIcon /> : <MenuOutlinedIcon />}
                         </button>
                     </div>
 
+                    {/* Desktop Menu */}
+                    <ul className="hidden lg:flex items-center 
+                     gap-2 lg:gap-4
+                     text-[14px] lg:text-[15px] xl:text-[16px]
+                     font-medium uppercase">
+                        {menuItems.map((item) => (
+                            <li key={item.name}>
+                                <NavLink
+                                    to={item.to}
+                                    className={({ isActive }) =>
+                                        `flex items-center gap-2 px-3 lg:px-4 py-2 rounded-md transition-all duration-200
+                ${isActive
+                                            ? "bg-indigo-700 text-white"
+                                            : "text-gray-700 hover:bg-indigo-600 hover:text-white"}`
+                                    }
+                                >
+                                    <item.icon className="text-lg" />
+                                    <span>{item.name}</span>
+                                </NavLink>
+                            </li>
+                        ))}
+                    </ul>
+
+                    {/* Spacer for symmetry */}
+                    <div className="hidden lg:block w-8"></div>
                 </div>
 
-                {/* Mobile Menu */}
+                {/* Mobile Dropdown */}
                 <div
-                    className={`lg:hidden transition-all duration-300 overflow-hidden ${open ? "max-h-125 mt-4" : "max-h-0"
+                    className={`lg:hidden transition-all duration-300 overflow-hidden ${open ? "max-h-96 mt-4" : "max-h-0"
                         }`}
                 >
-                    <ul className="flex flex-col gap-3 bg-white border rounded-lg p-4 shadow">
+                    <ul className="flex flex-col gap-3 bg-white border rounded-lg p-4 shadow-md">
                         {menuItems.map((item) => (
                             <li key={item.name}>
                                 <NavLink
@@ -91,24 +86,24 @@ const Navigation = () => {
                                     onClick={() => setOpen(false)}
                                     className={({ isActive }) =>
                                         `flex items-center gap-3 py-2 px-3 rounded-md text-sm uppercase transition
-           ${isActive
-                                            ? "bg-blue-600 text-white"
+                ${isActive
+                                            ? "bg-indigo-600 text-white"
                                             : "text-gray-700 hover:bg-gray-100"}`
                                     }
                                 >
-                                    <item.icon
-                                        className={({ isActive }) =>
-                                            isActive ? "text-white" : "text-gray-600"
-                                        }
-                                    />
+                                    <item.icon />
                                     {item.name}
                                 </NavLink>
                             </li>
                         ))}
                     </ul>
                 </div>
+
             </div>
         </nav>
+
+
+
 
     );
 };

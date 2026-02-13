@@ -6,6 +6,7 @@ const CustomersManagement = ({
     customers,
     onToggleBlock,
     onUpdateRole,
+    onAddCustomer,
     currentPage = 1,
     totalPages = 1,
     onPageChange,
@@ -16,7 +17,15 @@ const CustomersManagement = ({
         <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden flex flex-col">
             <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
                 <h3 className="text-lg font-black text-gray-900 uppercase tracking-widest">Customers Details</h3>
-                <span className="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold uppercase tracking-widest">{totalCustomers} Accounts</span>
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={onAddCustomer}
+                        className="px-6 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95"
+                    >
+                        Add Account
+                    </button>
+                    <span className="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-xs font-bold uppercase tracking-widest">{totalCustomers} Accounts</span>
+                </div>
             </div>
             <div className="overflow-x-auto flex-1">
                 <table className="w-full text-left">

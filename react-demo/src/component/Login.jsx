@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { login as apiLogin } from '../services/AuthService'; // rename to avoid conflict
 import { useAuth } from '../context/AuthContext';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid';
+import { NavLink } from "react-router-dom";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="screen-h flex items-center justify-center px-4">
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 relative"
@@ -123,6 +124,38 @@ const Login = () => {
           </span>
         </div>
 
+        <div className="flex items-center justify-between mb-6">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.rememberMe}
+              onChange={(e) =>
+                setFormData({ ...formData, rememberMe: e.target.checked })
+              }
+              className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            />
+            <span className="text-sm text-gray-600">Remember me</span>
+          </label>
+          <NavLink
+            to="/auth/forgot-password"
+            className="text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
+          >
+            Forgot Password?
+          </NavLink>
+        </div>
+
+        <div className="text-center m-6">
+          <p className="text-sm text-gray-600">
+            Don't have an account?{" "}
+            <NavLink
+              to="/auth/register"
+              className="font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
+            >
+              Sign Up
+            </NavLink>
+          </p>
+        </div>
+
         {/* Button */}
         <button
           type="submit"
@@ -132,11 +165,6 @@ const Login = () => {
         >
           {loading ? "Signing in..." : "Sign In"}
         </button>
-
-        {/* Footer */}
-        <p className="text-xs text-gray-400 text-center mt-6">
-          © 2026 Shree Organic Market
-        </p>
       </form>
     </div>
   );

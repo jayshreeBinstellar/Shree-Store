@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as AdminService from '../../services/AdminService';
 import ShippingOptionsManagement from '../../components/admin/ShippingOptionsManagement';
+import { toast } from 'react-hot-toast';
 
 const Shipping = () => {
     const [options, setOptions] = useState([]);
@@ -21,23 +22,35 @@ const Shipping = () => {
     const handleAdd = async (option) => {
         try {
             await AdminService.addShippingOption(option);
+            toast.success("Shipping option added");
             fetchOptions();
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to add option");
+        }
     };
 
     const handleUpdate = async (id, option) => {
         try {
             await AdminService.updateShippingOption(id, option);
+            toast.success("Shipping option updated");
             fetchOptions();
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to update option");
+        }
     };
 
     const handleDelete = async (id) => {
         if (!window.confirm("Delete this shipping option?")) return;
         try {
             await AdminService.deleteShippingOption(id);
+            toast.success("Shipping option deleted");
             fetchOptions();
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to delete option");
+        }
     };
 
     if (loading) return (

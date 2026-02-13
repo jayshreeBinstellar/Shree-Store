@@ -1,4 +1,4 @@
-import React, {useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
@@ -6,9 +6,12 @@ import SearchInput from "./SearchInput";
 import Navigation from "./Navigation";
 import { useAuth } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
-const Navbar = ({ onSearch, onOpenCart, cartCount }) => {
+import { useCart } from "../context/CartContext";
+
+const Navbar = ({ onOpenCart }) => {
   const { isAuthenticated } = useAuth();
   const { settings } = useSettings();
+  const { cartCount } = useCart();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -41,7 +44,7 @@ const Navbar = ({ onSearch, onOpenCart, cartCount }) => {
 
             {/* SEARCH */}
             <div className="flex-1 max-w-2xl hidden md:block">
-              <SearchInput onSearch={onSearch} />
+              <SearchInput />
             </div>
 
             {/* ACTIONS */}
@@ -62,12 +65,20 @@ const Navbar = ({ onSearch, onOpenCart, cartCount }) => {
                     </NavLink>
                   </div>
                 ) : (
-                  <NavLink
-                    to="/login"
-                    className="px-3 py-1 text-sm font-semibold text-indigo-600 border border-indigo-600 rounded-xl hover:bg-indigo-50 transition-colors"
-                  >
-                    Sign In
-                  </NavLink>
+                  <div className="flex items-center gap-3">
+                    <NavLink
+                      to="/auth"
+                      className="px-5 py-2 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all active:scale-95 whitespace-nowrap"
+                    >
+                      Sign In
+                    </NavLink>
+                    {/* <NavLink
+                      to="/auth/register"
+                      className="px-5 py-2 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all active:scale-95 whitespace-nowrap"
+                    >
+                      Sign Up
+                    </NavLink> */}
+                  </div>
                 )}
 
                 <div

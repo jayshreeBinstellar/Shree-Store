@@ -1,19 +1,23 @@
-import React, { useState } from 'react'
-
+import React, { useState } from "react";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import { useShop } from "../context/ShopContext";
 
-const SearchInput = ({ onSearch }) => {
+const SearchInput = () => {
+    const { setSearchTerm } = useShop();
     const [search, setSearch] = useState("");
+
+    const handleChange = (e) => {
+        const value = e.target.value;
+        setSearch(value);
+        setSearchTerm(value);
+    };
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
-            if (typeof onSearch === "function") onSearch(search);
+            setSearchTerm(search.trim());
+            
         }
-    };
-
-    const triggerSearch = () => {
-        if (typeof onSearch === "function") onSearch(search);
-    };
+    };  
 
     return (
         <div className="relative w-full group">
@@ -21,30 +25,25 @@ const SearchInput = ({ onSearch }) => {
                 <div className="px-5 text-gray-400 group-focus-within:text-indigo-600 transition-colors">
                     <SearchOutlinedIcon className="!w-6 !h-6" />
                 </div>
+
                 <input
                     type="search"
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={handleChange}
                     onKeyDown={handleKeyDown}
                     className="bg-transparent outline-none w-full text-base font-medium text-gray-900 placeholder:text-gray-400 placeholder:font-normal"
-                    placeholder="Search fresh products, electronics..."
+                    placeholder="Search products..."
                 />
+
                 <button
-                    onClick={triggerSearch}
-                    className="h-full bg-gray-900 text-white px-8 font-bold hover:bg-black transition-colors hidden sm:block active:bg-indigo-700"
+                    onClick={() => setSearchTerm(search.trim())}
+                    className="h-full bg-gray-900 text-white px-8 font-bold hover:bg-black transition-colors hidden sm:block"
                 >
                     Search
                 </button>
-            </div>
-
-            {/* Quick stats/tag mockups for style */}
-            <div className="absolute -bottom-6 left-2 flex gap-4 opacity-0 group-focus-within:opacity-100 transition-opacity">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter cursor-pointer hover:text-indigo-600">Laptops</span>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter cursor-pointer hover:text-indigo-600">Fresh Fruits</span>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter cursor-pointer hover:text-indigo-600">Shoes</span>
             </div>
         </div>
     );
 };
 
-export default SearchInput
+export default SearchInput;

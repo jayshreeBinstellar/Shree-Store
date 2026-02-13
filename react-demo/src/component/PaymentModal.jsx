@@ -67,7 +67,7 @@ const PaymentModal = ({ open, onClose, order }) => {
                                 {settings?.store_name || 'GROCERYPRO'}
                             </h2>
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">
-                                Official Invoice
+
                             </p>
                         </div>
 
@@ -216,9 +216,9 @@ const PaymentModal = ({ open, onClose, order }) => {
                 {/* FOOTER */}
                 <div className="bg-gray-50 px-8 py-5 flex justify-between items-center print:hidden border-t border-gray-100">
                     <p className="text-xs text-gray-400 italic">
-                        This invoice is system-generated and digitally verified.
+                        This system-generated and digitally verified.
                     </p>
-
+                                
                     <div className="flex gap-3">
                         <button
                             onClick={onClose}

@@ -1,23 +1,36 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import ProductDiscovery from "../component/ProductDiscovery";
 import BannerCarousel from "../component/BannerCarousel";
+import CategoryFilter from "../component/CategoryFilter";
 import { CircularProgress } from "@mui/material";
 import { getProducts, getCategories, getBanners } from "../services/ShopService";
+import { useShop } from "../context/ShopContext";
 
+
+//   Constants for the Products page
+ 
 const PAGE_SIZE = 12;
 
-const Products = ({ searchTerm, onViewDetails, liked, onToggleLike }) => {
+
+//  Products Page Component
+//  Displays a list of products with category filtering and search functionality.
+
+const Products = () => {
+    // Context
+    const { searchTerm, openDetails, liked, toggleLike } = useShop();
+
+    // State
     const [productsList, setProductsList] = useState([]);
     const [categories, setCategories] = useState([]);
     const [banners, setBanners] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [loading, setLoading] = useState(true);
     const [categoryLoading, setCategoryLoading] = useState(true);
-    // const [currentPage, setCurrentPage] = useState(1);
-    // const [totalPages, setTotalPages] = useState(1);
-    // const [totalProducts, setTotalProducts] = useState(0);
 
+    // Initial Metadata Fetch
     useEffect(() => {
+        let isMounted = true;
+
         const fetchMetadata = async () => {
             try {
                 setCategoryLoading(true);
@@ -26,28 +39,33 @@ const Products = ({ searchTerm, onViewDetails, liked, onToggleLike }) => {
                     getBanners()
                 ]);
 
-                if (catData.status === "success" && Array.isArray(catData.categories)) {
-                    setCategories(catData.categories);
-                }
+                if (isMounted) {
+                    if (catData.status === "success" && Array.isArray(catData.categories)) {
+                        setCategories(catData.categories);
+                    }
 
-                if (bannerData.status === "success") {
-                    // Filter banners for products page
-                    const productBanners = bannerData.banners.filter(
-                        b => b.is_active && b.position === 'products'
-                    );
-                    setBanners(productBanners);
+                    if (bannerData.status === "success") {
+                        const productBanners = bannerData.banners.filter(
+                            b => b.is_active && b.position === 'products'
+                        );
+                        setBanners(productBanners);
+                    }
                 }
             } catch (err) {
-                console.error("Failed to fetch metadata", err);
+                console.error("[Products] Failed to fetch metadata:", err);
             } finally {
-                setCategoryLoading(false);
+                if (isMounted) setCategoryLoading(false);
             }
         };
 
         fetchMetadata();
+        return () => { isMounted = false; };
     }, []);
 
-    const fetchProducts = async (page = 1) => {
+
+    //   Fetch products based on selected category
+
+    const fetchProducts = useCallback(async (page = 1) => {
         try {
             setLoading(true);
             let query = `page=${page}&limit=${PAGE_SIZE}`;
@@ -55,124 +73,102 @@ const Products = ({ searchTerm, onViewDetails, liked, onToggleLike }) => {
                 query += `&category=${selectedCategory.slug}`;
             }
             const data = await getProducts(query);
-            console.log(data, "image for it");
 
             setProductsList(data.products || []);
-            setCurrentPage(data.page || page);
-            setTotalPages(data.totalPages || 1);
-            setTotalProducts(data.total || 0);
         } catch (err) {
-            console.error("Failed to fetch products", err);
+            console.error("[Products] Failed to fetch products:", err);
         } finally {
             setLoading(false);
         }
-    };
-
-    useEffect(() => {
-        fetchProducts(1);
     }, [selectedCategory]);
 
-    // const handlePageChange = (page) => {
-    //     fetchProducts(page);
-    // };
+    // Handle Category Changes
+    useEffect(() => {
+        fetchProducts(1);
+    }, [fetchProducts]);
 
+    
+    //  Filter products based on search term
+ 
     const filteredProducts = useMemo(() => {
-        const term = searchTerm?.toLowerCase() || "";
+        const term = searchTerm?.toLowerCase().trim() || "";
         if (!term) return productsList;
 
         return productsList.filter(
-            (p) =>
-                p.title?.toLowerCase().includes(term)
+            (product) => product.title?.toLowerCase().includes(term)
         );
     }, [searchTerm, productsList]);
 
-    if (loading && categoryLoading) {
+    // Derived UI State
+    const showLoading = loading && categoryLoading;
+    const bannerVisible = banners.length > 0;
+
+    if (showLoading) {
         return (
-            <div className="flex justify-center items-center h-64">
-                <CircularProgress />
+            <div className="flex justify-center items-center h-96">
+                <CircularProgress color="inherit" />
             </div>
         );
     }
 
     return (
-        <div className="py-12 bg-white">
+        <div className="py-12 bg-white min-h-screen animate-in fade-in duration-500">
             <div className="container mx-auto px-4">
-                {/* Banner Carousel - Show on products page */}
-                {banners.length > 0 && (
+                {/* Banner Carousel */}
+                {bannerVisible && (
                     <div className="mb-16">
                         <BannerCarousel banners={banners} />
                     </div>
                 )}
 
-                {banners.length === 0 && (
-                    <div className="mb-4">
-                        <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-lg font-bold text-gray-900">Filter by Category:</h3>
+                {/* Category Filtering - Only if no banner or forced by design */}
+                {!bannerVisible && (
+                    <CategoryFilter
+                        categories={categories}
+                        selectedCategory={selectedCategory}
+                        onSelect={setSelectedCategory}
+                        loading={categoryLoading}
+                    />
+                )}
 
-                            {selectedCategory && (
-                                <button
-                                    onClick={() => setSelectedCategory(null)}
-                                    className="px-3 py-1 text-xs font-semibold text-indigo-600 bg-indigo-50 rounded-full hover:bg-indigo-100"
-                                >
-                                    Clear
-                                </button>
-                            )}
-                        </div>
+                {/* Products List */}
+                <section className="space-y-16">
+                    <ProductDiscovery
+                        title={selectedCategory ? `${selectedCategory.name} Products` : "Best Sellers"}
+                        subtitle={selectedCategory ? `Browse our ${selectedCategory.name} collection` : "Our most loved fresh items this week"}
+                        products={filteredProducts}
+                        layout={selectedCategory ? "grid" : "slider"}
+                        onViewDetails={openDetails}
+                        liked={liked}
+                        onToggleLike={toggleLike}
+                    />
 
-                        <div className="flex flex-wrap gap-3">
-                            {categoryLoading ? (
-                                <p className="text-gray-500">Loading categories...</p>
-                            ) : categories.length > 0 ? (
-                                categories.map((cat) => (
-                                    <button
-                                        key={cat.category_id}
-                                        onClick={() => setSelectedCategory(cat)}
-                                        className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${selectedCategory?.category_id === cat.category_id
-                                                ? 'bg-indigo-600 text-white shadow-lg'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                            }`}
-                                    >
-                                        {cat.name}
-                                    </button>
-                                ))
-                            ) : (
-                                <p className="text-gray-500">No categories available</p>
-                            )}
-                        </div>
+                    {!selectedCategory && (
+                        <>
+                            <div className="border-t border-gray-100"></div>
+                            <ProductDiscovery
+                                title="New Arrivals"
+                                subtitle="Freshly stocked and ready for your cart"
+                                products={filteredProducts}
+                                layout="grid"
+                                onViewDetails={openDetails}
+                                liked={liked}
+                                onToggleLike={toggleLike}
+                            />
+                        </>
+                    )}
+                </section>
+
+                {/* Empty State */}
+                {!loading && filteredProducts.length === 0 && (
+                    <div className="py-20 text-center">
+                        <h3 className="text-xl font-bold text-gray-400">No products found</h3>
+                        <p className="text-gray-500">Try adjusting your filters or search term</p>
                     </div>
                 )}
-
-                <ProductDiscovery
-                    title={selectedCategory ? `${selectedCategory.name} Products` : "Best Sellers"}
-                    subtitle={selectedCategory ? `Browse our ${selectedCategory.name} collection` : "Our most loved fresh items this week"}
-                    products={filteredProducts}
-                    layout={selectedCategory ? "grid" : "slider"}
-                    onViewDetails={onViewDetails}
-                    liked={liked}
-                    onToggleLike={onToggleLike}
-                />
-
-                {!selectedCategory && (
-                    <>
-                        <div className="my-10 border-t border-gray-100"></div>
-
-                        <ProductDiscovery
-                            title="New Arrivals"
-                            subtitle="Freshly stocked and ready for your cart"
-                            products={filteredProducts}
-                            layout="grid"
-                            onViewDetails={onViewDetails}
-                            liked={liked}
-                            onToggleLike={onToggleLike}
-                        />
-                    </>
-                )}
-
-                
             </div>
         </div>
     );
-}
+};
 
 export default Products;
-

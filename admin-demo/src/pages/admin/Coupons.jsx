@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import * as AdminService from '../../services/AdminService';
 import CouponsManagement from '../../components/admin/CouponsManagement';
+import { toast } from 'react-hot-toast';
 
 const Coupons = () => {
     const [coupons, setCoupons] = useState([]);
@@ -23,15 +24,23 @@ const Coupons = () => {
         if (!window.confirm("Delete coupon?")) return;
         try {
             await AdminService.deleteCoupon(id);
+            toast.success("Coupon deleted");
             fetchCoupons();
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to delete coupon");
+        }
     };
 
     const handleAddCoupon = async (data) => {
         try {
             await AdminService.addCoupon(data);
+            toast.success("Coupon added successfully");
             fetchCoupons();
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to add coupon");
+        }
     };
 
     if (loading) return (

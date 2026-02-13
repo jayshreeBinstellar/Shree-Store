@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import * as AdminService from '../../services/AdminService';
 import SettingsPortal from '../../components/admin/SettingsPortal';
+import { toast } from 'react-hot-toast';
 
 const Settings = () => {
     const [settings, setSettings] = useState(null);
@@ -22,8 +23,11 @@ const Settings = () => {
     const handleUpdateSettings = async (currentSettings) => {
         try {
             await AdminService.updateSettings(currentSettings || settings);
-            alert("Settings updated successfully!");
-        } catch (err) { console.error(err); }
+            toast.success("Settings updated successfully!");
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to update settings");
+        }
     };
 
     if (loading) return (

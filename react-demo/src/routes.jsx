@@ -15,11 +15,6 @@ const routes = [
     layout: "main",
     pages: [
       {
-        path: 'register',
-        name: 'register',
-        element: <Register />
-      },
-      {
         path: 'dashboard',
         name: 'dashboard',
         element: <DashBoard />
@@ -145,6 +140,11 @@ const routes = [
         path: "/",
         name: "login",
         element: <Login />
+      },
+      {
+        path: "/register",
+        name: "register",
+        element: <Register />
       }
     ]
   }

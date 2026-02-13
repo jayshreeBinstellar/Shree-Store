@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { MapPinIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { MapPinIcon, PhoneIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { getAddresses, addAddress, deleteAddress } from "../services/UserService";
 
 const AddressManager = () => {
@@ -196,7 +196,7 @@ const AddressManager = () => {
                                     {addr.street_address},<br />
                                     {addr.city}, {addr.state} - {addr.zip_code}
                                 </p>
-                                <p className="text-xs text-gray-500 font-bold mt-2">📞 {addr.phone}</p>
+                                <p className="text-xs text-gray-500 font-bold mt-2 flex gap-1"><PhoneIcon className="h-4 w-4" /> {addr.phone}</p>
                             </div>
                         </div>
                     </div>

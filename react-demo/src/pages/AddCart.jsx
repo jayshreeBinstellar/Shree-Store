@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef, useMemo } from "react"
 import { getAddresses } from "../services/UserService";
 import { checkout, getShippingOptions, validateCoupon, getStoreSettings } from "../services/ShopService"; // Import getStoreSettings
 import { useCart } from "../context/CartContext";
+import { toast } from "react-hot-toast";
 
 
 const AddCart = ({ onClose, onCartUpdate }) => {
@@ -213,7 +214,7 @@ const AddCart = ({ onClose, onCartUpdate }) => {
 
   const handleCheckout = async () => {
     const token = localStorage.getItem("token");
-    if (!token) return alert("Login required");
+    if (!token) return toast.error("Please login to checkout");
 
     const data = await checkout({
       items: cart,

@@ -66,7 +66,7 @@ exports.register = catchAsync(async (req, res) => {
     //convert password bycrpt
     const hash = await bcrypt.hash(password, 10)
 
-    const insertResult = await pool.query("INSERT INTO users (full_name, email, password_hash, dob, gender, created_at) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *",
+    const insertResult = await pool.query("INSERT INTO users (full_name, email, password_hash, dob, gender, role, is_admin, created_at) VALUES ($1, $2, $3, $4, $5, 'Customer', FALSE, NOW()) RETURNING *",
         [fullname, email, hash, dob, gender]
     );
     const user = insertResult.rows[0];

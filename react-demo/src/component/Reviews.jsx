@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Rating, Button, CircularProgress } from "@mui/material";
 import { getReviews, addReview } from "../services/ShopService";
+import { toast } from "react-hot-toast";
 
 const Reviews = ({ productId }) => {
     const [reviews, setReviews] = useState([]);
@@ -30,7 +31,7 @@ const Reviews = ({ productId }) => {
         e.preventDefault();
         const token = localStorage.getItem("token");
         if (!token) {
-            alert("Please login to leave a review");
+            toast.error("Please login to leave a review");
             return;
         }
 
@@ -40,12 +41,14 @@ const Reviews = ({ productId }) => {
             if (data.status === "success") {
                 setComment("");
                 setRating(5);
+                toast.success("Review submitted!");
                 fetchReviews(); // Refresh reviews
             } else {
-                alert(data.message || "Failed to submit review");
+                toast.error(data.message || "Failed to submit review");
             }
         } catch (err) {
             console.error("Error submitting review", err);
+            toast.error("Error submitting review");
         } finally {
             setIsSubmitting(false);
         }

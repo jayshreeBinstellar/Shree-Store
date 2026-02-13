@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import * as AdminService from '../../services/AdminService';
 import BannersManagement from '../../components/admin/BannersManagement';
+import { toast } from 'react-hot-toast';
 
 const Banners = () => {
     const [banners, setBanners] = useState([]);
@@ -33,6 +34,7 @@ const Banners = () => {
         try {
             const result = await AdminService.addBanner(formData);
             if (result.status === "success") {
+                toast.success("Banner added successfully");
                 await fetchBanners();
                 return true;
             } else {
@@ -40,6 +42,7 @@ const Banners = () => {
             }
         } catch (err) {
             console.error(err);
+            toast.error(err.message);
             throw err;
         }
     };
@@ -48,6 +51,7 @@ const Banners = () => {
         try {
             const result = await AdminService.updateBanner(bannerId, formData);
             if (result.status === "success") {
+                toast.success("Banner updated successfully");
                 await fetchBanners();
                 return true;
             } else {
@@ -55,6 +59,7 @@ const Banners = () => {
             }
         } catch (err) {
             console.error(err);
+            toast.error(err.message);
             throw err;
         }
     };
@@ -64,13 +69,14 @@ const Banners = () => {
         try {
             const result = await AdminService.deleteBanner(id);
             if (result.status === "success") {
+                toast.success("Banner deleted successfully");
                 await fetchBanners();
             } else {
                 throw new Error(result.message || "Failed to delete banner");
             }
         } catch (err) {
             console.error(err);
-            alert("Failed to delete banner");
+            toast.error("Failed to delete banner");
         }
     };
 

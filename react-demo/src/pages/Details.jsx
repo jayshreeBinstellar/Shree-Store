@@ -1,16 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import AddCart from "./AddCart";
 import { useCart } from "../context/CartContext";
 import Reviews from "../component/Reviews";
 import Slider from "react-slick";
 import { getProduct, getRelatedProducts } from "../services/ShopService";
 
-const Detail = ({ productId, onClose, onCartUpdate, allowPurchase = true, onProductChange }) => {
+import { useShop } from "../context/ShopContext";
 
+const Detail = () => {
+    const { selectedProductId: productId, closeDetails, allowPurchase, setSelectedProductId } = useShop();
     const [product, setProduct] = useState(null);
     const [relatedProducts, setRelatedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { cart, addItem, removeItem } = useCart();
+    const [cartLoading, setCartLoading] = useState(false);
+    const { cart, addItem, removeItem, refreshCart } = useCart();
 
     const sliderSettings = {
         dots: true,
@@ -62,16 +65,34 @@ const Detail = ({ productId, onClose, onCartUpdate, allowPurchase = true, onProd
         fetchProduct();
     }, [productId]);
 
-    const isInCart = product ? cart.some(item => item.id === product.product_id) : false;
+    const isInCart = useMemo(() =>
+        product ? cart.some(item => item.id === product.product_id) : false,
+        [product, cart]);
 
-    const handleCartAction = async () => {
-        if (isInCart) {
-            await removeItem(product.product_id);
-        } else {
-            await addItem(product.product_id, 1);
+    const images = useMemo(() =>
+        (product?.images && product.images.length > 0) ? product.images : [product?.thumbnail],
+        [product]);
+
+    const handleCartAction = useCallback(async () => {
+        if (!product || cartLoading) return;
+
+        try {
+            setCartLoading(true);
+
+            if (isInCart) {
+                await removeItem(product.product_id);
+            } else {
+                await addItem(product.product_id, 1);
+            }
+
+            if (refreshCart) refreshCart();
+        } catch (error) {
+            console.error("Cart action failed:", error);
+        } finally {
+            setCartLoading(false);
         }
-        if (onCartUpdate) onCartUpdate();
-    };
+    }, [product, isInCart, removeItem, addItem, refreshCart, cartLoading]);
+
 
     if (loading) {
         return (
@@ -85,8 +106,6 @@ const Detail = ({ productId, onClose, onCartUpdate, allowPurchase = true, onProd
 
     if (!product) return null;
 
-    const images = (product.images && product.images.length > 0) ? product.images : [product.thumbnail];
-
     return (
         <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 lg:p-10 animate-in fade-in duration-500">
 
@@ -95,7 +114,7 @@ const Detail = ({ productId, onClose, onCartUpdate, allowPurchase = true, onProd
                 {/* Close Button */}
                 <button
                     className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center bg-white/80 backdrop-blur-sm text-gray-400 hover:text-gray-900 rounded-2xl transition-all z-20 shadow-sm border border-gray-100 active:scale-95"
-                    onClick={onClose}
+                    onClick={closeDetails}
                 >
                     <span className="text-xl font-light">✕</span>
                 </button>
@@ -240,7 +259,7 @@ const Detail = ({ productId, onClose, onCartUpdate, allowPurchase = true, onProd
                                             onClick={() => {
                                                 const container = document.querySelector('.custom-scrollbar');
                                                 if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
-                                                if (onProductChange) onProductChange(rp.product_id);
+                                                if (setSelectedProductId) setSelectedProductId(rp.product_id);
                                             }}
                                             className="group cursor-pointer"
                                         >
@@ -266,6 +285,7 @@ const Detail = ({ productId, onClose, onCartUpdate, allowPurchase = true, onProd
                         <div className="px-8 md:px-12 py-6 bg-white border-t border-gray-100/10 shadow-[0_-15px_40px_rgba(0,0,0,0.03)] relative z-10">
                             <button
                                 onClick={handleCartAction}
+                                disabled={cartLoading}
                                 className={`w-full py-5 rounded-3xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 shadow-2xl flex items-center justify-center gap-3
                                 ${isInCart
                                         ? "bg-gray-100 text-gray-900 hover:bg-rose-50 hover:text-rose-600 shadow-gray-100"
@@ -275,7 +295,11 @@ const Detail = ({ productId, onClose, onCartUpdate, allowPurchase = true, onProd
                                 <svg className={`w-5 h-5 ${isInCart ? 'rotate-45' : ''} transition-transform`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                                 </svg>
-                                {isInCart ? "Remove from Basket" : "Add to Shopping Bag"}
+                                {cartLoading
+                                    ? "Processing..."
+                                    : isInCart
+                                        ? "Remove from Basket"
+                                        : "Add to Shopping Bag"}
                             </button>
                         </div>
                     )}

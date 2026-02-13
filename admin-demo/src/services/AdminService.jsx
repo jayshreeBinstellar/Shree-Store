@@ -166,6 +166,13 @@ export const toggleCustomerBlock = async (id) => {
         token: true
     });
 };
+export const addCustomer = async (data) => {
+    return await APIManager.postRequest({
+        path: API_ENDPOINT.ADD_CUSTOMER,
+        data,
+        token: true
+    });
+};
 
 export const getTickets = async (page = 1, limit = 10, status = '') => {
     const params = new URLSearchParams({

@@ -7,33 +7,32 @@ async function logActivity(userId, action, ipAddress, additionalData = null) {
             VALUES ($1, $2, $3, $4, NOW())
             RETURNING *
         `;
-
+        
         const result = await pool.query(query, [
             userId,
             action,
             ipAddress,
             additionalData ? JSON.stringify(additionalData) : null
         ]);
-
+        
         return result.rows[0];
     } catch (error) {
         console.error('Error logging activity:', error);
     }
 }
-
 function getIpAddress(req) {
-    return req.headers['x-forwarded-for']?.split(',')[0] ||
-        req.connection.remoteAddress ||
-        req.socket.remoteAddress ||
-        req.ip ||
-        'Unknown';
+    return req.headers['x-forwarded-for']?.split(',')[0] || 
+           req.connection.remoteAddress || 
+           req.socket.remoteAddress || 
+           req.ip || 
+           'Unknown';
 }
 
 function auditLoggingMiddleware(action) {
     return async (req, res, next) => {
         const originalSend = res.send;
-
-        res.send = function (data) {
+        
+        res.send = function(data) {
             if (res.statusCode >= 200 && res.statusCode < 300 && req.user) {
                 const ipAddress = getIpAddress(req);
                 logActivity(
@@ -47,10 +46,10 @@ function auditLoggingMiddleware(action) {
                     }
                 ).catch(err => console.error('Audit log error:', err));
             }
-
+            
             return originalSend.call(this, data);
         };
-
+        
         next();
     };
 }
@@ -60,4 +59,3 @@ module.exports = {
     getIpAddress,
     auditLoggingMiddleware
 };
-

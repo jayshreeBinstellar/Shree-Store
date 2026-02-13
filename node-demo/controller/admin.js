@@ -1,4 +1,5 @@
 const pool = require('../db');
+const bcrypt = require('bcrypt');
 const catchAsync = require('../utils/catchAsync');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { logActivity, getIpAddress } = require('../utils/auditLogger');
@@ -352,6 +353,34 @@ exports.toggleUserBlock = catchAsync(async (req, res) => {
         await logActivity(req.user.id, 'Toggled User Block', getIpAddress(req), { target_user_id: id, is_blocked: result.rows[0].is_blocked });
     }
     res.status(200).json({ status: "success", customer: result.rows[0] });
+});
+
+//this APi for add customer in admin panel
+exports.addCustomer = catchAsync(async (req, res) => {
+    const { fullname, email, password, dob, gender, role } = req.body;
+
+    // Check if user already exists
+    const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    if (existingUser.rows.length > 0) {
+        return res.status(400).json({ status: "error", message: "User already exists with this email" });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+    const userRole = role || 'Customer'; // Default to Customer if created from admin panel
+    const isAdmin = userRole === 'Super Admin' || userRole === 'Staff';
+
+    const result = await pool.query(
+        "INSERT INTO users (full_name, email, password_hash, dob, gender, role, is_admin, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING *",
+        [fullname, email, hash, dob || null, gender || 'Other', userRole, isAdmin]
+    );
+
+    await logActivity(req.user.id, 'Created User from Admin', getIpAddress(req), {
+        target_user_id: result.rows[0].user_id,
+        role: userRole,
+        email: email
+    });
+
+    res.status(201).json({ status: "success", user: result.rows[0] });
 });
 
 //this APi for update user role in admin panel

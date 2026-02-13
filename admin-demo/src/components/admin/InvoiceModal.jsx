@@ -72,7 +72,7 @@ const InvoiceModal = ({ open, onClose, order }) => {
                                 {storeName}
                             </h2>
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">
-                                Official Invoice
+
                             </p>
                         </div>
 
@@ -218,7 +218,7 @@ const InvoiceModal = ({ open, onClose, order }) => {
                 {/* FOOTER */}
                 <div className="bg-gray-50 px-4 py-4 flex justify-between items-center print:hidden">
                     <p className="text-xs text-gray-400 italic">
-                        This invoice is system-generated and digitally verified.
+                        This system-generated and digitally verified.
                     </p>
 
                     <div className="flex gap-3">

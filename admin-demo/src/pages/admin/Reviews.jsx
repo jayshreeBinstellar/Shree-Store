@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import * as AdminService from '../../services/AdminService';
 import ReviewsManagement from '../../components/admin/ReviewsManagement';
+import { toast } from 'react-hot-toast';
 
 const Reviews = () => {
     const [reviews, setReviews] = useState([]);
@@ -22,8 +23,12 @@ const Reviews = () => {
     const handleUpdateReviewStatus = async (id, status) => {
         try {
             await AdminService.updateReviewStatus(id, status);
+            toast.success(`Review ${status.toLowerCase()}`);
             fetchReviews();
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to update status");
+        }
     };
 
     if (loading) return (

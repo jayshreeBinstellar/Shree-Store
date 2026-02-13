@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../services/AuthService';
+import { useAuth } from '../context/AuthContext';
+import { NavLink } from "react-router-dom";
 
 const Register = () => {
   const navigate = useNavigate();
-
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     fullname: "",
     email: "",
@@ -42,10 +44,13 @@ const Register = () => {
       const res = await register({ fullname, email, password, dob, gender });
       console.log("Register response:", res);
 
-      if (res.status === "success") {
+      if (res.status === true) {
+
         setMessage(res.message);
+        login(res.token);
+
         setIsError(false);
-        setTimeout(() => navigate("/"), 1500);
+        setTimeout(() => navigate("/main/dashboard"), 1500);
       } else {
         setMessage(res.message);
         setIsError(true);
@@ -60,57 +65,100 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center ">
+    <div className="screen-h flex items-center justify-center px-4">
       <form
         onSubmit={handleRegister}
-        className="w-full max-w-md p-6 bg-white border border-gray-300 rounded-lg shadow-md"
+        className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 relative"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
+        {/* Heading */}
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+            Create Account
+          </h2>
+          <p className="text-sm text-gray-500 mt-2">
+            Please fill in the details to register.
+          </p>
+        </div>
 
+        {/* Message */}
         {message && (
-          <p className={`mb-4 text-center ${isError ? "text-red-500" : "text-green-500"}`}>
+          <p
+            className={`mb-4 text-center text-sm font-semibold ${isError ? "text-red-500" : "text-green-600"
+              }`}
+          >
             {message}
           </p>
         )}
 
-        <div className="flex flex-col gap-4">
+        {/* Full Name */}
+        <div className="mb-5">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
+            Full Name
+          </label>
           <input
             type="text"
             name="fullname"
-            placeholder="Full Name"
             value={formData.fullname}
             onChange={handleChange}
-            className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Enter your full name"
+            className="w-full h-12 px-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white outline-none transition-all"
           />
+        </div>
+
+        {/* Email */}
+        <div className="mb-5">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
+            Email
+          </label>
           <input
             type="email"
             name="email"
-            placeholder="Email"
             value={formData.email}
             onChange={handleChange}
-            className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Enter your email"
+            className="w-full h-12 px-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white outline-none transition-all"
           />
+        </div>
+
+        {/* Password */}
+        <div className="mb-5">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
+            Password
+          </label>
           <input
             type="password"
             name="password"
-            placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Enter your password"
+            className="w-full h-12 px-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white outline-none transition-all"
           />
+        </div>
+
+        {/* Date of Birth */}
+        <div className="mb-5">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
+            Date of Birth
+          </label>
           <input
             type="date"
             name="dob"
-            placeholder="Date of Birth"
             value={formData.dob}
             onChange={handleChange}
-            className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full h-12 px-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white outline-none transition-all"
           />
+        </div>
+
+        {/* Gender */}
+        <div className="mb-6">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
+            Gender
+          </label>
           <select
             name="gender"
             value={formData.gender}
             onChange={handleChange}
-            className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full h-12 px-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white outline-none transition-all"
           >
             <option value="">Select Gender</option>
             <option value="male">Male</option>
@@ -119,16 +167,31 @@ const Register = () => {
           </select>
         </div>
 
+        {/* Login Link */}
+        <div className="text-center mb-6">
+          <p className="text-sm text-gray-600">
+            Already have an account?{" "}
+            <NavLink
+              to="/auth/login"
+              className="font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
+            >
+              Sign In
+            </NavLink>
+          </p>
+        </div>
+
+        {/* Button */}
         <button
           type="submit"
           disabled={loading}
-          className={`w-full mt-4 py-2 px-4 bg-blue-500 text-white font-medium rounded hover:bg-blue-600 transition-colors ${loading ? "opacity-50 cursor-not-allowed" : ""
+          className={`w-full h-12 rounded-2xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all active:scale-[0.98] shadow-lg ${loading ? "opacity-50 cursor-not-allowed" : ""
             }`}
         >
-          {loading ? "Registering..." : "Register"}
+          {loading ? "Registering..." : "Create Account"}
         </button>
       </form>
     </div>
+
   );
 };
 

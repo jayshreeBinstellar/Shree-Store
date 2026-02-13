@@ -1,7 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import * as AdminService from '../../services/AdminService';
 import CustomersManagement from '../../components/admin/CustomersManagement';
+import AddCustomerModal from '../../components/admin/AddCustomerModal';
+import { toast } from 'react-hot-toast';
 
 const Customers = () => {
     const [customers, setCustomers] = useState([]);
@@ -9,6 +10,7 @@ const Customers = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalCustomers, setTotalCustomers] = useState(0);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     const fetchCustomers = async (page = 1) => {
         try {
@@ -21,6 +23,16 @@ const Customers = () => {
             }
         } catch (err) {
             console.error(err);
+        }
+    };
+
+    const handleAddCustomer = async (formData) => {
+        const res = await AdminService.addCustomer(formData);
+        if (res.status === "success") {
+            toast.success("Account created successfully!");
+            fetchCustomers(currentPage);
+        } else {
+            throw new Error(res.message);
         }
     };
 
@@ -37,15 +49,23 @@ const Customers = () => {
     const handleUpdateUserRole = async (id, role) => {
         try {
             await AdminService.updateCustomerRole(id, role);
+            toast.success("User role updated");
             fetchCustomers(currentPage);
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to update role");
+        }
     };
 
     const handleToggleBlock = async (id) => {
         try {
             await AdminService.toggleCustomerBlock(id);
+            toast.success("User status switched");
             fetchCustomers(currentPage);
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to switch status");
+        }
     };
 
     const handlePageChange = (newPage) => {
@@ -61,18 +81,26 @@ const Customers = () => {
     );
 
     return (
-        <CustomersManagement
-            customers={customers}
-            onToggleBlock={handleToggleBlock}
-            onUpdateRole={handleUpdateUserRole}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            isLoading={loading}
-            totalCustomers={totalCustomers}
+        <>
+            <CustomersManagement
+                customers={customers}
+                onToggleBlock={handleToggleBlock}
+                onUpdateRole={handleUpdateUserRole}
+                onAddCustomer={() => setIsAddModalOpen(true)}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                isLoading={loading}
+                totalCustomers={totalCustomers}
             />
-        )
-    
+            <AddCustomerModal
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+                onAdd={handleAddCustomer}
+            />
+        </>
+    );
+
 };
 
 export default Customers;

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import * as AdminService from '../../services/AdminService';
 import CategoriesManagement from '../../components/admin/CategoriesManagement';
+import { toast } from 'react-hot-toast';
 
 const Categories = () => {
     const [categories, setCategories] = useState([]);
@@ -70,7 +71,7 @@ const Categories = () => {
     const handleSubmitForm = async (e) => {
         e.preventDefault();
         if (!formData.name.trim()) {
-            alert('Category name is required');
+            toast.error('Category name is required');
             return;
         }
 
@@ -78,14 +79,16 @@ const Categories = () => {
         try {
             if (editingCategory) {
                 await AdminService.updateCategory(editingCategory.category_id, formData);
+                toast.success('Category updated successfully');
             } else {
                 await AdminService.addCategory(formData);
+                toast.success('Category added successfully');
             }
             fetchCategories();
             handleCloseModal();
         } catch (err) {
             console.error(err);
-            alert('Failed to save category');
+            toast.error('Failed to save category');
         } finally {
             setSubmitting(false);
         }

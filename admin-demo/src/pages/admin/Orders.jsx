@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import * as AdminService from '../../services/AdminService';
 import OrdersManagement from '../../components/admin/OrdersManagement';
 import InvoiceModal from '../../components/admin/InvoiceModal';
+import { toast } from 'react-hot-toast';
 
 const Orders = () => {
     const [orders, setOrders] = useState([]);
@@ -44,8 +45,12 @@ const Orders = () => {
     const handleUpdateOrderStatus = async (id, status) => {
         try {
             await AdminService.updateOrderStatus(id, status);
+            toast.success(`Order status updated to ${status}`);
             fetchOrders(currentPage);
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to update status");
+        }
     };
 
     const handleEditShipping = (order) => {
@@ -64,9 +69,13 @@ const Orders = () => {
                 ...shippingData,
                 status: currentOrderForShipping.status === 'Pending' ? 'Shipped' : currentOrderForShipping.status
             });
+            toast.success("Shipping details saved");
             setShippingModalOpen(false);
             fetchOrders(currentPage);
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to save shipping details");
+        }
     };
 
     const handlePageChange = (newPage) => {

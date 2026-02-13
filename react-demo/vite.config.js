@@ -9,17 +9,17 @@ export default defineConfig({
     port: 3002,
     proxy: {
       '/auth': {
-        target: 'http://192.168.0.134:3001',
+        target: 'http://192.168.0.137:3001',
         changeOrigin: true,
         secure: false
       },
       '/shop': {
-        target: 'http://192.168.0.134:3001',
+        target: 'http://192.168.0.137:3001',
         changeOrigin: true,
         secure: false
       },
       '/uploads': {
-        target: 'http://192.168.0.134:3001',
+        target: 'http://192.168.0.137:3001',
         changeOrigin: true,
         secure: false
       }

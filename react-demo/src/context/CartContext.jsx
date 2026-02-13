@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getCart, addToCart, updateCartItem, removeFromCart } from "../services/ShopService";
 import { useAuth } from "./AuthContext";
+import { toast } from "react-hot-toast";
 
 const CartContext = createContext();
 
@@ -37,17 +38,18 @@ export const CartProvider = ({ children }) => {
 
     const addItem = async (productId, quantity = 1) => {
         if (!isAuthenticated) {
-            alert("Please login to add items to cart");
+            toast.error("Please login to add items to cart");
             return;
         }
         try {
             await addToCart(productId, quantity);
             await fetchCart();
+            toast.success("Added to cart!");
             return { status: 'success' };
         } catch (err) {
             console.error("Failed to add to cart", err);
             const msg = err.response?.data?.message || "Failed to add to cart";
-            alert(msg);
+            toast.error(msg);
             return { status: 'error', message: msg };
         }
     };

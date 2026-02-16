@@ -210,13 +210,13 @@ const Support = () => {
                                 onClick={() => { setActiveTab('form'); setSelectedTicket(null); }}
                                 className={`px-6 py-3 rounded-full font-bold transition-all ${activeTab === 'form' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                             >
-                                New Ticket
+                                Send Request
                             </button>
                             <button
                                 onClick={() => setActiveTab('tickets')}
                                 className={`px-6 py-3 rounded-full font-bold transition-all ${activeTab === 'tickets' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                             >
-                                My Tickets
+                                My Requests
                             </button>
                         </div>
 
@@ -309,7 +309,7 @@ const Support = () => {
                                             disabled={loading}
                                             className="bg-indigo-600! hover:bg-indigo-700! py-4! rounded-xl! font-bold! text-lg! w-full! shadow-lg!"
                                         >
-                                            {loading ? "Creating Ticket..." : "Create Support Ticket"}
+                                            {loading ? "Sending Request..." : "Send Request"}
                                         </Button>
                                     </form>
                                 </div>
@@ -381,7 +381,7 @@ const Support = () => {
                                     </div>
                                 ) : (
                                     <div className="p-12 text-center text-gray-500">
-                                        You haven't created any support tickets yet.
+                                        You haven't created any support requests yet.
                                     </div>
                                 )}
                             </div>
@@ -392,7 +392,7 @@ const Support = () => {
                                         onClick={() => setSelectedTicket(null)}
                                         className="text-gray-600 hover:text-gray-900 font-bold flex items-center gap-2"
                                     >
-                                        ← Back to Tickets
+                                        ← Back to Requests
                                     </button>
                                     <div className="flex gap-2">
                                         <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${getStatusColor(selectedTicket.status)}`}>

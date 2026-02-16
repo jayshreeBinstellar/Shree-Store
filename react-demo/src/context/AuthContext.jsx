@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useMemo } from "react";
 
 // Create Auth Context
 const AuthContext = createContext({});
@@ -68,9 +68,13 @@ export const AuthProvider = ({ children }) => {
   const user = token ? parseJwt(token) : null;
   const isAdmin = user?.isAdmin || false;
 
+  const value = useMemo(() => ({
+    token, user, isAdmin, loading, isAuthenticated, login, logout
+  }), [token, user, isAdmin, loading, isAuthenticated]);
+
   return (
     <AuthContext.Provider
-      value={{ token, user, isAdmin, loading, isAuthenticated, login, logout }}
+      value={value}
     >
       {children}
     </AuthContext.Provider>

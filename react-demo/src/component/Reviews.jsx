@@ -110,4 +110,4 @@ const Reviews = ({ productId }) => {
     );
 };
 
-export default Reviews;
+export default React.memo(Reviews);

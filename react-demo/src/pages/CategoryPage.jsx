@@ -26,7 +26,7 @@ const CategoryPage = ({
     const [loading, setLoading] = useState(true);
     const [visibleCount, setVisibleCount] = useState(INITIAL_PAGE_SIZE);
 
-    
+
     const fetchCategoryProducts = useCallback(async () => {
         let isMounted = true;
         try {
@@ -107,7 +107,7 @@ const CategoryPage = ({
     }
 
     return (
-        <div className="py-12 bg-white min-h-screen animate-in fade-in duration-500">
+        <div className="py-12 bg-white min-h-screen animate-in fade-in duration-300">
             <div className="container mx-auto px-4">
                 {/* Banners */}
                 {banners.length > 0 && (

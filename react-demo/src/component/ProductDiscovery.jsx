@@ -77,4 +77,4 @@ const ProductDiscovery = ({ title, subtitle, products, layout = "slider", onView
     );
 };
 
-export default ProductDiscovery;
+export default React.memo(ProductDiscovery);

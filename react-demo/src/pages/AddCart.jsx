@@ -3,6 +3,7 @@ import { getAddresses } from "../services/UserService";
 import { checkout, getShippingOptions, validateCoupon, getStoreSettings } from "../services/ShopService"; // Import getStoreSettings
 import { useCart } from "../context/CartContext";
 import { toast } from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 
 const AddCart = ({ onClose, onCartUpdate }) => {
@@ -212,18 +213,32 @@ const AddCart = ({ onClose, onCartUpdate }) => {
 
   //Checkout
 
+  const [checkingOut, setCheckingOut] = useState(false);
+
   const handleCheckout = async () => {
     const token = localStorage.getItem("token");
     if (!token) return toast.error("Please login to checkout");
 
-    const data = await checkout({
-      items: cart,
-      addressId: selectedAddress,
-      couponCode: appliedCoupon?.code || null,
-      shippingId: selectedShippingId
-    });
+    setCheckingOut(true);
+    try {
+      const data = await checkout({
+        items: cart,
+        addressId: selectedAddress,
+        couponCode: appliedCoupon?.code || null,
+        shippingId: selectedShippingId
+      });
 
-    if (data?.url) window.location.href = data.url;
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error("Checkout failed. Please try again.");
+        setCheckingOut(false);
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast.error("Checkout failed. Please try again.");
+      setCheckingOut(false);
+    }
   };
 
   const taxableAmount = Math.max(0, subtotal - baseDiscount - couponDiscount);
@@ -236,12 +251,12 @@ const AddCart = ({ onClose, onCartUpdate }) => {
 
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/20 backdrop-blur-sm animate-in fade-in duration-500"
+        className="absolute inset-0 bg-black/20 backdrop-blur-sm animate-in fade-in duration-300"
         onClick={onClose}
       ></div>
 
       {/* Drawer */}
-      <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-500 ease-out">
+      <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 ease-out">
         {/* Header */}
         <div className="p-4 border-b border-gray-100 flex items-center justify-between">
           <div>
@@ -252,7 +267,7 @@ const AddCart = ({ onClose, onCartUpdate }) => {
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-400 hover:text-gray-900 rounded-full transition-all"
+            className="cursor-pointer w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-400 hover:text-gray-900 rounded-full transition-all"
           >
             ✕
           </button>
@@ -269,7 +284,7 @@ const AddCart = ({ onClose, onCartUpdate }) => {
               </div>
               <button
                 onClick={onClose}
-                className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-black text-sm hover:bg-gray-900 transition-all shadow-md"
+                className="cursor-pointer bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-black text-sm hover:bg-gray-900 transition-all shadow-md"
               >
                 Start Shopping
               </button>
@@ -352,7 +367,7 @@ const AddCart = ({ onClose, onCartUpdate }) => {
               <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Shipping To</span>
-                  <a href="/main/account" className="text-[9px] font-black text-indigo-600 uppercase tracking-widest hover:underline italic">Edit</a>
+                  <Link to="/main/account" className="text-[9px] font-black text-indigo-600 uppercase tracking-widest hover:underline italic">Edit</Link>
                 </div>
                 {addresses.length > 0 ? (
                   <select
@@ -368,7 +383,7 @@ const AddCart = ({ onClose, onCartUpdate }) => {
                   </select>
                 ) : (
                   <div className="text-[10px] text-gray-400 font-medium italic">
-                    No addresses found. <a href="/main/account" className="text-indigo-600 font-bold hover:underline">Add one</a>
+                    No addresses found. <Link to="/main/account" className="text-indigo-600 font-bold hover:underline">Add one</Link>
                   </div>
                 )}
               </div>
@@ -473,10 +488,22 @@ const AddCart = ({ onClose, onCartUpdate }) => {
 
             <button
               onClick={handleCheckout}
-              className="w-full bg-indigo-600 text-white py-3 rounded-xl font-black text-base hover:bg-indigo-700 transition-all shadow-sm active:scale-95 group flex items-center justify-center gap-2"
+              disabled={checkingOut}
+              className={`w-full py-3 rounded-xl font-black text-base uppercase tracking-widest transition-all shadow-sm active:scale-95 group flex items-center justify-center gap-2
+                ${checkingOut ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}
+              `}
             >
-              Checkout Now
-              <span className="text-lg group-hover:translate-x-1 transition-transform">→</span>
+              {checkingOut ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  Checkout Now
+                  <span className="text-lg group-hover:translate-x-1 transition-transform">→</span>
+                </>
+              )}
             </button>
           </div>
         )}

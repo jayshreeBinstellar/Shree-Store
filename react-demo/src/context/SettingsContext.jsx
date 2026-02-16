@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useMemo } from 'react';
 import { getStoreSettings } from '../services/ShopService';
 
 const SettingsContext = createContext();
@@ -36,10 +36,10 @@ export const SettingsProvider = ({ children }) => {
         fetchSettings();
     }, []);
 
-    const value = {
+    const value = useMemo(() => ({
         settings,
         loading
-    };
+    }), [settings, loading]);
 
     return (
         <SettingsContext.Provider value={value}>

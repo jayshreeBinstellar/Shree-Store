@@ -54,7 +54,7 @@ const Contact = () => {
                         variant="contained"
                         className="bg-indigo-600! hover:bg-indigo-700! py-3! px-8! rounded-full! font-bold! shadow-lg! transform hover:scale-105 transition-all"
                     >
-                        Open Support Ticket
+                        Send Request
                     </Button>
                 </div>
 

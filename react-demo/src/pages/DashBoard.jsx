@@ -134,7 +134,7 @@ const DashBoard = ({ onOpenCart }) => {
     const cartItemCount = cart.length;
 
     return (
-        <div className="relative bg-white min-h-screen animate-in fade-in duration-700">
+        <div className="relative bg-white min-h-screen animate-in fade-in duration-300">
             {/* Hero Section */}
             <header className="container mx-auto px-4 pt-6">
                 <BannerCarousel banners={banners} />

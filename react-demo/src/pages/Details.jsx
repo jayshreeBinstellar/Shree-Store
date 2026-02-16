@@ -107,16 +107,16 @@ const Detail = () => {
     if (!product) return null;
 
     return (
-        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 lg:p-10 animate-in fade-in duration-500">
+        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 lg:p-10 animate-in fade-in duration-300">
 
-            <div className="bg-white w-full max-w-5xl rounded-[40px] relative overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.2)] animate-in zoom-in-95 duration-500 flex flex-col md:flex-row h-full max-h-[60vh]">
+            <div className="bg-white w-full max-w-5xl rounded-[40px] relative overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.2)] animate-in zoom-in-95 duration-300 flex flex-col md:flex-row h-full max-h-[60vh]">
 
                 {/* Close Button */}
                 <button
-                    className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center bg-white/80 backdrop-blur-sm text-gray-400 hover:text-gray-900 rounded-2xl transition-all z-20 shadow-sm border border-gray-100 active:scale-95"
+                    className=" cursor-pointer absolute top-6 right-6 w-10 h-10 flex items-center justify-center bg-white/80 backdrop-blur-sm text-gray-400 hover:text-gray-900 rounded-2xl transition-all z-20 shadow-sm border border-gray-100 active:scale-95"
                     onClick={closeDetails}
                 >
-                    <span className="text-xl font-light">✕</span>
+                    <span className="text-xl font-light ">✕</span>
                 </button>
 
                 {/* Left Side: Product Gallery */}

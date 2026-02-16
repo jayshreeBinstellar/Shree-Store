@@ -26,13 +26,13 @@ const ProductCard = ({ product, isLiked, onToggleLike, onViewDetails }) => {
                 <div className="absolute top-0 right-0 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <button
                         onClick={() => onToggleLike && onToggleLike(id)}
-                        className="w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-red-50 transition-colors"
+                        className="w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-red-50 transition-colors cursor-pointer"
                     >
                         {isLiked ? <Favorite className="text-red-500 w-4 h-4" /> : <FavoriteBorder className="text-gray-400 w-4 h-4" />}
                     </button>
                     <button
                         onClick={() => onViewDetails && onViewDetails(id)}
-                        className="w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-indigo-50 transition-colors"
+                        className="w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-indigo-50 transition-colors cursor-pointer"
                     >
                         <Visibility className="text-gray-400 w-4 h-4 hover:text-indigo-600" />
                     </button>
@@ -70,4 +70,4 @@ const ProductCard = ({ product, isLiked, onToggleLike, onViewDetails }) => {
     );
 };
 
-export default ProductCard;
+export default React.memo(ProductCard);

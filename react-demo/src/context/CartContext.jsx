@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { getCart, addToCart, updateCartItem, removeFromCart } from "../services/ShopService";
 import { useAuth } from "./AuthContext";
 import { toast } from "react-hot-toast";
@@ -73,10 +73,21 @@ export const CartProvider = ({ children }) => {
     };
 
 
-    const cartCount = cart.reduce((acc, item) => acc + item.qty, 0);
+    const cartCount = useMemo(() => cart.reduce((acc, item) => acc + item.qty, 0), [cart]);
+
+    const value = React.useMemo(() => ({
+        cart,
+        loading,
+        error,
+        addItem,
+        updateItem,
+        removeItem,
+        cartCount,
+        refreshCart: fetchCart
+    }), [cart, loading, error, cartCount]);
 
     return (
-        <CartContext.Provider value={{ cart, loading, error, addItem, updateItem, removeItem, cartCount, refreshCart: fetchCart }}>
+        <CartContext.Provider value={value}>
             {children}
         </CartContext.Provider>
     );

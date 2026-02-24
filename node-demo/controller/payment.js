@@ -31,7 +31,7 @@ exports.createCheckoutSession = catchAsync(async (req, res) => {
     //Get Tax Rate from Store Settings
     const settingsRes = await client.query("SELECT tax_percent FROM store_settings LIMIT 1");
     if (settingsRes.rows.length > 0) {
-      TAX_RATE = parseFloat(settingsRes.rows[0].tax_percent) / 100;
+      TAX_RATE = Number.parseFloat(settingsRes.rows[0].tax_percent) / 100;
     }
 
     //Validate items & prices from DB

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import * as AdminService from '../../services/AdminService';
 import DashboardOverview from '../../components/admin/DashboardOverview';
+import Loader from '../../components/Loader';
 
 const Dashboard = () => {
     const [stats, setStats] = useState(null);
@@ -29,13 +30,7 @@ const Dashboard = () => {
         fetchData();
     }, []);
 
-    if (loading) return (
-        <div className="h-96 w-full flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-                <div className="h-12 w-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-        </div>
-    );
+    if (loading) return <Loader />;
 
     return (
         <DashboardOverview

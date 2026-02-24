@@ -10,6 +10,9 @@ export default {
                 sans: ['Outfit', 'sans-serif'],
                 serif: ['Inter', 'sans-serif'],
             },
+            animation: {
+                'spin-slow': 'spin 3s linear infinite',
+            }
         },
     },
     plugins: [],

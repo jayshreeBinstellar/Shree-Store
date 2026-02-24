@@ -18,11 +18,12 @@ import Support from "./pages/admin/Support";
 import Logs from "./pages/admin/Logs";
 import Settings from "./pages/admin/Settings";
 import { Toaster } from "react-hot-toast";
+import Loader from "./components/Loader";
 
 const ProtectedRoute = ({ children }) => {
     const { token, isAdmin, loading } = useAuth();
 
-    if (loading) return null;
+    if (loading) return <Loader fullScreen />;
     if (!token || !isAdmin) return <Navigate to="/login" />;
 
     return children;

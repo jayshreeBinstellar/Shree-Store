@@ -68,8 +68,6 @@ const Navigation = () => {
                             </li>
                         ))}
                     </ul>
-
-                    {/* Spacer for symmetry */}
                     <div className="hidden lg:block w-8"></div>
                 </div>
 

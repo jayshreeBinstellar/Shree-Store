@@ -57,7 +57,7 @@ export const getShippingOptions = async () => {
 
 export const getStoreSettings = async () => {
     return await APIManager.getRequest({
-        path: '/shop/settings', 
+        path: API_ENDPOINT.SHOP_SETTINGS,
     });
 };
 

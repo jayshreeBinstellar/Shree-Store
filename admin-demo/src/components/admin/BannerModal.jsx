@@ -146,7 +146,7 @@ const BannerModal = ({ isOpen, onClose, onSubmit, banner = null }) => {
                     </button>
                 </div>
 
-                {/* Form */}    
+                {/* Form */}
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     {error && (
                         <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm font-medium">

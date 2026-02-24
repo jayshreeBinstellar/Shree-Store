@@ -3,20 +3,23 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import * as AdminService from '../services/AdminService';
+import Loader from '../components/Loader'
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+        setLoading(true);
         try {
             const response = await AdminService.login({ email, password });
             if (response.token) {
-                // Check if admin
                 const payload = JSON.parse(atob(response.token.split('.')[1]));
                 if (payload.isAdmin) {
                     login(response.token);
@@ -24,16 +27,15 @@ const Login = () => {
                 } else {
                     setError('Unauthorized access');
                 }
-            } else {
-                // Handle case where token is not in response (e.g. wrapper error)
-                // But ApiManager usually throws or returns data
-                // If login returns user data but token logic is different?
-                // Usually login returns token.
             }
         } catch (err) {
             setError(err.message || 'Login failed');
+        } finally {
+            setLoading(false);
         }
     };
+
+    if (loading) return <Loader fullScreen message="Authenticating..." />;
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">

@@ -1,3 +1,5 @@
+// calculate discount is manage coupon discount calculation logic. 
+// 
 exports.calculateDiscount = (coupon, cartTotal, cartItems) => {
     const now = new Date();
 

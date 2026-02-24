@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { EyeIcon } from "@heroicons/react/24/outline";
 import MuiPagination from "../Pagination";
+import Loader from "../Loader";
 
 const SupportDesk = ({ tickets, onViewTicket, onFilterChange, loading, currentPage, totalPages, onPageChange, totalTickets, isLoading }) => {
     const [filterStatus, setFilterStatus] = useState('All');
@@ -11,7 +12,7 @@ const SupportDesk = ({ tickets, onViewTicket, onFilterChange, loading, currentPa
     };
 
     const getStatusColor = (status) => {
-        switch(status) {
+        switch (status) {
             case 'Open':
                 return 'bg-indigo-50 text-indigo-600';
             case 'In Progress':
@@ -26,7 +27,7 @@ const SupportDesk = ({ tickets, onViewTicket, onFilterChange, loading, currentPa
     };
 
     const getPriorityColor = (priority) => {
-        switch(priority) {
+        switch (priority) {
             case 'Urgent':
                 return 'bg-red-50 text-red-600';
             case 'High':
@@ -54,11 +55,10 @@ const SupportDesk = ({ tickets, onViewTicket, onFilterChange, loading, currentPa
                         <button
                             key={status}
                             onClick={() => handleFilterChange(status)}
-                            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
-                                filterStatus === status
+                            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${filterStatus === status
                                     ? 'bg-indigo-600 text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
+                                }`}
                         >
                             {status}
                         </button>
@@ -81,7 +81,7 @@ const SupportDesk = ({ tickets, onViewTicket, onFilterChange, loading, currentPa
                         {loading ? (
                             <tr>
                                 <td colSpan="7" className="px-8 py-20 text-center">
-                                    <div className="h-8 w-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                                    <Loader />
                                 </td>
                             </tr>
                         ) : tickets.length > 0 ? tickets.map((ticket) => (

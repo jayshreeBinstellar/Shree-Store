@@ -283,19 +283,19 @@ exports.updateOrderStatus = catchAsync(async (req, res) => {
     res.status(200).json({ status: "success", order: result.rows[0] });
 });
 
-exports.updateOrderShipping = catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const { tracking_number, shipping_carrier, status } = req.body;
+// exports.updateOrderShipping = catchAsync(async (req, res) => {
+//     const { id } = req.params;
+//     const { tracking_number, shipping_carrier, status } = req.body;
 
-    const result = await pool.query(
-        "UPDATE orders SET tracking_number = $1, shipping_carrier = $2, status = COALESCE($3, status) WHERE order_id = $4 RETURNING *",
-        [tracking_number, shipping_carrier, status, id]
-    );
-    if (result.rows.length === 0) {
-        return res.status(404).json({ message: "Order not found" });
-    }
-    res.status(200).json({ status: "success", order: result.rows[0] });
-});
+//     const result = await pool.query(
+//         "UPDATE orders SET tracking_number = $1, shipping_carrier = $2, status = COALESCE($3, status) WHERE order_id = $4 RETURNING *",
+//         [tracking_number, shipping_carrier, status, id]
+//     );
+//     if (result.rows.length === 0) {
+//         return res.status(404).json({ message: "Order not found" });
+//     }
+//     res.status(200).json({ status: "success", order: result.rows[0] });
+// });
 
 // this APi for get all customers in admin panel
 exports.getAllCustomers = catchAsync(async (req, res) => {

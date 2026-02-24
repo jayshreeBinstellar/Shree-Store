@@ -6,14 +6,8 @@ import { CircularProgress } from "@mui/material";
 import { getProducts, getCategories, getBanners } from "../services/ShopService";
 import { useShop } from "../context/ShopContext";
 
-
-//   Constants for the Products page
  
 const PAGE_SIZE = 12;
-
-
-//  Products Page Component
-//  Displays a list of products with category filtering and search functionality.
 
 const Products = () => {
     // Context
@@ -121,7 +115,7 @@ const Products = () => {
                     </div>
                 )}
 
-                {/* Category Filtering - Only if no banner or forced by design */}
+                {/* Category Filtering */}
                 {!bannerVisible && (
                     <CategoryFilter
                         categories={categories}

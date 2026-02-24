@@ -1,35 +1,56 @@
 
 import React, { useState, useEffect } from 'react';
-import {getTransactions} from '../../services/AdminService';
+import { getTransactions } from '../../services/AdminService';
 import TransactionsLog from '../../components/admin/TransactionsLog';
+import Loader from '../../components/Loader';
 
 const Payments = () => {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [totalPages, setTotalPages] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalTransactions, setTotalTransactions] = useState(0);
 
-    const fetchTransactions = async () => {
+    const fetchTransactions = async (Pages) => {
+        setLoading(true);
+
         try {
-            const data = await getTransactions();
-            console.log(data, "transactions data");
-            
-            if (data.status === "success") setTransactions(data.transactions);
-        } catch (err) { console.error(err); }
-        finally { setLoading(false); }
+            const data = await getTransactions(Pages);
+
+            if (data.status === "success") {
+                setTransactions(data.transactions);
+                setTotalPages(data.totalPages);
+                setTotalTransactions(data.totalTransactions);
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
     };
 
     useEffect(() => {
-        fetchTransactions();
-    }, []);
+        fetchTransactions(currentPage);
+    }, [currentPage]);
 
-    if (loading) return (
-        <div className="h-96 w-full flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-                <div className="h-12 w-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-        </div>
+    if (loading) return <Loader />;
+
+    return (
+        <>
+            <TransactionsLog
+                transactions={transactions}
+                totalPages={totalPages}
+                currentPage={currentPage}
+                handlePageChange={handlePageChange}
+                totalTransactions={totalTransactions}
+
+
+            />
+        </>
     );
-
-    return <TransactionsLog transactions={transactions} />;
 };
 
 export default Payments;

@@ -5,9 +5,9 @@ const API_ENDPOINT = {
     REGISTER: "/auth/register",
 
     // User / Profile
-    PROFILE: "/auth/profile",
-    ADDRESSES: "/auth/addresses",
-    ADDRESS_DETAIL: (id) => `/auth/addresses/${id}`,
+    PROFILE: "/auth/profile", //
+    ADDRESSES: "/auth/addresses",//twice
+    ADDRESS_DETAIL: (id) => `/auth/addresses/${id}`,//
 
     // Products
     PRODUCTS: "/shop/products",
@@ -17,21 +17,15 @@ const API_ENDPOINT = {
 
     // Cart / Orders / Wishlist
     CART: "/shop/cart",
-    ORDER_HISTORY: "/shop/orders/history",
-    WISHLIST: "/shop/wishlist",
+    ORDER_HISTORY: "/shop/orders/history", //
+    WISHLIST: "/shop/wishlist",//twice
     WISHLIST_DETAIL: (id) => `/shop/wishlist/${id}`,
     CHECKOUT: "/shop/checkout",
     SHIPPING_OPTIONS: "/shop/shipping-options",
     VALIDATE_COUPON: "/shop/coupons/validate",
     ORDER: "/shop/orders",
     VERIFY_PAYMENT: "/shop/orders/verify-payment",
-
-
-    // Todo
-    TODO: "/auth/todo",
-    UPDATE_TODO: (id) => `/auth/updatetodo?id=${id}`,
-    GET_TODO: "/auth/gettodo",
-    DELETE_TODO: (id) => `/auth/deletetodo?id=${id}`,
+    SHOP_SETTINGS: "/shop/settings",
 
     //banner
     BANNERS: "/shop/banners",
@@ -44,9 +38,6 @@ const API_ENDPOINT = {
     SUPPORT_TICKET_DETAIL: (id) => `/shop/support/tickets/${id}`,
     SUPPORT_TICKET_REPLIES: (id) => `/shop/support/tickets/${id}/replies`,
     SUPPORT_CATEGORIES: "/shop/support/categories",
-
-    // External
-    COUNTRIES: "https://restcountries.com/v3.1/all?fields=name",
 
 }
 

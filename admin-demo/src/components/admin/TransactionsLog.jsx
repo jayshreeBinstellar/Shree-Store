@@ -1,6 +1,7 @@
 import React from "react";
+import MuiPagination from "../Pagination";
 
-const TransactionsLog = ({ transactions }) => {
+const TransactionsLog = ({ transactions, totalPages, currentPage, handlePageChange, totalTransactions }) => {
     return (
         <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-8 border-b border-gray-50 bg-gray-50/50">
@@ -42,6 +43,15 @@ const TransactionsLog = ({ transactions }) => {
                     </tbody>
                 </table>
             </div>
+            {totalPages > 1 && (
+                <MuiPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                    itemsTotal={totalTransactions}
+                />
+            )}
+
         </div>
     );
 };

@@ -4,7 +4,7 @@ import { checkout, getShippingOptions, validateCoupon, getStoreSettings } from "
 import { useCart } from "../context/CartContext";
 import { toast } from "react-hot-toast";
 import { Link } from "react-router-dom";
-
+import BASE_URL from "../api/ApiConstant";
 
 const AddCart = ({ onClose, onCartUpdate }) => {
   const { cart, removeItem, updateItem } = useCart();
@@ -302,7 +302,13 @@ const AddCart = ({ onClose, onCartUpdate }) => {
                   >
                     <div className="h-16 w-16 bg-white rounded-lg shrink-0 flex items-center justify-center p-1.5 shadow-sm">
                       <img
-                        src={item.thumbnail}
+                        src={
+                          item.thumbnail
+                            ? item.thumbnail.startsWith("http")
+                              ? item.thumbnail
+                              : `${BASE_URL}${item.thumbnail}`
+                            : "/no-image.png"
+                        }
                         className="h-full w-full object-contain mix-blend-multiply"
                         alt={item.title}
                       />

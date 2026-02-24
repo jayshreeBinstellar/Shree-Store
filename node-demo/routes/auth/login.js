@@ -3,7 +3,7 @@ const userController = require('../../controller/auth');
 const verifyToken = require('../../middleware/token');
 const router = express.Router();
 
-router.post('/login', userController.Login)
+router.post('/login', userController.logIn)
 router.post('/register', userController.register)
 router.post('/forgetpassword', userController.forgetPassword)
 router.get('/profile', verifyToken, userController.getProfile)

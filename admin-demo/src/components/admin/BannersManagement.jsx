@@ -114,10 +114,9 @@ const BannersManagement = ({ banners = [], onDelete, onAddClick, onUpdate }) => 
                                             {/* Status Badge */}
                                             <div className="flex gap-2 mb-3 flex-wrap">
                                                 <span
-                                                    className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
-                                                        positionColors[banner.position] ||
+                                                    className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${positionColors[banner.position] ||
                                                         "bg-gray-100 text-gray-600"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {banner.position}
                                                 </span>
@@ -181,7 +180,7 @@ const BannersManagement = ({ banners = [], onDelete, onAddClick, onUpdate }) => 
                                                 <div className="p-2 bg-gray-100 rounded-lg text-gray-400" title="Inactive">
                                                     <EyeSlashIcon className="h-4 w-4" />
                                                 </div>
-                                            )}  
+                                            )}
                                         </div>
                                     </div>
                                 ))}

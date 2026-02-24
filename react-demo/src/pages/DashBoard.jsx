@@ -10,18 +10,12 @@ import { getProducts, getBanners, getCategories } from "../services/ShopService"
 
 // Constants
 const PAGE_SIZE = 10;
-const SEARCH_DEBOUNCE_MS = 500;
+const SEARCH = 500;
 
-/**
- * DashBoard Component
- * Main landing page for authenticated users, showing featured products, categories, and banners.
- */
+
 const DashBoard = ({ onOpenCart }) => {
-    // Context
     const { openDetails, liked, toggleLike } = useShop();
     const { cart } = useCart();
-
-    // State
     const [products, setProducts] = useState([]);
     const [banners, setBanners] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -32,9 +26,6 @@ const DashBoard = ({ onOpenCart }) => {
     const [filters, setFilters] = useState({});
     const [searchTerm, setSearchTerm] = useState("");
 
-    /**
-     * Fetch Initial Metadata (Banners, Categories)
-     */
     useEffect(() => {
         let isMounted = true;
 
@@ -66,9 +57,6 @@ const DashBoard = ({ onOpenCart }) => {
         return () => { isMounted = false; };
     }, []);
 
-    /**
-     * Primary Product Acquisition Function
-     */
     const fetchProducts = useCallback(async (
         currentPage,
         currentFilters = filters,
@@ -99,21 +87,15 @@ const DashBoard = ({ onOpenCart }) => {
         }
     }, [filters, searchTerm]);
 
-    /**
-     * Debounced Effect for Search and Filter Updates
-     */
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             fetchProducts(1, filters, searchTerm, false);
             setPage(1);
-        }, SEARCH_DEBOUNCE_MS);
+        }, SEARCH);
 
         return () => clearTimeout(timeoutId);
     }, [searchTerm, filters, fetchProducts]);
 
-    /**
-     * Event Handlers
-     */
     const handleLoadMore = useCallback(() => {
         if (loading) return;
         const nextPage = page + 1;
@@ -130,7 +112,6 @@ const DashBoard = ({ onOpenCart }) => {
         setSearchTerm("");
     }, []);
 
-    // Derived State
     const cartItemCount = cart.length;
 
     return (

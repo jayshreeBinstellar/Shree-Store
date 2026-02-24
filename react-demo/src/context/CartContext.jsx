@@ -75,7 +75,7 @@ export const CartProvider = ({ children }) => {
 
     const cartCount = useMemo(() => cart.reduce((acc, item) => acc + item.qty, 0), [cart]);
 
-    const value = React.useMemo(() => ({
+    const value = useMemo(() => ({
         cart,
         loading,
         error,

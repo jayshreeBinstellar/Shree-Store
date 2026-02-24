@@ -4,9 +4,9 @@ const API_ENDPOINT = {
     LOGIN: "/auth/login",
 
     // Dashboard
-    GET_STATS: "/admin/stats",
+    GET_STATS: "/admin/stats", //yes
 
-    // Products
+    // Products //done
     GET_PRODUCTS: "/admin/products",
     ADD_PRODUCT: "/admin/products",
     BULK_ADD_PRODUCTS: "/admin/products/bulk",
@@ -15,53 +15,53 @@ const API_ENDPOINT = {
     TOGGLE_PRODUCT_STATUS: (id) => `/admin/products/${id}/status`,
     SOFT_DELETE_PRODUCT: (id) => `/admin/products/${id}/soft`,
 
-    // Orders
+    // Orders //check
     GET_ORDERS: "/admin/orders",
     UPDATE_ORDER_STATUS: (id) => `/admin/orders/${id}/status`,
 
-    // Customers
+    // Customers //done
     GET_CUSTOMERS: "/admin/customers",
     ADD_CUSTOMER: "/admin/customers",
     UPDATE_CUSTOMER_ROLE: (id) => `/admin/customers/${id}/role`,
     TOGGLE_CUSTOMER_BLOCK: (id) => `/admin/customers/${id}/block`,
 
-    // Categories
+    // Categories //done
     GET_CATEGORIES: "/admin/categories",
     ADD_CATEGORY: "/admin/categories",
     UPDATE_CATEGORY: (id) => `/admin/categories/${id}`,
     DELETE_CATEGORY: (id) => `/admin/categories/${id}`,
 
-    // Coupons
+    // Coupons //done
     GET_COUPONS: "/admin/coupons",
     ADD_COUPON: "/admin/coupons",
     DELETE_COUPON: (id) => `/admin/coupons/${id}`,
 
-    // Banners
+    // Banners //check
     GET_BANNERS: "/admin/banners",
     ADD_BANNER: "/admin/banners",
     DELETE_BANNER: (id) => `/admin/banners/${id}`,
 
-    // Reviews
+    // Reviews //done
     GET_REVIEWS: "/admin/reviews",
     UPDATE_REVIEW_STATUS: (id) => `/admin/reviews/${id}/status`,
 
-    // Support
+    // Support //done
     GET_TICKETS: "/admin/tickets",
     UPDATE_TICKET_STATUS: (id) => `/admin/tickets/${id}/status`,
 
-    // Shipping
+    // Shipping //done
     GET_SHIPPING_ZONES: "/admin/shipping-options",
     ADD_SHIPPING_ZONE: "/admin/shipping-options",
     UPDATE_SHIPPING_ZONE: (id) => `/admin/shipping-options/${id}`,
     DELETE_SHIPPING_ZONE: (id) => `/admin/shipping-options/${id}`,
 
-    // Transactions
+    // Transactions //done
     GET_TRANSACTIONS: "/admin/transactions",
 
-    // Logs
+    // Logs //done
     GET_LOGS: "/admin/logs",
 
-    // Settings
+    // Settings //done
     GET_SETTINGS: "/admin/settings",
     UPDATE_SETTINGS: "/admin/settings",
 };

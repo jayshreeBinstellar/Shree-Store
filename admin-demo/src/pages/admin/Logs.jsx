@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import * as AdminService from '../../services/AdminService';
 import ActivityLogs from '../../components/admin/ActivityLogs';
+import Loader from '../../components/Loader';
 
 const Logs = () => {
     const [logs, setLogs] = useState([]);
@@ -46,14 +47,7 @@ const Logs = () => {
         }
     };
 
-    if (loading) return (
-        <div className="h-96 w-full flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-                <div className="h-12 w-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-gray-500 font-medium">Loading audit logs...</p>
-            </div>
-        </div>
-    );
+    if (loading) return <Loader message="Loading audit logs..." />;
 
     return <ActivityLogs
         logs={logs}

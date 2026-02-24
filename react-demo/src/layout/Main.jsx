@@ -19,10 +19,6 @@ export function Main() {
   const { cartCount, refreshCart } = useCart();
   const {
     isDetailOpen,
-    closeDetails,
-    selectedProductId,
-    setSelectedProductId,
-    allowPurchase
   } = useShop();
 
   const [isCartOpen, setIsCartOpen] = useState(false);

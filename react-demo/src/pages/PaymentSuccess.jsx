@@ -98,7 +98,7 @@ const PaymentSuccess = () => {
                             onClick={() => navigate("/main/dashboard")}
                             className="w-full bg-indigo-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition"
                         >
-                            Go to Dashboard
+                            Go to Main Page
                         </button>
                     </>
                 )}

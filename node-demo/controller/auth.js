@@ -6,7 +6,7 @@ const catchAsync = require('../utils/catchAsync');
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
-exports.Login = catchAsync(async (req, res) => {
+exports.logIn = catchAsync(async (req, res) => {
     const { email, password } = req.body
 
     if (!email || !password) {
@@ -49,7 +49,7 @@ exports.register = catchAsync(async (req, res) => {
     const { fullname, email, password, dob, gender } = req.body
 
     if (!fullname || !email || !password || !dob || !gender) {
-        return res.status(400).json({ message: "all filed is requried" })
+        return res.status(400).json({ message: "all field is required" })
     }
     const existingUser = await pool.query(
         "SELECT user_id FROM users WHERE email = $1",
@@ -100,8 +100,8 @@ exports.forgetPassword = catchAsync(async (req, res) => {
     console.log(otp, "verify otp");
 
     res.status(200).json({
-        status: "sucess",
-        message: "send otp sucessfully",
+        status: "success",
+        message: "send otp successfully",
         user
     })
 });

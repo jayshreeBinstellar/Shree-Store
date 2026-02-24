@@ -20,23 +20,21 @@ exports.createCheckoutSession = catchAsync(async (req, res) => {
   }
 
   const client = await pool.connect();
-
+  const hostUrl = "https://abc123.ngrok-free.app";
   const getImageUrl = (path) => {
     if (!path) return [];
     if (path.startsWith('http')) return [path];
-    // Note: Localhost images won't render on Stripe hosted checkout
-    // But the URL will be correct for production
     return [`${hostUrl}${path}`];
   };
 
   try {
-    // 0. Get Tax Rate from Store Settings
+    //Get Tax Rate from Store Settings
     const settingsRes = await client.query("SELECT tax_percent FROM store_settings LIMIT 1");
     if (settingsRes.rows.length > 0) {
       TAX_RATE = parseFloat(settingsRes.rows[0].tax_percent) / 100;
     }
 
-    // 1. Validate items & prices from DB
+    //Validate items & prices from DB
     const productIds = items.map(item => item.id);
     const productsResult = await client.query(
       "SELECT * FROM products WHERE product_id = ANY($1)",
@@ -46,13 +44,13 @@ exports.createCheckoutSession = catchAsync(async (req, res) => {
     const dbProductsMap = new Map();
     productsResult.rows.forEach(p => dbProductsMap.set(p.product_id, p));
 
-    // Check if all items exist
+    //Check if all items exist
     const invalidProducts = items.filter(item => !dbProductsMap.has(item.id));
     if (invalidProducts.length > 0) {
       throw new Error(`One or more products not found`);
     }
 
-    // Process items with DB data
+    //Process items with db data
     const processedItems = items.map(item => {
       const dbProduct = dbProductsMap.get(item.id);
 
@@ -73,13 +71,13 @@ exports.createCheckoutSession = catchAsync(async (req, res) => {
       };
     });
 
-    // 2. Calculate Subtotal
+    //Calculate Subtotal
     let subtotal = 0;
     processedItems.forEach(item => {
       subtotal += item.price * item.qty;
     });
 
-    // 3. Shipping
+    //Shipping
     let shippingCost = 0;
     if (shippingId) {
       const shipRes = await client.query("SELECT cost FROM shipping_options WHERE shipping_id = $1", [shippingId]);
@@ -88,7 +86,7 @@ exports.createCheckoutSession = catchAsync(async (req, res) => {
       }
     }
 
-    // 4. Coupon
+    //Coupon
     let couponDiscount = 0;
     let couponId = null;
 
@@ -106,12 +104,11 @@ exports.createCheckoutSession = catchAsync(async (req, res) => {
 
     if (couponDiscount > subtotal) couponDiscount = subtotal;
 
-    // 5. Calculate Final Totals
+    //Calculate Final Totals
     const taxableAmount = subtotal - couponDiscount;
     const taxAmount = taxableAmount * TAX_RATE;
     const totalAmount = taxableAmount + taxAmount + shippingCost;
 
-    // 6. PREPARE METADATA (Serialize items to avoid Pending Order in DB)
     // We send essential data to Stripe so we can reconstruct the order later
     const itemsMinified = processedItems.map(i => ({
       id: i.id,
@@ -130,21 +127,19 @@ exports.createCheckoutSession = catchAsync(async (req, res) => {
 
     const successUrl = `${clientUrl}/main/payment-success?session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${clientUrl}/main/cart`;
+    const productData = {
+      name: `Shree Store Purchase`,
+      images: getImageUrl(processedItems[0].thumbnail),
+    }
+    console.log(productData);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
         price_data: {
           currency: 'usd',
-          product_data: {
-            name: `Shree Store Purchase`,
-            images: getImageUrl(processedItems[0].thumbnail),
-          },
+          product_data: productData,
           unit_amount: Math.round(totalAmount * 100),
-
-
-
-
         },
         quantity: 1,
       }],
@@ -161,14 +156,13 @@ exports.createCheckoutSession = catchAsync(async (req, res) => {
         shippingCost: shippingCost.toString(),
         discountAmount: couponDiscount.toString(),
         totalAmount: totalAmount.toString(),
-        items: itemsJson // The payload to reconstruct the order
+        items: itemsJson
       }
     });
 
     res.status(200).json({ url: session.url });
 
   } catch (err) {
-    // await client.query('ROLLBACK'); // No transaction started that needs rollback for DB writes
     console.error("Error creating checkout session:", err);
     res.status(400).json({ message: err.message || "Checkout failed" });
   } finally {
@@ -177,7 +171,7 @@ exports.createCheckoutSession = catchAsync(async (req, res) => {
 });
 
 
-// Helper to process success (Used by Webhook and VerifyPayment)
+//Helper to process success (Used by Webhook and VerifyPayment)
 const processSuccessfulPayment = async (session) => {
   const { userId, items, addressId, shippingId, couponId, subtotal, taxAmount, shippingCost, discountAmount, totalAmount } = session.metadata;
   const paymentIntentId = session.payment_intent;
@@ -191,17 +185,17 @@ const processSuccessfulPayment = async (session) => {
   try {
     await client.query("BEGIN");
 
-    // 1. Idempotency Check
+    //Idempotency Check
     const existingOrder = await client.query("SELECT order_id FROM orders WHERE payment_id = $1", [paymentIntentId]);
     if (existingOrder.rows.length > 0) {
       await client.query("COMMIT");
       return { status: "already_processed", orderId: existingOrder.rows[0].order_id };
     }
 
-    // 2. Deserialize Items
+    //Deserialize Items
     const orderItems = JSON.parse(items);
 
-    // 3. Insert Order (Directly as paid)
+    //Insert Order (Directly as paid)
     const insertOrderQuery = `
             INSERT INTO orders 
             (user_id, subtotal, tax_amount, shipping_fee, discount_amount, coupon_id, shipping_id, total_amount, status, address_id, created_at, payment_id, payment_method)
@@ -225,14 +219,8 @@ const processSuccessfulPayment = async (session) => {
     const orderResult = await client.query(insertOrderQuery, orderValues);
     const orderId = orderResult.rows[0].order_id;
 
-    // 4. Insert Order Items
+    // Insert Order Items
     for (const item of orderItems) {
-      // We need to fetch current product details for thumbnails if not stored, 
-      // but we can trust the 'p' (price) and 'd' (discount) from metadata snapshot 
-      // OR fetch fresh. Let's fetch fresh thumbnail/title to be safe, but use snapshot price.
-      // For speed/metadata limits, we only stored minified data.
-
-      // To ensure data integrity, let's fetch the full product details again using ID
       const prodRes = await client.query("SELECT title, thumbnail FROM products WHERE product_id = $1", [item.id]);
       const prod = prodRes.rows[0] || { title: 'Unknown', thumbnail: '' };
 
@@ -258,7 +246,7 @@ const processSuccessfulPayment = async (session) => {
       );
     }
 
-    // 5. Finalize (Stock, Cart, Coupon)
+    //Finalize (Stock, Cart, Coupon)
     await finalizeOrder(client, orderId, userId, couponId);
 
     await client.query("COMMIT");
@@ -291,15 +279,13 @@ exports.webhook = async (req, res) => {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
 
-    // Only process paid sessions
+    //Only process paid sessions
     if (session.payment_status === "paid") {
       try {
         const result = await processSuccessfulPayment(session);
         console.log(`[Webhook] Order processed: ${result.status} (Order ID: ${result.orderId})`);
       } catch (error) {
         console.error("[Webhook] Failed to process payment:", error);
-        // Return 200 to avoid Stripe retry loops for logic errors? 
-        // Better to return 500 if it's a transient DB error.
       }
     }
   }
@@ -311,7 +297,6 @@ exports.webhook = async (req, res) => {
 exports.verifyPayment = catchAsync(async (req, res) => {
   const userId = req.user.id;
   const { sessionId, status } = req.body;
-  // note: orderId is NOT passed here anymore because it doesn't exist yet
 
   console.log(`[verifyPayment] START - userId: ${userId}, sessionId: ${sessionId}`);
 

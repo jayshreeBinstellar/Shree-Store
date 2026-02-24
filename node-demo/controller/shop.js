@@ -196,22 +196,21 @@ exports.createOrder = catchAsync(async (req, res) => {
             }
         }
 
-        // Safety check: Discount cannot exceed subtotal
         if (couponDiscount > subtotal) couponDiscount = subtotal;
 
-        // Calculate Tax & Final Total
+        // Calculate Tax and Final Total
         const taxableAmount = subtotal - couponDiscount;
         const taxAmount = taxableAmount * TAX_RATE;
         const totalAmount = taxableAmount + taxAmount + shippingCost;
 
-        // 5. Insert order with PENDING status
+        //Insert order with PENDING status
         const orderResult = await client.query(
             "INSERT INTO orders (user_id, subtotal, tax_amount, shipping_fee, discount_amount, coupon_id, shipping_id, total_amount, status, address_id, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'Pending', $9, NOW()) RETURNING order_id",
             [userId, subtotal, taxAmount, shippingCost, couponDiscount, couponId, shippingId, totalAmount, addressId]
         );
         const { order_id: orderId } = orderResult.rows[0];
 
-        // 6. Insert order items
+        //Insert order items
         for (const item of processedItems) {
             await client.query(
                 "INSERT INTO order_items (order_id, product_id, quantity, price, discount, effective_price, title, thumbnail) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
@@ -226,12 +225,10 @@ exports.createOrder = catchAsync(async (req, res) => {
                     item.thumbnail
                 ]
             );
-            // NOTE: Stock is NOT deducted here.
         }
 
-        // NOTE: Coupon usage is NOT incremented here.
 
-        // 9. Commit transaction
+        //Commit transaction
         await client.query('COMMIT');
 
         res.status(201).json({
@@ -533,59 +530,58 @@ exports.removeFromCart = catchAsync(async (req, res) => {
     res.status(200).json({ status: "success", message: "Item removed from cart" });
 });
 
-// This function is now only used for manual verification or legacy support
 // Orders are created in the webhook when payment is successful
-exports.verifyPayment = catchAsync(async (req, res) => {
-    const userId = req.user.id;
-    const { orderId, paymentId, paymentMethod, status } = req.body;
+// exports.verifyPayment = catchAsync(async (req, res) => {
+//     const userId = req.user.id;
+//     const { orderId, paymentId, paymentMethod, status } = req.body;
 
-    console.log(`[verifyPayment] Called - orderId: ${orderId}, status: ${status}, userId: ${userId}`);
+//     console.log(`[verifyPayment] Called - orderId: ${orderId}, status: ${status}, userId: ${userId}`);
 
-    if (status !== 'success') {
-        console.log(`[verifyPayment] Payment not successful, status: ${status}`);
-        const client = await pool.connect();
-        await client.query("UPDATE orders SET status = 'Cancelled' WHERE order_id = $1", [orderId]);
-        client.release();
-        return res.status(200).json({ status: "success", message: "Order cancelled due to failed payment" });
-    }
+//     if (status !== 'success') {
+//         console.log(`[verifyPayment] Payment not successful, status: ${status}`);
+//         const client = await pool.connect();
+//         await client.query("UPDATE orders SET status = 'Cancelled' WHERE order_id = $1", [orderId]);
+//         client.release();
+//         return res.status(200).json({ status: "success", message: "Order cancelled due to failed payment" });
+//     }
 
-    const client = await pool.connect();
+//     const client = await pool.connect();
 
-    try {
-        await client.query('BEGIN');
+//     try {
+//         await client.query('BEGIN');
 
-        // 1. Get Order
-        const orderRes = await client.query("SELECT * FROM orders WHERE order_id = $1 FOR UPDATE", [orderId]);
-        if (orderRes.rows.length === 0) throw new Error("Order not found");
-        const order = orderRes.rows[0];
+//         // 1. Get Order
+//         const orderRes = await client.query("SELECT * FROM orders WHERE order_id = $1 FOR UPDATE", [orderId]);
+//         if (orderRes.rows.length === 0) throw new Error("Order not found");
+//         const order = orderRes.rows[0];
 
-        if (order.status === 'paid') {
-            await client.query('ROLLBACK');
-            return res.status(200).json({ status: "success", message: "Order already paid" });
-        }
+//         if (order.status === 'paid') {
+//             await client.query('ROLLBACK');
+//             return res.status(200).json({ status: "success", message: "Order already paid" });
+//         }
 
-        // 2. Get Order Items
-        const itemsRes = await client.query("SELECT * FROM order_items WHERE order_id = $1", [orderId]);
-        const orderItems = itemsRes.rows;
+//         // 2. Get Order Items
+//         const itemsRes = await client.query("SELECT * FROM order_items WHERE order_id = $1", [orderId]);
+//         const orderItems = itemsRes.rows;
 
-        await finalizeOrder(client, orderId, userId, order.coupon_id);
+//         await finalizeOrder(client, orderId, userId, order.coupon_id);
 
-        // 4. Update Order Status
-        await client.query(
-            "UPDATE orders SET status = 'paid', payment_id = $1, payment_method = $2 WHERE order_id = $3",
-            [paymentId || 'TEST_PAYMENT', paymentMethod || 'Card', orderId]
-        );
+//         // 4. Update Order Status
+//         await client.query(
+//             "UPDATE orders SET status = 'paid', payment_id = $1, payment_method = $2 WHERE order_id = $3",
+//             [paymentId || 'TEST_PAYMENT', paymentMethod || 'Card', orderId]
+//         );
 
-        await client.query('COMMIT');
+//         await client.query('COMMIT');
 
-        res.status(200).json({ status: "success", message: "Payment verified, order confirmed" });
+//         res.status(200).json({ status: "success", message: "Payment verified, order confirmed" });
 
-    } catch (error) {
-        await client.query('ROLLBACK');
-        console.error("Error verifying payment:", error);
-        res.status(400).json({ status: "error", message: error.message });
-    } finally {
-        client.release();
-    }
-});
+//     } catch (error) {
+//         await client.query('ROLLBACK');
+//         console.error("Error verifying payment:", error);
+//         res.status(400).json({ status: "error", message: error.message });
+//     } finally {
+//         client.release();
+//     }
+// });
 

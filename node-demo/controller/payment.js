@@ -298,7 +298,7 @@ exports.verifyPayment = catchAsync(async (req, res) => {
   const userId = req.user.id;
   const { sessionId, status } = req.body;
 
-  console.log(`[verifyPayment] START - userId: ${userId}, sessionId: ${sessionId}`);
+  // console.log(`[verifyPayment] START - userId: ${userId}, sessionId: ${sessionId}`);
 
   if (status !== 'success') {
     return res.status(200).json({ status: "success", message: "Verification skipped" });

@@ -39,17 +39,17 @@ const Payments = () => {
     if (loading) return <Loader />;
 
     return (
-        <>
-            <TransactionsLog
-                transactions={transactions}
-                totalPages={totalPages}
-                currentPage={currentPage}
-                handlePageChange={handlePageChange}
-                totalTransactions={totalTransactions}
+
+        <TransactionsLog
+            transactions={transactions}
+            totalPages={totalPages}
+            currentPage={currentPage}
+            handlePageChange={handlePageChange}
+            totalTransactions={totalTransactions}
 
 
-            />
-        </>
+        />
+
     );
 };
 

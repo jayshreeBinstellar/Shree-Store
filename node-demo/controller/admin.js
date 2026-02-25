@@ -841,96 +841,96 @@ exports.getTransactionLogs = catchAsync(async (req, res) => {
     });
 });
 
-exports.getStripePaymentDetails = catchAsync(async (req, res) => {
-    const { paymentId } = req.params;
+// exports.getStripePaymentDetails = catchAsync(async (req, res) => {
+//     const { paymentId } = req.params;
 
-    if (!paymentId || paymentId === 'PENDING' || paymentId === 'TEST_PAYMENT') {
-        return res.status(400).json({ status: "error", message: "Invalid or missing Payment ID" });
-    }
+//     if (!paymentId || paymentId === 'PENDING' || paymentId === 'TEST_PAYMENT') {
+//         return res.status(400).json({ status: "error", message: "Invalid or missing Payment ID" });
+//     }
 
-    try {
-        // Retrieve the PaymentIntent from Stripe
-        const paymentIntent = await stripe.paymentIntents.retrieve(paymentId);
+//     try {
+//         // Retrieve the PaymentIntent from Stripe
+//         const paymentIntent = await stripe.paymentIntents.retrieve(paymentId);
 
-        // Retrieve the latest charge to get receipt URL and other details
-        let charge = null;
-        if (paymentIntent.latest_charge) {
-            charge = await stripe.charges.retrieve(paymentIntent.latest_charge);
-        }
+//         // Retrieve the latest charge to get receipt URL and other details
+//         let charge = null;
+//         if (paymentIntent.latest_charge) {
+//             charge = await stripe.charges.retrieve(paymentIntent.latest_charge);
+//         }
 
-        res.status(200).json({
-            status: "success",
-            payment: paymentIntent,
-            charge: charge
-        });
-    } catch (error) {
-        console.error("Stripe Fetch Error:", error);
-        return res.status(400).json({ status: "error", message: error.message });
-    }
-});
+//         res.status(200).json({
+//             status: "success",
+//             payment: paymentIntent,
+//             charge: charge
+//         });
+//     } catch (error) {
+//         console.error("Stripe Fetch Error:", error);
+//         return res.status(400).json({ status: "error", message: error.message });
+//     }
+// });
 
-exports.syncStripeTransaction = catchAsync(async (req, res) => {
-    const { paymentId, orderId } = req.body;
+// exports.syncStripeTransaction = catchAsync(async (req, res) => {
+//     const { paymentId, orderId } = req.body;
 
-    if (!paymentId) {
-        return res.status(400).json({ status: "error", message: "Payment ID is required" });
-    }
+//     if (!paymentId) {
+//         return res.status(400).json({ status: "error", message: "Payment ID is required" });
+//     }
 
-    try {
-        const paymentIntent = await stripe.paymentIntents.retrieve(paymentId);
+//     try {
+//         const paymentIntent = await stripe.paymentIntents.retrieve(paymentId);
 
-        let receiptUrl = null;
-        let paymentMethodType = 'card';
+//         let receiptUrl = null;
+//         let paymentMethodType = 'card';
 
-        if (paymentIntent.latest_charge) {
-            const charge = await stripe.charges.retrieve(paymentIntent.latest_charge);
-            receiptUrl = charge.receipt_url;
-            paymentMethodType = charge.payment_method_details?.type || 'card';
-        }
+//         if (paymentIntent.latest_charge) {
+//             const charge = await stripe.charges.retrieve(paymentIntent.latest_charge);
+//             receiptUrl = charge.receipt_url;
+//             paymentMethodType = charge.payment_method_details?.type || 'card';
+//         }
 
-        // Update Order directly if orderId is provided, otherwise just return info
-        if (!orderId) {
-            return res.status(400).json({
-                status: "error",
-                message: "Order ID is required to sync transaction to an order",
-                scannedPayment: {
-                    paymentId,
-                    amount: paymentIntent.amount / 100,
-                    status: paymentIntent.status
-                }
-            });
-        }
+//         // Update Order directly if orderId is provided, otherwise just return info
+//         if (!orderId) {
+//             return res.status(400).json({
+//                 status: "error",
+//                 message: "Order ID is required to sync transaction to an order",
+//                 scannedPayment: {
+//                     paymentId,
+//                     amount: paymentIntent.amount / 100,
+//                     status: paymentIntent.status
+//                 }
+//             });
+//         }
 
-        const result = await pool.query(
-            `UPDATE orders 
-             SET status = 'paid',
-                 payment_method = $1,
-                 receipt_url = $2,
-                 payment_raw = $3,
-                 payment_id = $4
-             WHERE order_id = $5 
-             RETURNING *`,
-            [
-                paymentMethodType,
-                receiptUrl,
-                JSON.stringify(paymentIntent),
-                paymentId,
-                orderId
-            ]
-        );
+//         const result = await pool.query(
+//             `UPDATE orders
+//              SET status = 'paid',
+//                  payment_method = $1,
+//                  receipt_url = $2,
+//                  payment_raw = $3,
+//                  payment_id = $4
+//              WHERE order_id = $5
+//              RETURNING *`,
+//             [
+//                 paymentMethodType,
+//                 receiptUrl,
+//                 JSON.stringify(paymentIntent),
+//                 paymentId,
+//                 orderId
+//             ]
+//         );
 
-        if (result.rows.length === 0) {
-            return res.status(404).json({ status: "error", message: "Order not found or update failed" });
-        }
+//         if (result.rows.length === 0) {
+//             return res.status(404).json({ status: "error", message: "Order not found or update failed" });
+//         }
 
-        res.status(200).json({
-            status: "success",
-            message: "Transaction synced to order successfully",
-            order: result.rows[0]
-        });
+//         res.status(200).json({
+//             status: "success",
+//             message: "Transaction synced to order successfully",
+//             order: result.rows[0]
+//         });
 
-    } catch (error) {
-        console.error("Sync Error:", error);
-        return res.status(400).json({ status: "error", message: error.message });
-    }
-});
+//     } catch (error) {
+//         console.error("Sync Error:", error);
+//         return res.status(400).json({ status: "error", message: error.message });
+//     }
+// });

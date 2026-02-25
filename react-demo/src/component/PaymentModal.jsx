@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Box } from "@mui/material";
 import { ShoppingBagIcon, PrinterIcon } from "@heroicons/react/24/outline";
 import { useSettings } from "../context/SettingsContext";
-
+import { getThumbnailSrc } from "../utils/imageUtils";
 const Row = ({ label, children, negative }) => (
     <div className={`flex justify-between text-sm ${negative ? 'text-rose-600' : 'text-gray-700'}`}>
         <span className="font-semibold">{label}</span>
@@ -129,8 +129,8 @@ const PaymentModal = ({ open, onClose, order }) => {
                                     <td className="py-4">
                                         <div className="flex items-center gap-3">
                                             {item.thumbnail && (
-                                                <div className="w-10 h-10 rounded-lg bg-gray-50 p-1 border border-gray-100 shrink-0 hidden sm:block">
-                                                    <img src={item.thumbnail} alt="" className="w-full h-full object-contain mix-blend-multiply" />
+                                                <div className="w-10 h-10 rounded-lg bg-gray-50 p-1 border border-gray-100 shrink-0 sm:block">
+                                                    <img src={getThumbnailSrc(item.thumbnail)} className="w-full h-full object-contain mix-blend-multiply" />
                                                 </div>
                                             )}
                                             <div>
@@ -218,7 +218,7 @@ const PaymentModal = ({ open, onClose, order }) => {
                     <p className="text-xs text-gray-400 italic">
                         This system-generated and digitally verified.
                     </p>
-                                
+
                     <div className="flex gap-3">
                         <button
                             onClick={onClose}

@@ -1,7 +1,7 @@
-import React from "react";
-import { Button, Rating } from "@mui/material";
-import { Favorite, FavoriteBorder, Visibility, LocalMall } from "@mui/icons-material";
-import BASE_URL from "../api/ApiConstant";
+import React, { memo } from "react";
+import { Rating } from "@mui/material";
+import { Favorite, FavoriteBorder, Visibility } from "@mui/icons-material";
+import { getThumbnailSrc } from "../utils/imageUtils";
 
 const ProductCard = ({ product, isLiked, onToggleLike, onViewDetails }) => {
     const id = product.product_id || product.id;
@@ -11,13 +11,7 @@ const ProductCard = ({ product, isLiked, onToggleLike, onViewDetails }) => {
             {/* Image Container */}
             <div className="relative aspect-square  overflow-hidden rounded-xl bg-gray-50 flex items-center justify-center mb-3">
                 <img
-                    src={
-                        product.thumbnail
-                            ? product.thumbnail.startsWith("http")
-                                ? product.thumbnail
-                                : `${BASE_URL}${product.thumbnail}`
-                            : "/no-image.png"
-                    }
+                    src={getThumbnailSrc(product.thumbnail)}
                     alt={product.title}
                     className="w-full h-full   object-cover  mix-blend-multiply transition-transform duration-700 group-hover:scale-115"
                 />
@@ -70,4 +64,4 @@ const ProductCard = ({ product, isLiked, onToggleLike, onViewDetails }) => {
     );
 };
 
-export default React.memo(ProductCard);
+export default memo(ProductCard);

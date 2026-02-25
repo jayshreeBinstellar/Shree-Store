@@ -18,7 +18,7 @@ const Arrow = ({ onClick, direction }) => (
     </button>
 );
 
-const breakAfterWords = (text, count = 3) => {
+const breakAfterWords = (text, count = 20) => {
     const words = text.split(" ");
     return (
         <>
@@ -65,19 +65,19 @@ const BannerCarousel = ({ banners = [] }) => {
                             {/* Content */}
                             <div className="absolute inset-0 flex items-center px-8 text-white">
                                 <div className="max-w-xl">
-                                    <span className="bg-indigo-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
-                                        Featured Offer
-                                    </span>
 
-                                    <h1 className="text-4xl font-black mt-4 mb-4 leading-tight">
-                                        {banner.title}
-                                    </h1>
+                                    <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/70 flex flex-col justify-center items-center text-center px-6 md:px-12">
+                                        <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight leading-tight">
+                                            {banner.title}
+                                        </h1>
 
-                                    {banner.description && (
-                                        <p className="text-gray-300 mb-6">
-                                            {breakAfterWords(banner.description, 3)}
-                                        </p>
-                                    )}
+                                        {banner.description && (
+                                            <p className="text-white/90 max-w-2xl text-base md:text-xl leading-relaxed">
+                                                {breakAfterWords(banner.description)}
+                                            </p>
+                                        )}
+
+                                    </div>
 
                                     {banner.link_url && (
                                         <a
@@ -104,3 +104,14 @@ const BannerCarousel = ({ banners = [] }) => {
 };
 
 export default BannerCarousel;
+
+
+//    <h1 className="text-4xl font-black mt-4 mb-4 leading-tight">
+//                                         {banner.title}
+//                                     </h1>
+
+//                                     {banner.description && (
+//                                         <p className="text-gray-300 mb-6">
+//                                             {breakAfterWords(banner.description, 3)}
+//                                         </p>
+//                                     )}

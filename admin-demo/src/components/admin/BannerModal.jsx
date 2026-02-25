@@ -286,7 +286,6 @@ const BannerModal = ({ isOpen, onClose, onSubmit, banner = null }) => {
                                     <option value="products">Products Page</option>
                                     <option value="about">About Page</option>
                                     <option value="contact">Contact Page</option>
-                                    <option value="footer">Footer (All Pages)</option>
                                 </optgroup>
                                 <optgroup label="Category Pages">
                                     <option value="category">All Categories</option>

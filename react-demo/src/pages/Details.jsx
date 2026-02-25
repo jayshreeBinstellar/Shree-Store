@@ -4,7 +4,7 @@ import { useCart } from "../context/CartContext";
 import Reviews from "../component/Reviews";
 import Slider from "react-slick";
 import { getProduct, getRelatedProducts } from "../services/ShopService";
-import BASE_URL from "../api/ApiConstant";
+import { getThumbnailSrc } from "../utils/imageUtils";
 import { useShop } from "../context/ShopContext";
 
 const Detail = () => {
@@ -104,6 +104,8 @@ const Detail = () => {
         );
     }
 
+
+
     if (!product) return null;
 
     return (
@@ -128,13 +130,7 @@ const Detail = () => {
                                 <div key={idx} className="h-full aspect-square outline-none">
                                     <div className="w-full h-full flex items-center justify-center">
                                         <img
-                                            src={
-                                                img
-                                                    ? img.startsWith("http")
-                                                        ? img
-                                                        : `${BASE_URL}${img}`
-                                                    : "/no-image.png"
-                                            }
+                                            src={getThumbnailSrc(img)}
                                             alt={`${product.title}-${idx}`}
                                             className="max-w-full max-h-full object-contain mix-blend-multiply transition-transform duration-700 group-hover:scale-105"
                                         />

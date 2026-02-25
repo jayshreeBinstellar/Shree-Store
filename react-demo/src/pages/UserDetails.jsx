@@ -9,7 +9,7 @@ import {
     ShieldCheckIcon,
     ArrowLeftStartOnRectangleIcon
 } from "@heroicons/react/24/outline";
-
+import { getThumbnailSrc } from "../utils/imageUtils";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AddressManager from "../component/AddressManager";
@@ -268,7 +268,7 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                                                                             className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center p-1 cursor-pointer hover:border-indigo-600 transition-all hover:scale-110"
                                                                             title={item.title}
                                                                         >
-                                                                            <img src={item.thumbnail} alt={item.title} className="w-full h-full object-contain mix-blend-multiply" />
+                                                                            <img src={getThumbnailSrc(item.thumbnail)} alt={item.title} className="w-full h-full object-contain mix-blend-multiply" />
                                                                         </div>
                                                                     ))}
                                                                 </div>
@@ -355,7 +355,7 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                                                         className="aspect-square bg-gray-50 rounded-3xl overflow-hidden mb-3 cursor-pointer p-4 group-hover:shadow-lg transition-all"
                                                     >
                                                         <img
-                                                            src={product.thumbnail}
+                                                            src={getThumbnailSrc(product.thumbnail)}
                                                             alt={product.title}
                                                             className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500"
                                                         />

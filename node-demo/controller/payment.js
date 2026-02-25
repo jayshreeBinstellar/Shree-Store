@@ -298,7 +298,7 @@ exports.verifyPayment = catchAsync(async (req, res) => {
   const userId = req.user.id;
   const { sessionId, status } = req.body;
 
-  // console.log(`[verifyPayment] START - userId: ${userId}, sessionId: ${sessionId}`);
+
 
   if (status !== 'success') {
     return res.status(200).json({ status: "success", message: "Verification skipped" });
@@ -309,14 +309,14 @@ exports.verifyPayment = catchAsync(async (req, res) => {
   }
 
   try {
-    // console.log(`[verifyPayment] Retrieving Stripe Session: ${sessionId}`);
+    
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.payment_status !== 'paid') {
       return res.status(400).json({ status: "error", message: "Payment not completed" });
     }
 
-    // console.log(`[verifyPayment] Session paid. Processing Order Creation...`);
+ 
     const result = await processSuccessfulPayment(session);
 
     res.status(200).json({

@@ -12,6 +12,7 @@ const BannersManagement = ({ banners = [], onDelete, onAddClick, onUpdate }) => 
 
     useEffect(() => {
         setBannersData(banners);
+        setCurrentPage(1);
     }, [banners]);
 
     const handleAddNew = () => {

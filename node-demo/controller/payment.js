@@ -6,7 +6,7 @@ const { finalizeOrder } = require('../utils/orderLifecycle');
 
 //read env file
 require('dotenv').config();
-
+const BASE_URL = process.env.BASE_URL;
 
 exports.createCheckoutSession = catchAsync(async (req, res) => {
   const { items, addressId, shippingId, couponCode } = req.body;
@@ -20,7 +20,7 @@ exports.createCheckoutSession = catchAsync(async (req, res) => {
   }
 
   const client = await pool.connect();
-  const hostUrl = "https://abc123.ngrok-free.app";
+  const hostUrl = BASE_URL;
   const getImageUrl = (path) => {
     if (!path) return [];
     if (path.startsWith('http')) return [path];
@@ -309,14 +309,14 @@ exports.verifyPayment = catchAsync(async (req, res) => {
   }
 
   try {
-    console.log(`[verifyPayment] Retrieving Stripe Session: ${sessionId}`);
+    // console.log(`[verifyPayment] Retrieving Stripe Session: ${sessionId}`);
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.payment_status !== 'paid') {
       return res.status(400).json({ status: "error", message: "Payment not completed" });
     }
 
-    console.log(`[verifyPayment] Session paid. Processing Order Creation...`);
+    // console.log(`[verifyPayment] Session paid. Processing Order Creation...`);
     const result = await processSuccessfulPayment(session);
 
     res.status(200).json({

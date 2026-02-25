@@ -2,7 +2,6 @@ import React from 'react'
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone'
 import EmailIcon from '@mui/icons-material/Email'
 import PlaceIcon from '@mui/icons-material/Place'
-import { Button } from '@mui/material'
 import { useSettings } from '../context/SettingsContext'
 
 export const ContactInfoCard = ({ type = 'support' }) => {

@@ -3,16 +3,17 @@ import { EyeIcon, PrinterIcon, ArrowPathIcon, TruckIcon } from "@heroicons/react
 import MuiPagination from "../Pagination";
 
 
-const OrdersManagement = ({ 
-    orders, 
-    onUpdateStatus, 
-    onViewInvoice, 
+const OrdersManagement = ({
+    orders,
+    onUpdateStatus,
+    onViewInvoice,
     onEditShipping,
     currentPage = 1,
     totalPages = 1,
     onPageChange,
     isLoading = false,
-    totalOrders = 0
+    totalOrders = 0,
+    pageSize = 10
 }) => {
     return (
         <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden flex flex-col">
@@ -32,9 +33,9 @@ const OrdersManagement = ({
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
-                        {orders.map((order) => (
+                        {orders.map((order, index) => (
                             <tr key={order.order_id} className="hover:bg-gray-50/50 transition-colors group">
-                                <td className="px-8 py-4 font-black text-indigo-600">#{order.order_id}</td>
+                                <td className="px-8 py-4 font-black text-indigo-600">  {(currentPage - 1) * pageSize + index + 1}</td>
                                 <td className="px-8 py-4">
                                     <div className="flex flex-col">
                                         <span className="font-bold text-gray-900">{order.full_name}</span>
@@ -89,7 +90,7 @@ const OrdersManagement = ({
                 </table>
             </div>
             {totalPages > 1 && (
-                <MuiPagination 
+                <MuiPagination
                     currentPage={currentPage}
                     totalPages={totalPages}
                     onPageChange={onPageChange}

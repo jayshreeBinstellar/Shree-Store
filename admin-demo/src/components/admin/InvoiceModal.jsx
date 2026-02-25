@@ -131,8 +131,8 @@ const InvoiceModal = ({ open, onClose, order }) => {
                         </thead>
 
                         <tbody className="divide-y divide-gray-100">
-                            {order?.items?.map((item, idx) => (
-                                <tr key={idx}>
+                            {order?.items?.map((item, index) => (
+                                <tr key={item.id}>
                                     <td className="py-4">
                                         <p className="font-semibold text-gray-900">{item.title}</p>
 

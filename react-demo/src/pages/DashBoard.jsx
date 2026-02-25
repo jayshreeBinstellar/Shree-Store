@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { ShoppingCartIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useCart } from "../context/CartContext";
 import { useShop } from "../context/ShopContext";

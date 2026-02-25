@@ -35,7 +35,7 @@ const OrdersManagement = ({
                     <tbody className="divide-y divide-gray-50">
                         {orders.map((order) => (
                             <tr key={order.order_id} className="hover:bg-gray-50/50 transition-colors group">
-                                <td className="px-8 py-4 font-black text-indigo-600">  {order.order_id}</td>
+                                <td className="px-8 py-4 font-black text-indigo-600">#{order.order_id}</td>
                                 <td className="px-8 py-4">
                                     <div className="flex flex-col">
                                         <span className="font-bold text-gray-900">{order.full_name}</span>

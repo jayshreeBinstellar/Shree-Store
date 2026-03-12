@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { register } from '../services/AuthService';
 import { useAuth } from '../context/AuthContext';
 import { NavLink } from "react-router-dom";
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -14,6 +16,7 @@ const Register = () => {
     dob: "",
     gender: ""
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -121,18 +124,24 @@ const Register = () => {
         </div>
 
         {/* Password */}
-        <div className="mb-5">
+        <div className="mb-5 relative">
           <label className="block text-sm font-bold text-gray-700 mb-2">
             Password
           </label>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             name="password"
             value={formData.password}
             onChange={handleChange}
             placeholder="Enter your password"
-            className="w-full h-12 px-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white outline-none transition-all"
+            className="w-full h-12 px-4 pr-12 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-indigo-600 focus:bg-white outline-none transition-all"
           />
+          <span
+            className="absolute right-3 top-9 cursor-pointer text-gray-400 hover:text-indigo-600 transition-colors"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <VisibilityOff /> : <Visibility />}
+          </span>
         </div>
 
         {/* Date of Birth */}

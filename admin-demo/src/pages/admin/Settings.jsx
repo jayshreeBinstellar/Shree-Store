@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import * as AdminService from '../../services/AdminService';
 import SettingsPortal from '../../components/admin/SettingsPortal';
 import { toast } from 'react-hot-toast';
-import Loader from '../../components/Loader';
+import Loader from '../../components/common/Loader';
 
 const Settings = () => {
     const [settings, setSettings] = useState(null);

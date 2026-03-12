@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import * as AdminService from '../../services/AdminService';
 import DashboardOverview from '../../components/admin/DashboardOverview';
-import Loader from '../../components/Loader';
+import Loader from '../../components/common/Loader';
 
 const Dashboard = () => {
     const [stats, setStats] = useState(null);

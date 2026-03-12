@@ -13,6 +13,7 @@ const Detail = () => {
     const [relatedProducts, setRelatedProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [cartLoading, setCartLoading] = useState(false);
+    const [selectedSize, setSelectedSize] = useState("");
     const { cart, addItem, removeItem, refreshCart } = useCart();
 
     const sliderSettings = {
@@ -40,6 +41,7 @@ const Detail = () => {
     useEffect(() => {
         if (!productId) return;
         setLoading(true);
+        setSelectedSize(""); // Reset size on new product selection
 
         const fetchProduct = async () => {
             try {
@@ -215,6 +217,37 @@ const Detail = () => {
                                 {product.description}
                             </p>
                         </div>
+
+                        {/* Size Selector */}
+                        {(() => {
+                            const cat = product.category?.toLowerCase() || "";
+                            const isClothing = cat.includes("shirt") || cat.includes("dress") || cat === "tops" || cat.includes("wear");
+                            const isShoes = cat.includes("shoe") || cat.includes("footwear");
+
+                            if (!isClothing && !isShoes) return null;
+
+                            const sizes = isShoes ? ["7", "8", "9", "10", "11"] : ["S", "M", "L", "XL", "XXL"];
+
+                            return (
+                                <div className="space-y-4 mb-10">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-xs font-black text-gray-900 uppercase tracking-widest">Select Size</h3>
+                                        <button className="text-[10px] font-bold text-indigo-600 uppercase hover:underline">Size Guide</button>
+                                    </div>
+                                    <div className="grid grid-cols-5 gap-3">
+                                        {sizes.map((size) => (
+                                            <button
+                                                key={size}
+                                                onClick={() => setSelectedSize(size)}
+                                                className={`h-12 border-2 rounded-2xl flex items-center justify-center text-xs font-black transition-all active:scale-95 cursor-pointer ${selectedSize === size ? "border-indigo-600 text-indigo-600 bg-indigo-50 shadow-md" : "border-gray-100 text-gray-400 hover:border-gray-300 hover:text-gray-900 bg-white"}`}
+                                            >
+                                                {size}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })()}
 
                         {/* Fast Shipping Badge */}
                         <div className="grid grid-cols-2 gap-4 mb-10">

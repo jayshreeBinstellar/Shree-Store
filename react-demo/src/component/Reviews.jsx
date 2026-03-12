@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
 import { Rating, Button, CircularProgress } from "@mui/material";
 import { getReviews, addReview } from "../services/ShopService";
 import { toast } from "react-hot-toast";
@@ -110,4 +110,4 @@ const Reviews = ({ productId }) => {
     );
 };
 
-export default React.memo(Reviews);
+export default memo(Reviews);

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Box } from "@mui/material";
+import Modal from "../common/Modal";
 import * as AdminService from "../../services/AdminService";
 import { toast } from "react-hot-toast";
 
@@ -54,81 +54,84 @@ const ProductModal = ({
     };
 
     return (
-        <Modal open={open} onClose={onClose}>
-            <Box className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-[40px] shadow-2xl p-9 outline-none max-h-[90vh]">
-                <div className="overflow-y-auto max-h-[80vh]">
-                    <h2 className="text-2xl font-black text-gray-900 mb-5 uppercase tracking-widest">
-                        {editingProduct ? "Edit Luxury Item" : "New Collection Addition"}
-                    </h2>
-                    <form onSubmit={handleFormSubmit} className="grid grid-cols-2 gap-6">
-                        <div className="col-span-2">
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Product Title</label>
-                            <input
-                                required name="title" value={formData.title} onChange={handleFormChange}
-                                className="w-full px-3 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
-                            />
-                        </div>
-                        <div className="col-span-2">
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Description</label>
-                            <textarea
-                                required name="description" value={formData.description} onChange={handleFormChange} rows="3"
-                                className="w-full px-3 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Sale Price ($)</label>
-                            <input
-                                required type="number" step="0.01" name="price" value={formData.price} onChange={handleFormChange}
-                                className="w-full px-3 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Old Price ($)</label>
-                            <input
-                                type="number" step="0.01" name="old_price" value={formData.old_price} onChange={handleFormChange}
-                                className="w-full px-3 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Stock Units</label>
-                            <input
-                                required type="number" name="stock" value={formData.stock} onChange={handleFormChange}
-                                className="w-full px-3 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Category</label>
-                            <select
-                                required name="category" value={formData.category} onChange={handleFormChange}
-                                className="w-full px-3 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
-                            >
-                                <option value="">Select Category</option>
-                                {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                        </div>
-                        <div className="col-span-2">
-                            <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Product Image</label>
-                            <input
-                                type="file" accept="image/*" onChange={handleFileChange}
-                                className="w-full px-3 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-                            />
-                            {selectedFile && (
-                                <p className="mt-2 text-sm text-gray-600">Selected: {selectedFile.name}</p>
-                            )}
-                        </div>
-                        <div className="col-span-2 pt-4">
-                            <button
-                                disabled={uploading}
-                                className="w-full py-4 bg-gray-900 text-white rounded-[24px] font-black uppercase tracking-widest hover:bg-black transition-all active:scale-95 shadow-xl shadow-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {uploading ? "Uploading..." : (editingProduct ? "Update Product" : "Launch Product")}
-                            </button>
-                        </div>
-                    </form>
-
-                </div>
-
-            </Box>
+        <Modal isOpen={open} onClose={onClose} title={editingProduct ? "Edit Luxury Item" : "New Collection Addition"} size="lg" className="rounded-[40px]">
+            <div className=" overflow-y-auto max-h-[55vh]">
+                <form onSubmit={handleFormSubmit} className="grid grid-cols-2 gap-6 p-1">
+                    <div className="col-span-2">
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Product Title</label>
+                        <input
+                            required name="title" value={formData.title} onChange={handleFormChange} placeholder="product title"
+                            className="w-full px-3 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                        />
+                    </div>
+                    <div className="col-span-2">
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Description</label>
+                        <textarea
+                            required name="description" value={formData.description} onChange={handleFormChange} rows="3" placeholder="short discription"
+                            className="w-full px-3 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Sale Price ($)</label>
+                        <input
+                            required type="number" step="0.01" name="price" value={formData.price} onChange={handleFormChange} placeholder=" sale price"
+                            className="w-full px-3 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Old Price ($)</label>
+                        <input
+                            type="number" step="0.01" name="old_price" value={formData.old_price} onChange={handleFormChange} placeholder=" old price"
+                            className="w-full px-3 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Stock Units</label>
+                        <input
+                            required type="number" name="stock" value={formData.stock} onChange={handleFormChange} placeholder="number of stock"
+                            className="w-full px-3 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Category</label>
+                        <select
+                            required name="category" value={formData.category} onChange={handleFormChange}
+                            className="w-full px-3 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                        >
+                            <option value="">Select Category</option>
+                            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
+                    <div className="col-span-2">
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Available Sizes (Comma separated)</label>
+                        <input
+                            name="sizes"
+                            value={Array.isArray(formData.sizes) ? formData.sizes.join(', ') : formData.sizes || ''}
+                            onChange={(e) => handleFormChange({ target: { name: 'sizes', value: e.target.value.split(',').map(s => s.trim()).filter(s => s !== '') } })}
+                            placeholder="e.g. S, M, L, XL or 7, 8, 9, 10"
+                            className="w-full px-3 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                        />
+                    </div>
+                    <div className="col-span-2">
+                        <label className="block text-xs font-black text-gray-400 uppercase tracking-wider mb-3">Product Image</label>
+                        <input
+                            type="file" accept="image/*" onChange={handleFileChange}
+                            className="w-full px-3 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                        />
+                        {selectedFile && (
+                            <p className="mt-2 text-sm text-gray-600">Selected: {selectedFile.name}</p>
+                        )}
+                    </div>
+                    <div className="col-span-2 pt-4">
+                        <button
+                            disabled={uploading}
+                            className="w-full py-4 bg-gray-900 text-white rounded-[24px] font-black uppercase tracking-widest hover:bg-black transition-all active:scale-95 shadow-xl shadow-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {uploading ? "Uploading..." : (editingProduct ? "Update Product" : "Launch Product")}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </Modal>
     );
 };

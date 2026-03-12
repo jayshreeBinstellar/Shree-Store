@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import Slider from "react-slick";
 import { Button } from "@mui/material";
 import ArrowRightAltOutlinedIcon from "@mui/icons-material/ArrowRightAltOutlined";
@@ -27,23 +27,25 @@ const ProductDiscovery = ({ title, subtitle, products, layout = "slider", onView
                     <h2 className="text-4xl font-black text-gray-900 tracking-tighter leading-none">{title}</h2>
                     {subtitle && <p className="text-gray-500 text-lg font-medium">{subtitle}</p>}
                 </div>
-                {onExploreAll ? (
-                    <Button
-                        onClick={onExploreAll}
-                        className="group text-indigo-600! bg-indigo-50! hover:bg-indigo-100! rounded-2xl! px-8! py-3! capitalize! text-base! font-bold! transition-all shrink-0"
-                    >
-                        Explore All
-                        <ArrowRightAltOutlinedIcon className="ml-2 group-hover:translate-y-2 transition-transform rotate-90" />
-                    </Button>
-                ) : (
-                    <Link to="/main/products" className="shrink-0">
+                {onExploreAll !== null && (
+                    onExploreAll ? (
                         <Button
-                            className="group text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-2xl px-8 py-3 capitalize text-base font-bold transition-all"
+                            onClick={onExploreAll}
+                            className="group text-indigo-600! bg-indigo-50! hover:bg-indigo-100! rounded-2xl! px-8! py-3! capitalize! text-base! font-bold! transition-all shrink-0"
                         >
                             Explore All
-                            <ArrowRightAltOutlinedIcon className="ml-2 group-hover:translate-x-2 transition-transform" />
+                            <ArrowRightAltOutlinedIcon className="ml-2 group-hover:translate-y-2 transition-transform rotate-90" />
                         </Button>
-                    </Link>
+                    ) : (
+                        <Link to="/main/products" className="shrink-0">
+                            <Button
+                                className="group text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-2xl px-8 py-3 capitalize text-base font-bold transition-all"
+                            >
+                                Explore All
+                                <ArrowRightAltOutlinedIcon className="ml-2 group-hover:translate-x-2 transition-transform" />
+                            </Button>
+                        </Link>
+                    )
                 )}
             </div>
 
@@ -77,4 +79,4 @@ const ProductDiscovery = ({ title, subtitle, products, layout = "slider", onView
     );
 };
 
-export default React.memo(ProductDiscovery);
+export default memo(ProductDiscovery);

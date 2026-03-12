@@ -58,6 +58,8 @@ export const ShopProvider = ({ children }) => {
         }
     }, [liked, isAuthenticated, token]);
 
+    const [isCartOpen, setIsCartOpen] = useState(false);
+
     const openDetails = useCallback((id, canPurchase = true) => {
         setSelectedProductId(id);
         setAllowPurchase(canPurchase);
@@ -69,6 +71,9 @@ export const ShopProvider = ({ children }) => {
         setSelectedProductId(null);
     }, []);
 
+    const openCart = useCallback(() => setIsCartOpen(true), []);
+    const closeCart = useCallback(() => setIsCartOpen(false), []);
+
     const value = useMemo(() => ({
         searchTerm,
         setSearchTerm,
@@ -76,21 +81,28 @@ export const ShopProvider = ({ children }) => {
         setSelectedProductId,
         isDetailOpen,
         setIsDetailOpen,
+        isCartOpen,
+        setIsCartOpen,
         allowPurchase,
         setAllowPurchase,
         liked,
         toggleLike,
         openDetails,
-        closeDetails
+        closeDetails,
+        openCart,
+        closeCart
     }), [
         searchTerm,
         selectedProductId,
         isDetailOpen,
+        isCartOpen,
         allowPurchase,
         liked,
         toggleLike,
         openDetails,
-        closeDetails
+        closeDetails,
+        openCart,
+        closeCart
     ]);
 
     return (

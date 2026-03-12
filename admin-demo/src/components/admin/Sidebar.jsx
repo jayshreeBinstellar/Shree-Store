@@ -1,85 +1,204 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, memo } from "react";
 import {
-    Squares2X2Icon, ClipboardDocumentListIcon, PlusIcon, TagIcon,
-    PhotoIcon, TicketIcon, UsersIcon, StarIcon, TruckIcon,
-    CreditCardIcon, LifebuoyIcon, DocumentTextIcon, Cog6ToothIcon,
-    ShoppingBagIcon
+    Squares2X2Icon,
+    ClipboardDocumentListIcon,
+    PlusIcon,
+    TagIcon,
+    PhotoIcon,
+    TicketIcon,
+    UsersIcon,
+    StarIcon,
+    TruckIcon,
+    CreditCardIcon,
+    LifebuoyIcon,
+    DocumentTextIcon,
+    Cog6ToothIcon,
+    ShoppingBagIcon,
+    UserIcon
 } from "@heroicons/react/24/outline";
-import { NavLink } from "react-router-dom";
-import { getSettings } from "../../services/AdminService";
+import  {useConfirm  }  from '../../context/ConfirmationContext';
 
-const SidebarItem = ({ to, icon: Icon, label }) => (
-    <NavLink
-        to={to}
-        className={({ isActive }) => `w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-300 group ${isActive
-            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
-            : 'text-gray-500 hover:bg-indigo-50 hover:text-indigo-600'
-            }`}
-        end={to === "/"}
-    >
-        {({ isActive }) => (
-            <>
-                <Icon className={`h-6 w-6 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-indigo-600'}`} />
-                <span className={`font-bold text-sm tracking-tight ${isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`}>{label}</span>
-            </>
-        )}
-    </NavLink>
-);
+import { NavLink } from "react-router-dom";
+import { getSettings, logout } from "../../services/AdminService";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+
+
+/* ---------------- Sidebar Item ---------------- */
+
+const SidebarItem = memo(({ to, icon: Icon, label }) => {
+    return (
+        <NavLink
+            to={to}
+            end={to === "/"}
+            className={({ isActive }) =>
+                `group relative flex items-center gap-3.5 px-4 py-[14px] rounded-[14px]
+                transition-all duration-200 overflow-hidden w-full
+                ${isActive
+                    ? "bg-indigo-50 text-indigo-600 font-bold"
+                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                }`
+            }
+        >
+            {({ isActive }) => (
+                <>
+                    {/* Active Indicator */}
+                    {isActive && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-indigo-600 rounded-r-full" />
+                    )}
+
+                    {/* Icon */}
+                    <Icon
+                        className={`h-[22px] w-[22px] transition-transform duration-200 group-hover:scale-110 ${isActive ? "text-indigo-600" : "text-slate-400"
+                            }`}
+                        strokeWidth={isActive ? 2.5 : 2}
+                    />
+
+                    {/* Label */}
+                    <span className="text-[14px] tracking-tight whitespace-nowrap">
+                        {label}
+                    </span>
+
+                    {/* Glow */}
+                    {isActive && (
+                        <div className="absolute inset-0 bg-indigo-500/5 blur-md -z-10 rounded-2xl" />
+                    )}
+                </>
+            )}
+        </NavLink>
+    );
+});
+
+
+/* ---------------- Menu Config ---------------- */
+
+const MENU = [
+    {
+        title: "Overview",
+        items: [
+            { to: "/", icon: Squares2X2Icon, label: "Dashboard" },
+            { to: "/orders", icon: ClipboardDocumentListIcon, label: "Orders" },
+            { to: "/products", icon: PlusIcon, label: "Products" },
+            { to: "/categories", icon: TagIcon, label: "Categories" },
+            { to: "/customers", icon: UsersIcon, label: "Customers" }
+        ]
+    },
+    {
+        title: "Marketing",
+        items: [
+            { to: "/banners", icon: PhotoIcon, label: "Banners" },
+            { to: "/coupons", icon: TicketIcon, label: "Coupons" },
+            { to: "/reviews", icon: StarIcon, label: "Reviews" }
+        ]
+    },
+    {
+        title: "Management",
+        items: [
+            { to: "/shipping", icon: TruckIcon, label: "Shipping" },
+            { to: "/payments", icon: CreditCardIcon, label: "Payments" },
+            { to: "/support", icon: LifebuoyIcon, label: "Support" },
+            { to: "/logs", icon: DocumentTextIcon, label: "Audit Logs" },
+            { to: "/settings", icon: Cog6ToothIcon, label: "Settings" },
+        ]
+    }
+];
+
+
+/* ---------------- Sidebar ---------------- */
 
 const Sidebar = () => {
-    const [storeName, setStoreName] = useState('GROCERYPRO');
+
+    const [storeName, setStoreName] = useState("GROCERYPRO");
+    const auth = useAuth();
+    const navigate = useNavigate();
+
+    const confirm = useConfirm();
+
+    const handleLogout = async () => {
+        const confirmed = await confirm('Are you sure you want to logout?');
+        if (!confirmed) return;
+
+        try {
+            await logout();
+        } catch (err) {
+            console.log('Logout API optional');
+        }
+
+        auth.logout();
+        navigate('/login');
+    };
 
     useEffect(() => {
-        const fetchSettings = async () => {
+        const loadSettings = async () => {
             try {
                 const res = await getSettings();
-                if (res.status === 'success' && res.settings && res.settings.store_name) {
+
+                if (res?.status === "success" && res?.settings?.store_name) {
                     setStoreName(res.settings.store_name);
                 }
-            } catch (error) {
-                console.error("Failed to load settings in sidebar", error);
+            } catch (err) {
+                console.error("Sidebar settings error:", err);
             }
         };
-        fetchSettings();
+
+        loadSettings();
     }, []);
 
     return (
-        <aside className="w-80 bg-white border-r border-gray-100 flex flex-col p-8 sticky top-0 h-screen">
-            <div className="flex items-center gap-3 mb-12 px-2">
-                <div className="bg-indigo-600 h-10 w-10 rounded-xl flex items-center justify-center">
-                    <ShoppingBagIcon className="h-6 w-6 text-white" />
+        <aside className="w-[280px] bg-white flex flex-col h-screen sticky top-0 border-r border-slate-200 shadow-sm z-40 shrink-0">
+
+            {/* Logo */}
+            <div className="h-[88px] flex items-center gap-3 px-8">
+                <div className="bg-gradient-to-tr from-indigo-600 to-indigo-500 h-[38px] w-[38px] rounded-xl flex items-center justify-center shadow-md">
+                    <ShoppingBagIcon className="h-[20px] w-[20px] text-white" strokeWidth={2.5} />
                 </div>
-                <span className="text-xl font-black text-gray-900 hidden lg:block tracking-tighter uppercase">
-                    {storeName}
-                </span>
+
+                <div className="flex flex-col">
+                    <span className="text-[17px] font-black text-slate-800 uppercase">
+                        {storeName}
+                    </span>
+                    <span className="text-[9px] font-black text-indigo-500 uppercase tracking-[0.2em]">
+                        Admin Center
+                    </span>
+                </div>
             </div>
 
-            <nav className="flex flex-col gap-1 overflow-y-auto pr-2 custom-scrollbar">
-                <SidebarItem to="/" icon={Squares2X2Icon} label="Dashboard" />
-                <SidebarItem to="/orders" icon={ClipboardDocumentListIcon} label="Orders" />
-                <SidebarItem to="/products" icon={PlusIcon} label="Products" />
-                <SidebarItem to="/categories" icon={TagIcon} label="Categories" />
-                <SidebarItem to="/banners" icon={PhotoIcon} label="Banners" />
-                <SidebarItem to="/coupons" icon={TicketIcon} label="Coupons" />
-                <SidebarItem to="/customers" icon={UsersIcon} label="Customers" />
-                <SidebarItem to="/reviews" icon={StarIcon} label="Reviews" />
-                <SidebarItem to="/shipping" icon={TruckIcon} label="Shipping" />
-                <SidebarItem to="/payments" icon={CreditCardIcon} label="Payments" />
-                <SidebarItem to="/support" icon={LifebuoyIcon} label="Support" />
-                <SidebarItem to="/logs" icon={DocumentTextIcon} label="Audit Logs" />
-                <SidebarItem to="/settings" icon={Cog6ToothIcon} label="Settings" />
+
+            {/* Navigation */}
+            <nav className="flex flex-col gap-1 overflow-y-auto px-4 flex-1 pb-6">
+
+                {MENU.map((section) => (
+                    <div key={section.title}>
+
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-4 mb-2 mt-6">
+                            {section.title}
+                        </div>
+
+                        {section.items.map((item) => (
+                            <SidebarItem key={item.to} {...item} />
+                        ))}
+
+                    </div>
+                ))}
+
             </nav>
 
-            {/* <div className="mt-auto bg-gray-50 rounded-3xl p-4 hidden lg:block border border-gray-100">
-                <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Build Status</p>
-                <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-bold text-gray-700">v2.1 Stable</span>
-                </div>
-            </div> */}
+
+            <div
+                // onOpen={onOpen}
+                // onClose={onClose}
+                onClick={handleLogout}
+                className="p-3 mx-4 mb-6 rounded-2xl bg-indigo-50 border border-indigo-100 cursor-pointer">
+                {/* Logout Button */}
+                <button className="flex gap-1 items-center">
+                    <svg className="h-5 w-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Logout</span>
+                </button>
+            </div>
         </aside>
     );
 };
 
 export default Sidebar;
-

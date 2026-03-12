@@ -13,8 +13,8 @@ const PAGE_SIZE = 10;
 const SEARCH = 500;
 
 
-const DashBoard = ({ onOpenCart }) => {
-    const { openDetails, liked, toggleLike } = useShop();
+const DashBoard = () => {
+    const { openDetails, liked, toggleLike, searchTerm, setSearchTerm, openCart } = useShop();
     const { cart } = useCart();
     const [products, setProducts] = useState([]);
     const [banners, setBanners] = useState([]);
@@ -24,7 +24,6 @@ const DashBoard = ({ onOpenCart }) => {
     const [hasMore, setHasMore] = useState(true);
     const [totalItems, setTotalItems] = useState(0);
     const [filters, setFilters] = useState({});
-    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         let isMounted = true;
@@ -150,7 +149,7 @@ const DashBoard = ({ onOpenCart }) => {
                             <div className="flex items-center gap-4">
                                 <button
                                     className="relative cursor-pointer group active:scale-90 transition-transform"
-                                    onClick={onOpenCart}
+                                    onClick={openCart}
                                     aria-label="Open Cart"
                                 >
                                     <div className="p-3 bg-indigo-600 rounded-xl shadow-lg hover:bg-indigo-700 transition-colors">

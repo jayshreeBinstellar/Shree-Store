@@ -1,170 +1,180 @@
-import React, { useState } from "react";
-import { TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import React from "react";
+import { TrashIcon, TicketIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import PrimeDataTable from '../common/PrimeDataTable';
 
-const CouponsManagement = ({ coupons, onDelete, onAdd }) => {
-    const [showModal, setShowModal] = useState(false);
-    const [formData, setFormData] = useState({
-        code: '',
-        discount_type: 'cart_percent',
-        discount_value: '',
-        min_order_value: '0',
-        usage_limit: '100',
-        expiry_date: ''
-    });
+const CouponsManagement = ({
+    coupons = [],
+    onDelete,
+    onAddClick,
+    search = "",
+    onSearch,
+    totalRecords = 0,
+    onLazy,
+    lazyParams,
+    onBulkDelete,
+    selection = [],
+    onSelectionChange,
+    onSelectAll,
+    isLoading = false,
+    onReload
+}) => {
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        await onAdd(formData);
-        setShowModal(false);
-        setFormData({
-            code: '',
-            discount_type: 'cart_percent',
-            discount_value: '',
-            min_order_value: '0',
-            usage_limit: '100',
-            expiry_date: ''
-        });
-    };
+    const bulkActions = [
+        {
+            label: 'Delete',
+            severity: 'danger',
+            icon: TrashIcon,
+            handler: (selection) => {
+                onBulkDelete(selection);
+            }
+        }
+    ];
 
     return (
-        <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                <h3 className="text-lg font-black text-gray-900 uppercase tracking-widest">Active Coupons</h3>
-                <button
-                    onClick={() => setShowModal(true)}
-                    className="px-6 py-3 bg-indigo-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-indigo-700 shadow-xl shadow-indigo-100"
-                >
-                    Generate Coupon
-                </button>
-            </div>
-            <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="bg-gray-50/50">
-                            <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">Code</th>
-                            <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">Discount</th>
-                            <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">Min. Order</th>
-                            <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">Usage</th>
-                            <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">Expiry</th>
-                            <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                        {coupons.length > 0 ? coupons.map((cp) => (
-                            <tr key={cp.coupon_id} className="hover:bg-gray-50/50 transition-colors">
-                                <td className="px-8 py-4 font-black text-indigo-600 tracking-tighter">{cp.code}</td>
-                                <td className="px-8 py-4">
-                                    <span className="font-bold text-gray-900">
-                                        {(cp.type || cp.discount_type || '').includes('percent') ? `${cp.value || cp.discount_value}%` : `$${cp.value || cp.discount_value}`}
-                                    </span>
-                                </td>
-                                <td className="px-8 py-4 text-gray-500 font-medium">${cp.min_cart_value || cp.min_order_value}</td>
-                                <td className="px-8 py-4">
-                                    <div className="flex flex-col gap-1">
-                                        <span className="text-xs font-bold text-gray-700">{cp.used_count || 0} / {cp.usage_limit || 0}</span>
-                                        <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                            <div className="bg-indigo-600 h-full" style={{ width: `${cp.usage_limit > 0 ? ((cp.used_count || 0) / (cp.usage_limit || 1)) * 100 : 0}%` }}></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="px-8 py-4 text-gray-400 text-xs text-nowrap">
-                                    {cp.expiry_date ? new Date(cp.expiry_date).toLocaleDateString() : 'No Limit'}
-                                </td>
-                                <td className="px-8 py-4">
-                                    <button onClick={() => onDelete(cp.coupon_id)} className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg"><TrashIcon className="h-4 w-4" /></button>
-                                </td>
-                            </tr>
-                        )) : (
-                            <tr>
-                                <td colSpan="6" className="px-8 py-20 text-center text-gray-400 font-medium italic">No coupons available.</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+        <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden flex flex-col">
 
-            {/* Modal */}
-            {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-2">
-                    <div className="bg-white rounded-3xl p-5 w-full max-w-md shadow-2xl animate-in zoom-in-95">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">New Coupon</h3>
-                            <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-full"><XMarkIcon className="w-5 h-5 text-gray-500" /></button>
-                        </div>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Coupon Code</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.code}
-                                    onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-2 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none uppercase"
-                                    placeholder="e.g. SUMMER2024"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Type</label>
-                                    <select
-                                        value={formData.discount_type}
-                                        onChange={e => setFormData({ ...formData, discount_type: e.target.value })}
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-1 py-2.5 text-gray-500 focus:ring-2 focus:ring-indigo-500 outline-none"
-                                    >
-                                        <option value="cart_percent">Percentage Off Cart</option>
-                                        <option value="cart_fixed">Fixed Amount Off Cart</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Value</label>
-                                    <input
-                                        type="number"
-                                        required
-                                        value={formData.discount_value}
-                                        onChange={e => setFormData({ ...formData, discount_value: e.target.value })}
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-2 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none"
-                                        placeholder="e.g. 10"
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Min Order ($)</label>
-                                    <input
-                                        type="number"
-                                        value={formData.min_order_value}
-                                        onChange={e => setFormData({ ...formData, min_order_value: e.target.value })}
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-2 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Usage Limit</label>
-                                    <input
-                                        type="number"
-                                        value={formData.usage_limit}
-                                        onChange={e => setFormData({ ...formData, usage_limit: e.target.value })}
-                                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-2 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Expiry Date</label>
-                                <input
-                                    type="date"
-                                    required
-                                    value={formData.expiry_date}
-                                    onChange={e => setFormData({ ...formData, expiry_date: e.target.value })}
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-2 py-2.5 text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none"
-                                />
-                            </div>
-                            <button type="submit" className="w-full bg-indigo-600 text-white py-3 rounded-xl uppercase tracking-light hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 mt-4">
-                                Create Coupon
-                            </button>
-                        </form>
-                    </div>
+            {/* HEADER */}
+            <div className="p-8 border-b border-gray-50 flex flex-col md:flex-row justify-between items-center bg-gray-50/50 gap-4">
+                <div>
+                    <h3 className="text-lg font-black text-gray-900 uppercase tracking-widest">
+                        Coupons & Offers
+                    </h3>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
+                        Manage {totalRecords} active coupons
+                    </p>
                 </div>
-            )}
 
+                <div className="flex flex-wrap gap-3 items-center justify-center md:justify-end">
+
+                    {/* ADD BUTTON */}
+                    <button
+                        onClick={onAddClick}
+                        className="bg-indigo-600 text-white px-5 py-2 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+                    >
+                        <TicketIcon className="h-4 w-4" />
+                        Generate
+                    </button>
+                    {/* SEARCH */}
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search coupons..."
+                            value={search || ""}
+                            onChange={(e) => onSearch && onSearch(e.target.value)}
+                            className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500 outline-none w-56 lg:w-64"
+                        />
+                        <svg className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <button className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
+                        onClick={() => onReload && onReload()}
+                    ><ArrowPathIcon className="h-5 w-5" />
+
+                    </button>
+
+                </div>
+            </div>
+
+            {/* TABLE */}
+            <div className="overflow-x-auto flex-1 p-4">
+                <PrimeDataTable
+                    value={coupons}
+                    loading={isLoading}
+                    rows={lazyParams?.rows || 10}
+                    totalRecords={totalRecords}
+                    first={lazyParams?.first || 0}
+                    sortField={lazyParams?.sortField}
+                    sortOrder={lazyParams?.sortOrder}
+                    filters={lazyParams?.filters}
+                    filterDisplay="menu"
+                    paginator
+                    lazy
+                    onLazy={onLazy}
+                    dataKey="coupon_id"
+
+                    selection={selection}
+                    onSelectionChange={onSelectionChange}
+                    onSelectAll={onSelectAll}
+
+                    showGridlines
+                    bulkActions={bulkActions}
+
+                    columns={[
+                        {
+                            field: 'code',
+                            header: 'Code',
+                            sortable: true,
+                            filter: true,
+                            filterPlaceholder: "Filter Code",
+                            body: cp => <span className="font-black text-indigo-600 tracking-tighter uppercase">{cp.code}</span>
+                        },
+                        {
+                            field: 'discount_value',
+                            header: 'Discount',
+                            body: cp => (
+                                <span className="font-bold text-gray-900">
+                                    {(cp.type || cp.discount_type || '').includes('percent') ? `${cp.value || cp.discount_value}%` : `$${cp.value || cp.discount_value}`}
+                                </span>
+                            ),
+                            sortable: true,
+                            filter: true,
+                            filterPlaceholder: "Filter Discount"
+                        },
+                        {
+                            field: 'min_order_value',
+                            header: 'Min. Order',
+                            body: cp => <span className="text-gray-600 font-medium">${cp.min_cart_value || cp.min_order_value || 0}</span>,
+                            sortable: true,
+                            filter: true,
+                            filterPlaceholder: "Filter Min Order"
+                        },
+                        {
+                            field: 'usage',
+                            header: 'Usage',
+                            body: cp => (
+                                <div className="flex flex-col gap-1.5">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[10px] font-black text-gray-700 uppercase">{cp.used_count || 0} / {cp.usage_limit || 0}</span>
+                                        <span className="text-[9px] text-gray-400 font-bold">{Math.round((cp.used_count || 0) / (cp.usage_limit || 1) * 100)}%</span>
+                                    </div>
+                                    <div className="w-28 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                        <div
+                                            className="bg-indigo-600 h-full transition-all duration-500"
+                                            style={{ width: `${Math.min(100, (cp.used_count || 0) / (cp.usage_limit || 1) * 100)}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            ),
+                            sortable: false
+                        },
+                        {
+                            field: 'expiry_date',
+                            header: 'Expiry',
+                            body: cp => cp.expiry_date ? (
+                                <span className={`font-bold ${new Date(cp.expiry_date) < new Date() ? 'text-rose-500' : 'text-gray-600'}`}>
+                                    {new Date(cp.expiry_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </span>
+                            ) : 'No Limit',
+                            sortable: true,
+                            filter: false,
+                            filterPlaceholder: "Filter Expiry"
+                        },
+                        {
+                            header: 'Actions',
+                            body: cp => (
+                                <button
+                                    onClick={() => onDelete(cp.coupon_id)}
+                                    className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                    title="Delete Coupon"
+                                >
+                                    <TrashIcon className="h-4 w-4" />
+                                </button>
+                            )
+                        },
+                    ]}
+                />
+            </div>
         </div>
     );
 };

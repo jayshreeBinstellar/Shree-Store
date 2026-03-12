@@ -15,39 +15,40 @@ import { useNavigate } from "react-router-dom";
 import AddressManager from "../component/AddressManager";
 import OrderStatusTimeline from "../component/OrderStatusTimeline";
 import PaymentModal from "../component/PaymentModal";
+import ProductCard from "../component/ProductCard";
 import { getProfile, getOrders, getWishlist } from "../services/UserService";
 
 
-const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) => {
+import { useShop } from "../context/ShopContext";
+
+const UserDetails = () => {
+    const { openDetails, toggleLike, openCart } = useShop();
+    const { cart, addItem } = useCart();
 
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [orderHistory, setOrderHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const [wishlist, setWishlist] = useState([]);
-    const { cart } = useCart();
 
     // Invoice Modal State
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
 
-
     useEffect(() => {
         const fetchData = async () => {
             const token = localStorage.getItem("token");
             if (!token) {
-                navigate("/"); // Redirect to home or login if no token
+                navigate("/");
                 return;
             }
 
             try {
-                // Fetch User Profile
                 const userData = await getProfile();
                 if (userData.status === "success") {
                     setUser(userData.user);
                 }
 
-                // Fetch Order History
                 const orderData = await getOrders();
                 if (orderData.status === "success") {
                     setOrderHistory(orderData.orders.map(order => ({
@@ -56,17 +57,15 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                         status: order.status,
                         total: `$${order.total_amount}`,
                         items: order.items || [],
-                        raw: order // Store full object for invoice
+                        raw: order
                     })));
                 }
 
-                // Fetch Wishlist
                 const wishlistData = await getWishlist();
                 if (wishlistData.status === "success") {
                     setWishlist(wishlistData.wishlist);
                 }
             } catch (error) {
-
                 console.error("Error fetching user data:", error);
             } finally {
                 setLoading(false);
@@ -89,17 +88,14 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
         setIsInvoiceOpen(true);
     };
 
-
-
     if (!user) return null;
-
 
     return (
         <div className="bg-[#f8fafc] min-h-screen py-10 md:py-20">
             <div className="container mx-auto px-4 max-w-6xl">
                 <div className="flex flex-col lg:flex-row gap-8 items-start">
 
-                    {/* LEFT PANEL - Profile Overview (Sticky) */}
+                    {/* LEFT PANEL */}
                     <div className="w-full lg:w-1/3 lg:sticky lg:top-24">
                         <div className="bg-white rounded-[40px] p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col items-center text-center">
                             <div className="relative group">
@@ -150,38 +146,28 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                                 </div>
                             </div>
 
-                            <button
-                                onClick={handleLogout}
-                                className="mt-10 w-full py-4 bg-gray-900 text-white rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-black transition-all active:scale-95 shadow-xl shadow-gray-200 group"
-                            >
+                            <button onClick={handleLogout} className="mt-10 w-full py-4 bg-gray-900 text-white rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-black transition-all active:scale-95 shadow-xl shadow-gray-200 group">
                                 <ArrowLeftStartOnRectangleIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                                 Logout
                             </button>
                         </div>
                     </div>
 
-                    {/* RIGHT PANEL - Content Area */}
+                    {/* RIGHT PANEL */}
                     <div className="w-full lg:w-2/3 space-y-8">
 
-                        {/* STATS OVERVIEW */}
                         <div className="grid grid-cols-2 gap-4 md:gap-6">
-                            <div
-                                onClick={() => setActiveTab("wishlist")}
-                                className="bg-white p-6 md:p-8 rounded-[40px] shadow-sm border border-gray-100 flex items-center justify-between group hover:border-indigo-600 transition-all cursor-pointer overflow-hidden relative"
-                            >
+                            <div onClick={() => setActiveTab("wishlist")} className="bg-white p-6 md:p-8 rounded-[40px] shadow-sm border border-gray-100 flex items-center justify-between group hover:border-indigo-600 transition-all cursor-pointer overflow-hidden relative">
                                 <div className="relative z-10">
                                     <p className="text-gray-400 font-bold text-[10px] md:text-xs uppercase tracking-[0.2em]">Favorites</p>
-                                    <h3 className="text-3xl md:text-4xl font-black text-gray-900 group-hover:text-indigo-600 transition-colors mt-1"> {wishlist.length}</h3>
+                                    <h3 className="text-3xl md:text-4xl font-black text-gray-900 group-hover:text-indigo-600 transition-colors mt-1">{wishlist.length}</h3>
                                 </div>
                                 <div className="w-12 h-12 md:w-16 md:h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform relative z-10">
                                     <HeartIcon className="w-6 h-6 md:w-8 md:h-8 fill-rose-500" />
                                 </div>
                                 <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-rose-50/30 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
                             </div>
-                            <div
-                                onClick={onOpenCart}
-                                className="bg-white p-6 md:p-8 rounded-[40px] shadow-sm border border-gray-100 flex items-center justify-between group hover:border-indigo-600 transition-all cursor-pointer overflow-hidden relative"
-                            >
+                            <div onClick={openCart} className="bg-white p-6 md:p-8 rounded-[40px] shadow-sm border border-gray-100 flex items-center justify-between group hover:border-indigo-600 transition-all cursor-pointer overflow-hidden relative">
                                 <div className="relative z-10">
                                     <p className="text-gray-400 font-bold text-[10px] md:text-xs uppercase tracking-[0.2em]">In Basket</p>
                                     <h3 className="text-3xl md:text-4xl font-black text-gray-900 group-hover:text-indigo-600 transition-colors mt-1">{cart.length}</h3>
@@ -193,40 +179,26 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                             </div>
                         </div>
 
-                        {/* TABS NAVIGATION */}
                         <div className="bg-white p-2 rounded-3xl shadow-sm border border-gray-100 flex gap-2">
-                            <button
-                                onClick={() => setActiveTab("orders")}
-                                className={`flex-1 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all ${activeTab === 'orders' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50'}`}
-                            >
-                                My Orders
-                            </button>
-                            <button
-                                onClick={() => setActiveTab("wishlist")}
-                                className={`flex-1 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all ${activeTab === 'wishlist' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50'}`}
-                            >
-                                Wishlist
-                            </button>
-                            <button
-                                onClick={() => setActiveTab("addresses")}
-                                className={`flex-1 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all ${activeTab === 'addresses' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50'}`}
-                            >
-                                Addresses
-                            </button>
+                            {["orders", "wishlist", "addresses"].map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`flex-1 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all ${activeTab === tab ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50'}`}
+                                >
+                                    {tab === "orders" ? "My Orders" : tab === "wishlist" ? "Wishlist" : "Addresses"}
+                                </button>
+                            ))}
                         </div>
 
-                        {/* TAB CONTENT */}
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            {activeTab === "orders" ? (
+                            {activeTab === "orders" && (
                                 <div className="bg-white rounded-[40px] p-6 md:p-10 shadow-sm border border-gray-100">
                                     <div className="flex items-center justify-between mb-8">
                                         <h3 className="text-2xl font-black text-gray-900">Recent Purchase</h3>
-                                        <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full uppercase tracking-widest">
-                                            {orderHistory.length} Total Orders
-                                        </span>
+                                        <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full uppercase tracking-widest">{orderHistory.length} Total Orders</span>
                                     </div>
 
-                                    {/* Desktop Table */}
                                     <div className="hidden md:block overflow-x-auto">
                                         <table className="w-full">
                                             <thead>
@@ -238,25 +210,16 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                                             </thead>
                                             <tbody className="divide-y divide-gray-50">
                                                 {orderHistory.map((order) => (
-                                                    <tr key={order.id}
-                                                        className="group hover:bg-gray-50/50 transition-all cursor-pointer"
-                                                        onClick={() => handleOpenInvoice(order)}
-                                                        title="Click to view Invoice"
-                                                    >
-                                                        <td className="p-4 ">
+                                                    <tr key={order.id} className="group hover:bg-gray-50/50 transition-all cursor-pointer" onClick={() => handleOpenInvoice(order)}>
+                                                        <td className="p-4">
                                                             <div className="flex flex-col">
                                                                 <span className="font-black text-gray-900 mb-2 truncate max-w-37.5">{order.id}</span>
                                                                 <span className="text-xs text-gray-400 font-bold mb-4">{order.date}</span>
-
-                                                                {/* Order Products */}
                                                                 <div className="flex flex-wrap gap-2">
                                                                     {order.items.map((item, idx) => (
                                                                         <div
                                                                             key={idx}
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation(); // Don't trigger modal
-                                                                                onViewDetails(item.product_id, order.status?.toLowerCase() === 'delivered')
-                                                                            }}
+                                                                            onClick={(e) => { e.stopPropagation(); openDetails(item.product_id, order.status?.toLowerCase() === 'delivered'); }}
                                                                             className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center p-1 cursor-pointer hover:border-indigo-600 transition-all hover:scale-110"
                                                                             title={item.title}
                                                                         >
@@ -268,33 +231,20 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                                                         </td>
                                                         <td className="p-4">
                                                             <div className={`flex flex-col ${order.status?.toLowerCase() === 'delivered' ? 'gap-2' : 'gap-1'}`}>
-                                                                <span className={`w-fit px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${order.status?.toLowerCase() === 'delivered' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-                                                                    }`}>
-                                                                    {order.status}
-                                                                </span>
-                                                                {order.status?.toLowerCase() !== 'delivered' && (
-                                                                    <div className="w-full max-w-87.5 pr-4">
-                                                                        <OrderStatusTimeline status={order.status} />
-                                                                    </div>
-                                                                )}
+                                                                <span className={`w-fit px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${order.status?.toLowerCase() === 'delivered' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>{order.status}</span>
+                                                                {order.status?.toLowerCase() !== 'delivered' && <div className="w-full max-w-87.5 pr-4"><OrderStatusTimeline status={order.status} /></div>}
                                                             </div>
                                                         </td>
-                                                        <td className="p-4 font-black text-gray-900 text-right text-lg">
-                                                            {order.total}
-                                                        </td>
+                                                        <td className="p-4 font-black text-gray-900 text-right text-lg">{order.total}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
                                         </table>
                                     </div>
 
-                                    {/* Mobile Cards */}
                                     <div className="md:hidden space-y-6">
                                         {orderHistory.map((order) => (
-                                            <div key={order.id}
-                                                className="bg-gray-50 p-6 rounded-3xl border border-gray-100"
-                                                onClick={() => handleOpenInvoice(order)}
-                                            >
+                                            <div key={order.id} className="bg-gray-50 p-6 rounded-3xl border border-gray-100" onClick={() => handleOpenInvoice(order)}>
                                                 <div className="flex justify-between items-start mb-4">
                                                     <div>
                                                         <h4 className="font-black text-gray-900">{order.id}</h4>
@@ -303,12 +253,8 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                                                     <span className="text-lg font-black text-indigo-600">{order.total}</span>
                                                 </div>
                                                 <div className={`space-y-${order.status?.toLowerCase() === 'delivered' ? '1' : '4'}`}>
-                                                    <span className={`inline-block px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${order.status?.toLowerCase() === 'delivered' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                                                        {order.status}
-                                                    </span>
-                                                    {order.status?.toLowerCase() !== 'delivered' && (
-                                                        <OrderStatusTimeline status={order.status} />
-                                                    )}
+                                                    <span className={`inline-block px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${order.status?.toLowerCase() === 'delivered' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>{order.status}</span>
+                                                    {order.status?.toLowerCase() !== 'delivered' && <OrderStatusTimeline status={order.status} />}
                                                 </div>
                                             </div>
                                         ))}
@@ -316,51 +262,35 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
 
                                     {orderHistory.length === 0 && (
                                         <div className="text-center py-20 bg-gray-50 rounded-[30px] border-2 border-dashed border-gray-200">
-                                            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                                                <ShoppingBagIcon className="w-8 h-8 text-gray-200" />
-                                            </div>
+                                            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm"><ShoppingBagIcon className="w-8 h-8 text-gray-200" /></div>
                                             <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No orders placed yet</p>
-                                            <button
-                                                onClick={() => navigate("/")}
-                                                className="mt-6 text-indigo-600 font-black text-sm hover:underline"
-                                            >
-                                                Start Exploring Products
-                                            </button>
+                                            <button onClick={() => navigate("/")} className="mt-6 text-indigo-600 font-black text-sm hover:underline">Start Exploring Products</button>
                                         </div>
                                     )}
                                 </div>
-                            ) : activeTab === "wishlist" ? (
+                            )}
+
+                            {activeTab === "wishlist" && (
                                 <div className="bg-white rounded-[40px] p-6 md:p-10 shadow-sm border border-gray-100">
                                     <div className="flex items-center justify-between mb-8">
                                         <h3 className="text-2xl font-black text-gray-900">My Wishlist</h3>
-                                        <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full uppercase tracking-widest">
-                                            {wishlist.length} Items Liked
-                                        </span>
+                                        <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full uppercase tracking-widest">{wishlist.length} Items Liked</span>
                                     </div>
 
                                     {wishlist.length > 0 ? (
-                                        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                             {wishlist.map((product) => (
-                                                <div key={product.product_id} className="relative group">
-                                                    <div
-                                                        onClick={() => onViewDetails(product.product_id)}
-                                                        className="aspect-square bg-gray-50 rounded-3xl overflow-hidden mb-3 cursor-pointer p-4 group-hover:shadow-lg transition-all"
-                                                    >
-                                                        <img
-                                                            src={getThumbnailSrc(product.thumbnail)}
-                                                            alt={product.title}
-                                                            className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500"
-                                                        />
-                                                    </div>
-                                                    <h4 className="font-black text-gray-900 text-sm truncate">{product.title}</h4>
-                                                    <p className="text-indigo-600 font-black text-sm">${product.price}</p>
-                                                    <button
-                                                        onClick={() => onToggleLike(product.product_id)}
-                                                        className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-sm rounded-xl text-rose-500 shadow-sm hover:bg-rose-50 transition-colors"
-                                                    >
-                                                        <HeartIcon className="w-4 h-4 fill-current" />
-                                                    </button>
-                                                </div>
+                                                <ProductCard
+                                                    key={product.product_id}
+                                                    product={product}
+                                                    isLiked={true}
+                                                    onToggleLike={async (id) => {
+                                                        await toggleLike(id);
+                                                        // Immediately update local state to remove the item
+                                                        setWishlist(prev => prev.filter(p => (p.product_id || p.id) !== id));
+                                                    }}
+                                                    onViewDetails={openDetails}
+                                                />
                                             ))}
                                         </div>
                                     ) : (
@@ -370,25 +300,17 @@ const UserDetails = ({ liked = {}, onToggleLike, onViewDetails, onOpenCart }) =>
                                         </div>
                                     )}
                                 </div>
-                            ) : (
-                                <AddressManager />
                             )}
 
+                            {activeTab === "addresses" && <AddressManager />}
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* INVOICE MODAL */}
-            <PaymentModal
-                open={isInvoiceOpen}
-                onClose={() => setIsInvoiceOpen(false)}
-                order={selectedOrder}
-            />
-
+            <PaymentModal open={isInvoiceOpen} onClose={() => setIsInvoiceOpen(false)} order={selectedOrder} />
         </div>
     );
 };
-
 
 export default UserDetails;

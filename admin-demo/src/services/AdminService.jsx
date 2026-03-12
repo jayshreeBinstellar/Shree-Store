@@ -1,8 +1,117 @@
 import APIManager from "../api/ApiManager";
 import API_ENDPOINT from "../api/ApiEndpoint";
 
+export const buildQueryString = (params) => {
+    if (!params) return '';
+
+    // If it's not an object (old signature), we return empty or handle specifically
+    if (typeof params !== 'object') {
+        return '';
+    }
+
+    const { first = 0, rows = 10, sortField, sortOrder, filters } = params;
+
+    const queryParams = new URLSearchParams();
+
+    // Map pagination
+    queryParams.append('page', Math.floor(first / rows) + 1);
+    queryParams.append('limit', rows);
+
+    // Map sorting
+    if (sortField) {
+        queryParams.append('sortKey', sortField);
+        // PrimeReact uses 1 for ASC, -1 for DESC
+        // Explicitly check for -1 to return DESC, otherwise default to ASC
+        queryParams.append('sortBy', sortOrder === -1 ? 'DESC' : 'ASC');
+    }
+
+    // Map filters
+    const formattedFilters = [];
+    if (filters) {
+        Object.entries(filters).forEach(([column, filter]) => {
+            if (!filter) return;
+
+            const addFilter = (val, matchMode) => {
+                // Skip empty values OR "All" placeholder
+                if (val !== null && val !== undefined && val !== '' && val !== 'All') {
+
+                    let finalizedValue = val;
+                    let type = typeof val === 'number' ? 'number' : 'text';
+
+                    // Detect booleans or "true"/"false" strings
+                    if (val === true || val === false || val === 'true' || val === 'false') {
+                        finalizedValue = (val === true || val === 'true');
+                        type = 'boolean';
+                    }
+
+                    formattedFilters.push({
+                        column: column === 'global' ? 'all' : column,
+                        type: type,
+                        value: finalizedValue,
+                        operator: matchMode || 'contains'
+                    });
+                }
+            };
+
+            if (filter) {
+                if (filter.constraints) {
+                    filter.constraints.forEach(c => {
+                        if (c.value !== undefined && c.value !== null && c.value !== '') {
+                            addFilter(c.value, c.matchMode);
+                        }
+                    });
+                } else if (filter.value !== undefined) {
+                    addFilter(filter.value, filter.matchMode);
+                }
+            }
+        });
+    }
+
+    if (formattedFilters.length > 0) {
+        queryParams.append('filters', JSON.stringify(formattedFilters));
+    }
+
+    return queryParams.toString();
+};
+
+const handleCompatibility = (params, oldArgsMapper) => {
+    if (typeof params !== 'object' || params === null) {
+        return buildQueryString(oldArgsMapper(params));
+    }
+    return buildQueryString(params);
+};
+
 export const login = async (data) => {
     return await APIManager.postRequest({ path: API_ENDPOINT.LOGIN, data });
+};
+
+// Password Reset Functions
+export const forgotPassword = async (email) => {
+    return await APIManager.postRequest({ 
+        path: API_ENDPOINT.FORGOT_PASSWORD, 
+        data: { email } 
+    });
+};
+
+export const verifyOTP = async (email, otp) => {
+    return await APIManager.postRequest({ 
+        path: API_ENDPOINT.VERIFY_OTP, 
+        data: { email, otp } 
+    });
+};
+
+export const resetPassword = async (resetToken, newPassword) => {
+    return await APIManager.postRequest({ 
+        path: API_ENDPOINT.RESET_PASSWORD, 
+        data: { resetToken, newPassword } 
+    });
+};
+
+export const resendOTP = async (email) => {
+    return await APIManager.postRequest({ 
+        path: API_ENDPOINT.RESEND_OTP, 
+        data: { email } 
+    });
 };
 
 export const getStats = async () => {
@@ -10,50 +119,56 @@ export const getStats = async () => {
 };
 
 // Shipping
-export const getShippingOptions = async () => {
+export const getShippingOptions = async (paramsOrSearch) => {
+    const query = handleCompatibility(paramsOrSearch, (search) => ({
+        filters: {
+            global: { value: search || '', matchMode: 'contains' }
+        }
+    }));
     return await APIManager.getRequest({
-        path: '/admin/shipping-options',
+        path: `${API_ENDPOINT.GET_SHIPPING_ZONE}?${query}`,
         token: true
     });
 };
 export const addShippingOption = async (data) => {
     return await APIManager.postRequest({
-        path: '/admin/shipping-options',
+        path: API_ENDPOINT.ADD_SHIPPING_ZONE,
         data, token: true
     });
 };
 export const updateShippingOption = async (id, data) => {
     return await APIManager.putRequest({
-        path: `/admin/shipping-options/${id}`,
+        path: API_ENDPOINT.UPDATE_SHIPPING_ZONE(id),
         data, token: true
     });
 };
 export const deleteShippingOption = async (id) => {
     return await APIManager.deleteRequest({
-        path: `/admin/shipping-options/${id}`,
+        path: API_ENDPOINT.DELETE_SHIPPING_ZONE(id),
         token: true
     });
 };
 
 export const updateOrderShipping = async (id, data) => {
     return await APIManager.putRequest({
-        path: `/admin/orders/${id}/shipping`,
+        path: API_ENDPOINT.UPDATE_ORDER_SHIPPING(id),
         data: data,
         token: true
     });
 };
 
-export const getOrders = async (page = 1, limit = 10, status = '') => {
-    const params = new URLSearchParams({
-        page,
-        limit,
-        ...(status && { status })
-    });
+export const getOrders = async (paramsOrStatus, search) => {
+    const query = handleCompatibility(paramsOrStatus, (status) => ({
+        filters: {
+            status: { value: status !== 'All' ? status : '', matchMode: 'equals' },
+            global: { value: search || '', matchMode: 'contains' }
+        }
+    }));
     return await APIManager.getRequest({
-        path: `${API_ENDPOINT.GET_ORDERS}?${params}`,
+        path: `${API_ENDPOINT.GET_ORDERS}?${query}`,
         token: true
     });
-}
+};
 
 export const updateOrderStatus = async (id, status) => {
     return await APIManager.putRequest({
@@ -63,15 +178,16 @@ export const updateOrderStatus = async (id, status) => {
     });
 };
 
-export const getProducts = async (page = 1, limit = 10, search = '') => {
-    const params = new URLSearchParams({
-        page,
-        limit,
-        ...(search && { search })
-    });
-
-    return APIManager.getRequest({
-        path: `${API_ENDPOINT.GET_PRODUCTS}?${params}`,
+export const getProducts = async (paramsOrSearch, category, status) => {
+    const query = handleCompatibility(paramsOrSearch, (search) => ({
+        filters: {
+            global: { value: search || '', matchMode: 'contains' },
+            category: { value: category || '', matchMode: 'equals' },
+            is_active: { value: status || '', matchMode: 'equals' }
+        }
+    }));
+    return await APIManager.getRequest({
+        path: `${API_ENDPOINT.GET_PRODUCTS}?${query}`,
         token: true
     });
 };
@@ -110,14 +226,14 @@ export const bulkAddProducts = async (products) => {
     });
 };
 
-export const getCategories = async (page = 1, limit = 10, search = '') => {
-    const params = new URLSearchParams({
-        page,
-        limit,
-        ...(search && { search })
-    });
+export const getCategories = async (paramsOrSearch) => {
+    const query = handleCompatibility(paramsOrSearch, (search) => ({
+        filters: {
+            global: { value: search || '', matchMode: 'contains' }
+        }
+    }));
     return await APIManager.getRequest({
-        path: `${API_ENDPOINT.GET_CATEGORIES}?${params}`,
+        path: `${API_ENDPOINT.GET_CATEGORIES}?${query}`,
         token: true
     });
 };
@@ -142,14 +258,14 @@ export const deleteCategory = async (id) => {
     });
 };
 
-export const getCustomers = async (page = 1, limit = 10, search = '') => {
-    const params = new URLSearchParams({
-        page,
-        limit,
-        ...(search && { search })
-    });
+export const getCustomers = async (paramsOrSearch) => {
+    const query = handleCompatibility(paramsOrSearch, (search) => ({
+        filters: {
+            global: { value: search || '', matchMode: 'contains' }
+        }
+    }));
     return await APIManager.getRequest({
-        path: `${API_ENDPOINT.GET_CUSTOMERS}?${params}`,
+        path: `${API_ENDPOINT.GET_CUSTOMERS}?${query}`,
         token: true
     });
 };
@@ -174,14 +290,15 @@ export const addCustomer = async (data) => {
     });
 };
 
-export const getTickets = async (page = 1, limit = 10, status = '') => {
-    const params = new URLSearchParams({
-        page,
-        limit,
-        ...(status && { status })
-    });
+export const getTickets = async (paramsOrStatus, search) => {
+    const query = handleCompatibility(paramsOrStatus, (status) => ({
+        filters: {
+            status: { value: status !== 'All' ? status : '', matchMode: 'equals' },
+            global: { value: search || '', matchMode: 'contains' }
+        }
+    }));
     return await APIManager.getRequest({
-        path: `${API_ENDPOINT.GET_TICKETS}?${params}`,
+        path: `${API_ENDPOINT.GET_TICKETS}?${query}`,
         token: true
     });
 };
@@ -206,14 +323,14 @@ export const updateSettings = async (data) => {
     });
 };
 
-export const getCoupons = async (page = 1, limit = 10, search = '') => {
-    const params = new URLSearchParams({
-        page,
-        limit,
-        ...(search && { search })
-    });
+export const getCoupons = async (paramsOrSearch) => {
+    const query = handleCompatibility(paramsOrSearch, (search) => ({
+        filters: {
+            global: { value: search || '', matchMode: 'contains' }
+        }
+    }));
     return await APIManager.getRequest({
-        path: `${API_ENDPOINT.GET_COUPONS}?${params}`,
+        path: `${API_ENDPOINT.GET_COUPONS}?${query}`,
         token: true
     });
 };
@@ -233,10 +350,14 @@ export const deleteCoupon = async (id) => {
     });
 };
 
-export const getBanners = async (page = 1, limit = 12) => {
-    const params = new URLSearchParams({ page, limit });
+export const getBanners = async (paramsOrSearch) => {
+    const query = handleCompatibility(paramsOrSearch, (search) => ({
+        filters: {
+            global: { value: search || '', matchMode: 'contains' }
+        }
+    }));
     return await APIManager.getRequest({
-        path: `${API_ENDPOINT.GET_BANNERS}?${params}`,
+        path: `${API_ENDPOINT.GET_BANNERS}?${query}`,
         token: true
     });
 };
@@ -248,14 +369,14 @@ export const deleteBanner = async (id) => {
     });
 };
 
-export const getReviews = async (page = 1, limit = 10, status = '') => {
-    const params = new URLSearchParams({
-        page,
-        limit,
-        ...(status && { status })
-    });
+export const getReviews = async (paramsOrSearch) => {
+    const query = handleCompatibility(paramsOrSearch, (search) => ({
+        filters: {
+            global: { value: search || '', matchMode: 'contains' }
+        }
+    }));
     return await APIManager.getRequest({
-        path: `${API_ENDPOINT.GET_REVIEWS}?${params}`,
+        path: `${API_ENDPOINT.GET_REVIEWS}?${query}`,
         token: true
     });
 };
@@ -269,24 +390,28 @@ export const updateReviewStatus = async (id, status) => {
 
 export const getShippingZones = async () => {
     return await APIManager.getRequest({
-        path: API_ENDPOINT.GET_SHIPPING_ZONES,
+        path: API_ENDPOINT.GET_SHIPPING_ZONE,
         token: true
 
     });
 };
 
-export const getTransactions = async (page = 1, limit = 10) => {
-    const params = new URLSearchParams({ page, limit });
+export const getTransactions = async (lazyParams) => {
+    const query = handleCompatibility(lazyParams, () => ({}));
     return await APIManager.getRequest({
-        path: `${API_ENDPOINT.GET_TRANSACTIONS}?${params}`,
+        path: `${API_ENDPOINT.GET_TRANSACTIONS}?${query}`,
         token: true
     });
 };
 
-export const getLogs = async (page = 1, limit = 20) => {
-    const params = new URLSearchParams({ page, limit });
+export const getLogs = async (paramsOrSearch) => {
+    const query = handleCompatibility(paramsOrSearch, (search) => ({
+        filters: {
+            global: { value: search || '', matchMode: 'contains' }
+        }
+    }));
     return await APIManager.getRequest({
-        path: `${API_ENDPOINT.GET_LOGS}?${params}`,
+        path: `${API_ENDPOINT.GET_LOGS}?${query}`,
         token: true
     });
 };
@@ -326,5 +451,128 @@ export const uploadProductImage = async (file) => {
         path: '/admin/upload-product-image',
         data: formData,
         token: true
+    });
+};
+
+// --- New Standardized API Functions ---
+
+export const getUser = async (params) => {
+    const queryParams = { ...params, first: params?.first || 0, rows: params?.rows || 10 };
+    const query = buildQueryString(queryParams);
+    return await APIManager.getRequest({
+        path: API_ENDPOINT.GET_CUSTOMERS + `?${query}`,
+        token: true
+    });
+};
+
+
+export const bulkDeleteProducts = async (ids) => {
+    return await APIManager.postRequest({
+        path: '/admin/products/bulk-delete',
+        data: { ids },
+        token: true
+    });
+};
+
+export const bulkUpdateProductStatus = async (ids, status) => {
+    return await APIManager.postRequest({
+        path: '/admin/products/bulk-status',
+        data: { ids, status },
+        token: true
+    });
+};
+
+export const bulkUpdateOrderStatus = async (ids, status) => {
+    return await APIManager.postRequest({
+        path: '/admin/orders/bulk-status',
+        data: { ids, status },
+        token: true
+    });
+};
+
+export const bulkToggleCustomerBlock = async (ids, is_blocked) => {
+    return await APIManager.postRequest({
+        path: '/admin/customers/bulk-block',
+        data: { ids, is_blocked },
+        token: true
+    });
+};
+
+export const bulkDeleteCoupons = async (ids) => {
+    return await APIManager.postRequest({
+        path: '/admin/coupons/bulk-delete',
+        data: { ids },
+        token: true
+    });
+};
+
+export const bulkDeleteBanners = async (ids) => {
+    return await APIManager.postRequest({
+        path: '/admin/banners/bulk-delete',
+        data: { ids },
+        token: true
+    });
+};
+
+export const bulkDeleteCategories = async (ids) => {
+    return await APIManager.postRequest({
+        path: '/admin/categories/bulk-delete',
+        data: { ids },
+        token: true
+    });
+};
+
+export const bulkUpdateReviewStatus = async (ids, status) => {
+    return await APIManager.postRequest({
+        path: '/admin/reviews/bulk-status',
+        data: { ids, status },
+        token: true
+    });
+};
+
+export const bulkUpdateTransactionStatus = async (ids, status) => {
+    return await APIManager.postRequest({
+        path: '/admin/transactions/bulk-status',
+        data: { ids, status },
+        token: true
+    });
+};
+
+export const bulkUpdateTicketStatus = async (ids, status) => {
+    return await APIManager.postRequest({
+        path: '/admin/tickets/bulk-status',
+        data: { ids, status },
+        token: true
+    });
+};
+
+// Profile & Auth
+export const getProfile = async () => {
+    return await APIManager.getRequest({ 
+        path: API_ENDPOINT.PROFILE, 
+        token: true 
+    });
+};
+
+export const logout = async () => {
+    return await APIManager.postRequest({ 
+        path: API_ENDPOINT.LOGOUT, 
+        token: true 
+    });
+};
+
+export const updateProfile = async (data) => {
+    return await APIManager.putRequest({ 
+        path: API_ENDPOINT.UPDATE_PROFILE, 
+        data, 
+        token: true 
+    });
+};
+
+export const changeMyPassword = async (currentPassword, newPassword) => {
+    return await APIManager.putRequest({ 
+        path: API_ENDPOINT.CHANGE_PASSWORD, 
+        data: { currentPassword, newPassword }, 
+        token: true 
     });
 };

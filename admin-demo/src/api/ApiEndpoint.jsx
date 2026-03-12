@@ -2,7 +2,17 @@
 const API_ENDPOINT = {
     // Auth
     LOGIN: "/auth/login",
+    FORGOT_PASSWORD: "/auth/forgetpassword",
+    VERIFY_OTP: "/auth/verify-otp",
+    RESET_PASSWORD: "/auth/reset-password",
+    RESEND_OTP: "/auth/resend-otp",
 
+    // Profile & Logout
+    PROFILE: "/auth/profile",
+    UPDATE_PROFILE: "/auth/edit-profile",
+    LOGOUT: "/auth/logout",
+    CHANGE_PASSWORD: "/auth/change-password",
+    
     // Dashboard
     GET_STATS: "/admin/stats", //yes
 
@@ -39,7 +49,10 @@ const API_ENDPOINT = {
     // Banners //check
     GET_BANNERS: "/admin/banners",
     ADD_BANNER: "/admin/banners",
+    UPDATE_BANNER: (id) => `/admin/banners/${id}`,
     DELETE_BANNER: (id) => `/admin/banners/${id}`,
+    UPLOAD_BANNER_IMAGE: "/admin/upload-banner-image",
+    UPLOAD_PRODUCT_IMAGE: "/admin/upload-product-image",
 
     // Reviews //done
     GET_REVIEWS: "/admin/reviews",
@@ -50,11 +63,11 @@ const API_ENDPOINT = {
     UPDATE_TICKET_STATUS: (id) => `/admin/tickets/${id}/status`,
 
     // Shipping //done
-    GET_SHIPPING_ZONES: "/admin/shipping-options",
+    GET_SHIPPING_ZONE: "/admin/shipping-options",
     ADD_SHIPPING_ZONE: "/admin/shipping-options",
     UPDATE_SHIPPING_ZONE: (id) => `/admin/shipping-options/${id}`,
     DELETE_SHIPPING_ZONE: (id) => `/admin/shipping-options/${id}`,
-
+    UPDATE_ORDER_SHIPPING: (id) => `/admin/orders/${id}/shipping`,
     // Transactions //done
     GET_TRANSACTIONS: "/admin/transactions",
 
@@ -64,6 +77,9 @@ const API_ENDPOINT = {
     // Settings //done
     GET_SETTINGS: "/admin/settings",
     UPDATE_SETTINGS: "/admin/settings",
+
+
+
 };
 
 export default API_ENDPOINT;

@@ -52,7 +52,10 @@ const buildHeaders = (token = getToken(), isFormData = false) => {
     if (!isFormData) {
         headers["Content-Type"] = "application/json";
     }
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+    
+    // Handle token: true to mean "use stored token"
+    const actualToken = token === true ? getToken() : token;
+    if (actualToken) headers["Authorization"] = `Bearer ${actualToken}`;
 
     return headers;
 };

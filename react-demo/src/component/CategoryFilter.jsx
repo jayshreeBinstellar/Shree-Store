@@ -19,6 +19,15 @@ const CategoryFilter = ({ categories, selectedCategory, onSelect, loading }) => 
             </div>
 
             <div className="flex flex-wrap gap-3">
+                <button
+                    onClick={() => onSelect(null)}
+                    className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${!selectedCategory
+                            ? 'bg-indigo-600 text-white shadow-lg scale-105'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                >
+                    All Categories
+                </button>
                 {categories.map((cat) => (
                     <button
                         key={cat.category_id}

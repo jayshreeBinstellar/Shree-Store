@@ -1,114 +1,156 @@
-import React, { useState } from 'react';
-import { PencilSquareIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
+import React from 'react';
+import { PencilSquareIcon, TrashIcon, TruckIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import PrimeDataTable from '../common/PrimeDataTable';
 
-const ShippingOptionsManagement = ({ options, onAdd, onUpdate, onDelete }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [currentOption, setCurrentOption] = useState({ name: '', cost: '', estimated_days: '' });
+const ShippingOptionsManagement = ({
+    options = [],
+    onEditClick,
+    onAddClick,
+    onDelete,
+    search = "",
+    onSearch,
+    totalRecords = 0,
+    onLazy,
+    lazyParams,
+    onBulkDelete,
+    selection = [],
+    onSelectionChange,
+    onSelectAll,
+    isLoading = false,
+    onReload
+}) => {
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (currentOption.shipping_id) {
-            onUpdate(currentOption.shipping_id, currentOption);
-        } else {
-            onAdd(currentOption);
+    const bulkActions = [
+        {
+            label: 'Delete',
+            severity: 'danger',
+            icon: TrashIcon,
+            handler: (selection) => {
+                onBulkDelete(selection);
+            }
         }
-        setIsEditing(false);
-        setCurrentOption({ name: '', cost: '', estimated_days: '' });
-    };
+    ];
 
     return (
-        <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-8 border-b border-gray-50 flex justify-between items-center">
-                <h3 className="text-lg font-black text-gray-900 uppercase tracking-widest">Shipping Options</h3>
-                <button
-                    onClick={() => { setIsEditing(true); setCurrentOption({ name: '', cost: '', estimated_days: '' }); }}
-                    className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-indigo-700 transition-all"
-                >
-                    <PlusIcon className="w-4 h-4" /> Add Option
-                </button>
+        <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+
+            {/* HEADER */}
+            <div className="p-8 border-b border-gray-50 flex flex-col md:flex-row justify-between items-center bg-gray-50/50 gap-4">
+                <div>
+                    <h3 className="text-lg font-black text-gray-900 uppercase tracking-widest">
+                        Shipping Logistics
+                    </h3>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
+                        Manage {options.length} delivery methods
+                    </p>
+                </div>
+
+                <div className="flex flex-wrap gap-3 items-center justify-center md:justify-end">
+
+                       {/* ADD BUTTON */}
+                    <button
+                        onClick={onAddClick}
+                        className="bg-indigo-600 text-white px-5 py-2 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+                    >
+                        <TruckIcon className="h-4 w-4" />
+                        Add Method
+                    </button>
+                    {/* SEARCH */}
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search methods..."
+                            value={search || ""}
+                            onChange={(e) => onSearch && onSearch(e.target.value)}
+                            className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500 outline-none w-56 lg:w-64"
+                        />
+                        <svg className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+
+                 
+
+                     <button className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
+                        onClick={() => onReload && onReload()}
+                    ><ArrowPathIcon className="h-5 w-5" />
+                    
+                    </button>
+                </div>
             </div>
 
-            {isEditing && (
-                <div className="p-6 ">
-                    <form onSubmit={handleSubmit} className="flex gap-4 items-end">
-                        <div className="flex-1">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Name</label>
-                            <input
-                                type="text"
-                                value={currentOption.name}
-                                onChange={e => setCurrentOption({ ...currentOption, name: e.target.value })}
-                                className="w-full p-2 rounded-lg border border-gray-200 text-sm font-bold"
-                                placeholder="e.g. Standard Delivery"
-                                required
-                            />
-                        </div>
-                        <div className="w-32">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Cost ($)</label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                value={currentOption.cost}
-                                onChange={e => setCurrentOption({ ...currentOption, cost: e.target.value })}
-                                className="w-full p-2 rounded-lg border border-gray-200 text-sm font-bold"
-                                placeholder="0.00"
-                                required
-                            />
-                        </div>
-                        <div className="w-48">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Days</label>
-                            <input
-                                type="text"
-                                value={currentOption.estimated_days}
-                                onChange={e => setCurrentOption({ ...currentOption, estimated_days: e.target.value })}
-                                className="w-full p-2 rounded-lg border border-gray-200 text-sm font-bold"
-                                placeholder="e.g. 3-5 Days"
-                                required
-                            />
-                        </div>
-                        <div className="flex gap-2">
-                            <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold text-sm">Save</button>
-                            <button type="button" onClick={() => setIsEditing(false)} className="bg-gray-200 text-gray-600 px-4 py-2 rounded-lg font-bold text-sm">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-            )}
+            {/* TABLE */}
+            <div className="overflow-x-auto flex-1 p-4">
+                <PrimeDataTable
+                    value={options}
+                    loading={isLoading}
+                    rows={lazyParams?.rows || 10}
+                    totalRecords={totalRecords || options.length}
+                    first={lazyParams?.first || 0}
+                    sortField={lazyParams?.sortField}
+                    sortOrder={lazyParams?.sortOrder}
+                    filters={lazyParams?.filters}
+                    filterDisplay="menu"
+                    paginator
+                    lazy={!!onLazy}
+                    onLazy={onLazy}
+                    dataKey="shipping_id"
 
-            <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="bg-gray-50/50">
-                            <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">Name</th>
-                            <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">Cost</th>
-                            <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">Est. Days</th>
-                            <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                        {options.map((option) => (
-                            <tr key={option.shipping_id} className="hover:bg-gray-50/50 transition-colors">
-                                <td className="px-8 py-4 font-bold text-gray-900">{option.name}</td>
-                                <td className="px-8 py-4 font-black text-indigo-600">${parseFloat(option.cost).toFixed(2)}</td>
-                                <td className="px-8 py-4 font-bold text-gray-500 text-xs uppercase tracking-wider">{option.estimated_days}</td>
-                                <td className="px-8 py-4 text-right">
-                                    <div className="flex justify-end gap-2">
-                                        <button
-                                            onClick={() => { setIsEditing(true); setCurrentOption(option); }}
-                                            className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                                        >
-                                            <PencilSquareIcon className="h-5 w-5" />
-                                        </button>
-                                        <button
-                                            onClick={() => onDelete(option.shipping_id)}
-                                            className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                                        >
-                                            <TrashIcon className="h-5 w-5" />
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                    selection={selection}
+                    onSelectionChange={onSelectionChange}
+                    onSelectAll={onSelectAll}
+
+                    showGridlines
+                    bulkActions={bulkActions}
+
+                    columns={[
+                        {
+                            field: 'name',
+                            header: 'Method Name',
+                            body: row => <span className="font-bold text-gray-900">{row.name}</span>,
+                            sortable: true,
+                            filter: true,
+                            filterPlaceholder: "Filter Name"
+                        },
+                        {
+                            field: 'cost',
+                            header: 'Shipping Cost',
+                            body: (row) => <span className="font-black text-indigo-600 tracking-tighter">${parseFloat(row.cost).toFixed(2)}</span>,
+                            sortable: true,
+                            filter: true,
+                            filterPlaceholder: "Filter Cost"
+                        },
+                        {
+                            field: 'estimated_days',
+                            header: 'Delivery Time',
+                            body: row => <span className="px-3 py-1 bg-gray-50 border border-gray-100 rounded-lg text-[10px] font-black text-gray-600 uppercase tracking-tight">{row.estimated_days}</span>,
+                            sortable: true,
+                            filter: true,
+                            filterPlaceholder: "Filter Days"
+                        },
+                        {
+                            header: 'Actions',
+                            body: (row) => (
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => onEditClick(row)}
+                                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                        title="Edit Method"
+                                    >
+                                        <PencilSquareIcon className="h-5 w-5" />
+                                    </button>
+                                    <button
+                                        onClick={() => onDelete(row.shipping_id)}
+                                        className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                        title="Delete Method"
+                                    >
+                                        <TrashIcon className="h-5 w-5" />
+                                    </button>
+                                </div>
+                            ),
+                        },
+                    ]}
+                />
             </div>
         </div>
     );

@@ -25,6 +25,16 @@ const CategoryPage = ({
     const [banners, setBanners] = useState([]);
     const [loading, setLoading] = useState(true);
     const [visibleCount, setVisibleCount] = useState(INITIAL_PAGE_SIZE);
+    const [activeSegment, setActiveSegment] = useState("all");
+
+    const segments = useMemo(() => {
+        if (routeName !== "fashion") return [];
+        return [
+            { id: "all", name: "Explore All" },
+            { id: "men", name: "Men's Wear" },
+            { id: "women", name: "Women's Wear" }
+        ];
+    }, [routeName]);
 
 
     const fetchCategoryProducts = useCallback(async () => {
@@ -77,10 +87,39 @@ const CategoryPage = ({
     }, [fetchRouteBanners]);
 
     const filteredProducts = useMemo(() => {
+        let list = products;
+
+        if (activeSegment !== "all") {
+            // Find relevant sub-category definition to use its keys for precise filtering
+            const relevantSub = subCategories?.find(sub =>
+                sub.name.toLowerCase().includes(activeSegment)
+            );
+
+            if (relevantSub) {
+                list = list.filter(p => {
+                    const prodCat = p.category?.toLowerCase() || "";
+                    return relevantSub.keys.some(k => prodCat === k.toLowerCase());
+                });
+            } else {
+                // Precise fallback matching
+                list = list.filter(p => {
+                    const cat = p.category?.toLowerCase() || "";
+                    const title = p.title?.toLowerCase() || "";
+                    if (activeSegment === "men") {
+                        return cat.includes("mens") || (title.includes("men") && !title.includes("women"));
+                    }
+                    if (activeSegment === "women") {
+                        return cat.includes("womens") || title.includes("women") || cat === "tops";
+                    }
+                    return true;
+                });
+            }
+        }
+
         const term = searchTerm?.toLowerCase().trim();
-        if (!term) return products;
-        return products.filter(p => p.title?.toLowerCase().includes(term));
-    }, [products, searchTerm]);
+        if (!term) return list;
+        return list.filter(p => p.title?.toLowerCase().includes(term));
+    }, [products, searchTerm, activeSegment, subCategories]);
 
     const handleLoadMore = useCallback(() => {
         setVisibleCount(prev => prev + LOAD_MORE_INCREMENT);
@@ -116,10 +155,36 @@ const CategoryPage = ({
                     </section>
                 )}
 
+                {/* Segment Filter */}
+                {segments.length > 0 && (
+                    <div className="flex justify-center mb-16 animate-in slide-in-from-top-4 duration-500">
+                        <div className="bg-gray-50 border border-gray-100 p-2 rounded-[32px] flex gap-2 shadow-sm">
+                            {segments.map((seg) => (
+                                <button
+                                    key={seg.id}
+                                    onClick={() => {
+                                        setActiveSegment(seg.id);
+                                        setVisibleCount(INITIAL_PAGE_SIZE);
+                                    }}
+                                    className={`px-10 py-4 rounded-[24px] font-black text-xs uppercase tracking-widest transition-all ${activeSegment === seg.id ? "bg-indigo-600 text-white shadow-xl shadow-indigo-100 scale-105" : "text-gray-400 hover:text-gray-900 hover:bg-white"}`}
+                                >
+                                    {seg.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Structured Sub-categories */}
                 {subCategories?.length > 0 && !searchTerm && (
                     <section className="space-y-20 mb-20 border-b border-gray-100 pb-20">
                         {subCategories.map((sub) => {
+                            // Filter sections based on active segment
+                            if (routeName === "fashion" && activeSegment !== "all") {
+                                if (activeSegment === "men" && !sub.name.toLowerCase().includes("men")) return null;
+                                if (activeSegment === "women" && !sub.name.toLowerCase().includes("women")) return null;
+                            }
+
                             const subProducts = products.filter(p => {
                                 const catMatch = sub.keys.some(k => p.category?.toLowerCase() === k.toLowerCase());
                                 if (!catMatch) return false;
@@ -161,7 +226,12 @@ const CategoryPage = ({
                     <header className="flex items-center justify-between border-b border-gray-100 pb-4">
                         <div>
                             <h2 className="text-2xl font-black text-gray-900 tracking-tight">
-                                {searchTerm ? `Search: "${searchTerm}"` : `All ${title} Items`}
+                                {searchTerm
+                                    ? `Search: "${searchTerm}"`
+                                    : activeSegment !== "all"
+                                        ? segments.find(s => s.id === activeSegment)?.name
+                                        : `All ${title} Items`
+                                }
                             </h2>
                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
                                 {filteredProducts.length} curated products

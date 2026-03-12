@@ -1,52 +1,17 @@
-import React, { useState, useMemo } from "react";
-import MuiPagination from "../Pagination";
+import React from "react";
+import { ClockIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import PrimeDataTable from '../common/PrimeDataTable';
 
-const ActivityLogs = ({ logs, total, currentPage, limit, totalPages, onPageChange, itemsPerPage, itemsTotal }) => {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [sortConfig, setSortConfig] = useState({ key: "created_at", direction: "desc" });
-    const [filterAction, setFilterAction] = useState("");
-
-    // Get unique actions for filter dropdown
-    const uniqueActions = useMemo(() => {
-        return [...new Set(logs.map(log => log.action))];
-    }, [logs]);
-
-    // Filter and sort logs
-    const filteredAndSortedLogs = useMemo(() => {
-        let filtered = logs.filter(log => {
-            const searchLower = searchTerm.toLowerCase();
-            const matchesSearch = !searchTerm ||
-                log.admin_name?.toLowerCase().includes(searchLower) ||
-                log.action?.toLowerCase().includes(searchLower) ||
-                log.ip_address?.toLowerCase().includes(searchLower);
-
-            const matchesAction = !filterAction || log.action === filterAction;
-
-            return matchesSearch && matchesAction;
-        });
-
-        // Sort
-        return filtered.sort((a, b) => {
-            const aVal = a[sortConfig.key];
-            const bVal = b[sortConfig.key];
-
-            if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
-            if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
-            return 0;
-        });
-    }, [logs, searchTerm, sortConfig, filterAction]);
-
-    const handleSort = (key) => {
-        setSortConfig(prev => ({
-            key,
-            direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc"
-        }));
-    };
-
-    const getSortIcon = (key) => {
-        if (sortConfig.key !== key) return "↕";
-        return sortConfig.direction === "asc" ? "↑" : "↓";
-    };
+const ActivityLogs = ({
+    logs = [],
+    onSearch,
+    totalRecords = 0,
+    onLazy,
+    lazyParams,
+    search = "",
+    isLoading = false,
+    onReload
+}) => {
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -55,104 +20,117 @@ const ActivityLogs = ({ logs, total, currentPage, limit, totalPages, onPageChang
             day: 'numeric',
             year: 'numeric',
             hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
+            minute: '2-digit'
         });
     };
 
     return (
-        <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-8 border-b border-gray-50">
-                <div className="flex flex-col gap-4">
-                    <h3 className="text-lg font-black text-gray-900 uppercase tracking-widest">Audit Activity Logs</h3>
+        <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden flex flex-col">
 
-                    {/* Filter and Search Section */}
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* HEADER */}
+            <div className="p-8 border-b border-gray-50 flex flex-col md:flex-row justify-between items-center bg-gray-50/50 gap-4">
+                <div>
+                    <h3 className="text-lg font-black text-gray-900 uppercase tracking-widest flex items-center gap-2">
+                        System Audit Trail
+                    </h3>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
+                        Monitoring {totalRecords} administrative actions
+                    </p>
+                </div>
 
-                        {/* Search - Left */}
+                <div className="flex flex-wrap gap-3 items-center justify-center md:justify-end">
+                    {/* SEARCH */}
+                    <div className="relative">
                         <input
                             type="text"
-                            placeholder="Search by admin, action, or IP..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full md:w-80 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            placeholder="Search logs..."
+                            value={search || ""}
+                            onChange={(e) => onSearch && onSearch(e.target.value)}
+                            className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-indigo-500 outline-none w-56 lg:w-64"
                         />
-
-                        {/* Action Filter - Right */}
-                        <select
-                            value={filterAction}
-                            onChange={(e) => setFilterAction(e.target.value)}
-                            className="w-full md:w-60 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        >
-                            <option value="">All Actions</option>
-                            {uniqueActions.map(action => (
-                                <option key={action} value={action}>{action}</option>
-                            ))}
-                        </select>
-
+                        <svg className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
                     </div>
 
+                     <button className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
+                        onClick={() => onReload && onReload()}
+                    ><ArrowPathIcon className="h-5 w-5" />
+                    </button>
                 </div>
             </div>
 
-            <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="bg-gray-50/50">
-                            <th
-                                onClick={() => handleSort("admin_name")}
-                                className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest cursor-pointer hover:text-gray-600 transition-colors"
-                            >
-                                Admin {getSortIcon("admin_name")}
-                            </th>
-                            <th
-                                onClick={() => handleSort("action")}
-                                className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest cursor-pointer hover:text-gray-600 transition-colors"
-                            >
-                                Action {getSortIcon("action")}
-                            </th>
-                            <th className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest">IP Address</th>
-                            <th
-                                onClick={() => handleSort("created_at")}
-                                className="px-8 py-4 text-xs font-black text-gray-400 uppercase tracking-widest cursor-pointer hover:text-gray-600 transition-colors"
-                            >
-                                Timestamp {getSortIcon("created_at")}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                        {filteredAndSortedLogs.length > 0 ? filteredAndSortedLogs.map((log) => (
-                            <tr key={log.log_id} className="hover:bg-gray-50/50 transition-colors">
-                                <td className="px-8 py-4 font-bold text-gray-900">{log.admin_name || "Unknown"}</td>
-                                <td className="px-8 py-4">
-                                    <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold">
-                                        {log.action}
-                                    </span>
-                                </td>
-                                <td className="px-8 py-4 text-gray-500 text-sm font-mono">{log.ip_address || "N/A"}</td>
-                                <td className="px-8 py-4 text-gray-600 text-sm">{formatDate(log.created_at)}</td>
-                            </tr>
-                        )) : (
-                            <tr>
-                                <td colSpan="4" className="px-8 py-20 text-center text-gray-400 font-medium italic">
-                                    {searchTerm || filterAction ? "No matching logs found." : "No activity logs found yet."}
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            {/* TABLE */}
+            <div className="overflow-x-auto flex-1 p-4">
+                <PrimeDataTable
+                    value={logs}
+                    loading={isLoading}
+                    rows={lazyParams?.rows || 10}
+                    totalRecords={totalRecords}
+                    first={lazyParams?.first || 0}
+                    sortField={lazyParams?.sortField}
+                    sortOrder={lazyParams?.sortOrder}
+                    filters={lazyParams?.filters}
+                    filterDisplay="menu"
+                    paginator
+                    lazy
+                    onLazy={onLazy}
+                    dataKey="log_id"
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-                <MuiPagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={onPageChange}
-                    itemsPerPage={itemsPerPage}
-                    itemsTotal={itemsTotal}
+                    showGridlines
+
+                    columns={[
+                        {
+                            field: 'admin_name',
+                            header: 'Administrator',
+                            body: log => (
+                                <div className="flex items-center gap-2">
+                                    <div className="w-7 h-7 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-[10px] font-black text-indigo-600 uppercase">
+                                        {log.admin_name?.substring(0, 2)}
+                                    </div>
+                                    <span className="font-bold text-gray-900">{log.admin_name}</span>
+                                </div>
+                            ),
+                            sortable: true,
+                            filter: true,
+                            filterPlaceholder: "Filter Admin"
+                        },
+                        {
+                            field: 'action',
+                            header: 'Action Performed',
+                            body: log => (
+                                <span className="px-3 py-1 bg-gray-50 border border-gray-100 text-gray-700 rounded-lg text-[10px] font-black uppercase tracking-tight">
+                                    {log.action}
+                                </span>
+                            ),
+                            sortable: true,
+                            filter: true,
+                            filterPlaceholder: "Filter Action"
+                        },
+                        {
+                            field: 'ip_address',
+                            header: 'IP Source',
+                            body: log => <span className="font-mono text-[11px] text-gray-500 font-bold bg-gray-50 px-2 py-0.5 rounded border border-gray-100">{log.ip_address}</span>,
+                            sortable: true,
+                            filter: false,
+                            filterPlaceholder: "Filter IP"
+                        },
+                        {
+                            field: 'created_at',
+                            header: 'Event Timestamp',
+                            body: log => (
+                                <div className="flex items-center gap-2 text-gray-400">
+                                    <ClockIcon className="h-3.5 w-3.5" />
+                                    <span className="text-[11px] font-bold">{formatDate(log.created_at)}</span>
+                                </div>
+                            ),
+                            sortable: true,
+                            filter: false,
+                            filterPlaceholder: "Filter Time"
+                        },
+                    ]}
                 />
-            )}
+            </div>
         </div>
     );
 };

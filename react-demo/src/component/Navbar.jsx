@@ -8,10 +8,13 @@ import { useAuth } from "../context/AuthContext";
 import { useSettings } from "../context/SettingsContext";
 import { useCart } from "../context/CartContext";
 
-const Navbar = ({ onOpenCart }) => {
+import { useShop } from "../context/ShopContext";
+
+const Navbar = () => {
   const { isAuthenticated } = useAuth();
   const { settings } = useSettings();
   const { cartCount } = useCart();
+  const { openCart } = useShop();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -83,7 +86,7 @@ const Navbar = ({ onOpenCart }) => {
 
                 <div
                   className="relative group cursor-pointer"
-                  onClick={onOpenCart}
+                  onClick={openCart}
                 >
                   <div className="p-2 bg-indigo-600 text-white rounded-xl shadow-md group-hover:bg-indigo-700 transition-all active:scale-95">
                     <LocalMallOutlinedIcon fontSize="small" />

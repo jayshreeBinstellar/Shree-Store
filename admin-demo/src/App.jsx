@@ -1,6 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import  { ConfirmationProvider }  from "./context/ConfirmationContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import Login from "./pages/Login";
+import Login from "./pages/auth/Login";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import VerifyOTP from "./pages/auth/VerifyOTP";
+import ResetPassword from "./pages/auth/ResetPassword";
 import Layout from "./components/admin/Layout";
 
 // Pages
@@ -17,8 +21,10 @@ import Payments from "./pages/admin/Payments";
 import Support from "./pages/admin/Support";
 import Logs from "./pages/admin/Logs";
 import Settings from "./pages/admin/Settings";
+import Profile from "./pages/auth/Profile";
 import { Toaster } from "react-hot-toast";
-import Loader from "./components/Loader";
+import Loader from "./components/common/Loader";
+import ChangePassword from "./pages/auth/ChangePassword";
 
 const ProtectedRoute = ({ children }) => {
     const { token, isAdmin, loading } = useAuth();
@@ -32,11 +38,17 @@ const ProtectedRoute = ({ children }) => {
 function App() {
     return (
         <AuthProvider>
+            <ConfirmationProvider>
             <Toaster position="top-right" />
             <Router>
                 <Routes>
+                    {/* Public Auth Routes */}
                     <Route path="/login" element={<Login />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/verify-otp" element={<VerifyOTP />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
 
+                    {/* Protected Admin Routes */}
                     <Route path="/" element={
                         <ProtectedRoute>
                             <Layout />
@@ -55,9 +67,12 @@ function App() {
                         <Route path="support" element={<Support />} />
                         <Route path="logs" element={<Logs />} />
                         <Route path="settings" element={<Settings />} />
+                        <Route path="profile" element={<Profile />} />
+                        <Route path="change-password" element={<ChangePassword/>}/>
                     </Route>
                 </Routes>
             </Router>
+            </ConfirmationProvider>
         </AuthProvider>
     );
 }

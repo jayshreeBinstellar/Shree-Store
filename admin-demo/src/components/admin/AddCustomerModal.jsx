@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import Modal from "../common/Modal";
+
 const AddCustomerModal = ({ isOpen, onClose, onAdd }) => {
     const [formData, setFormData] = useState({
         fullname: "",
@@ -12,6 +16,7 @@ const AddCustomerModal = ({ isOpen, onClose, onAdd }) => {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
 
     if (!isOpen) return null;
 
@@ -38,16 +43,14 @@ const AddCustomerModal = ({ isOpen, onClose, onAdd }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
-            <div className="bg-white w-full max-w-md rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
-                <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                    <h3 className="text-lg font-black text-gray-900 uppercase tracking-widest">Add New Account</h3>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
-                        <XMarkIcon className="h-6 w-6 text-gray-400" />
-                    </button>
-                </div>
+        <Modal 
+          isOpen={isOpen} 
+          onClose={onClose} 
+          title="Add New Account"
+          className="rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300"
+        >
+          <form onSubmit={handleSubmit} className="">
 
-                <form onSubmit={handleSubmit} className="p-8 space-y-4">
                     {error && (
                         <div className="p-4 bg-rose-50 text-rose-600 rounded-2xl text-xs font-bold uppercase tracking-wider text-center border border-rose-100">
                             {error}
@@ -60,7 +63,7 @@ const AddCustomerModal = ({ isOpen, onClose, onAdd }) => {
                             <input
                                 required
                                 type="text"
-                                className="w-full px-6 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                className="w-full px-2 py-2 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                 value={formData.fullname}
                                 onChange={(e) => setFormData({ ...formData, fullname: e.target.value })}
                                 placeholder="Enter full name"
@@ -72,7 +75,7 @@ const AddCustomerModal = ({ isOpen, onClose, onAdd }) => {
                             <input
                                 required
                                 type="email"
-                                className="w-full px-6 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                className="w-full px-2 py-2 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 placeholder="name@example.com"
@@ -81,21 +84,29 @@ const AddCustomerModal = ({ isOpen, onClose, onAdd }) => {
 
                         <div>
                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Password</label>
-                            <input
-                                required
-                                type="password"
-                                className="w-full px-6 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                                value={formData.password}
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                placeholder="••••••••"
-                            />
+                            <div className="relative">
+                                <input
+                                    required
+                                    type={showPassword ? "text" : "password"}
+                                    className="w-full pr-12 px-2 py-2 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    placeholder="••••••••"
+                                />
+                                <span
+                                    className="absolute right-4 top-1 cursor-pointer text-gray-400 hover:text-indigo-600"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                </span>
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Role</label>
                                 <select
-                                    className="w-full px-6 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                    className="w-full px-2 py-2 bg-gray-50 border border-gray-100 rounded-2xl text-sm  focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                     value={formData.role}
                                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                                 >
@@ -107,7 +118,7 @@ const AddCustomerModal = ({ isOpen, onClose, onAdd }) => {
                             <div>
                                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Gender</label>
                                 <select
-                                    className="w-full px-6 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                    className="w-full px-2 py-2 bg-gray-50 border border-gray-100 rounded-2xl text-sm  focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                     value={formData.gender}
                                     onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                                 >
@@ -119,10 +130,10 @@ const AddCustomerModal = ({ isOpen, onClose, onAdd }) => {
                         </div>
 
                         <div>
-                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Date of Birth</label>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1">Date of Birth</label>
                             <input
                                 type="date"
-                                className="w-full px-6 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                className="w-full px-2 py-2 bg-gray-50 border border-gray-100 rounded-2xl text-sm  focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                 value={formData.dob}
                                 onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
                             />
@@ -139,9 +150,9 @@ const AddCustomerModal = ({ isOpen, onClose, onAdd }) => {
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
+          </Modal>
     );
 };
+
 
 export default AddCustomerModal;

@@ -19,9 +19,10 @@ export function Main() {
   const { cartCount, refreshCart } = useCart();
   const {
     isDetailOpen,
+    isCartOpen,
+    openCart,
+    closeCart
   } = useShop();
-
-  const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -35,14 +36,10 @@ export function Main() {
     }
   }, []);
 
-  const openCart = () => {
-    setIsCartOpen(true);
-  };
-
   return (
     <div className={`flex bg-gray-100 `}>
       <div className={`flex flex-col w-full min-h-screen`}>
-        <Navbar onOpenCart={openCart} cartCount={cartCount} />
+        <Navbar />
 
         <main className="flex-1">
           <Routes>
@@ -74,7 +71,7 @@ export function Main() {
 
         {isCartOpen && (
           <AddCart
-            onClose={() => setIsCartOpen(false)}
+            onClose={closeCart}
             onCartUpdate={refreshCart}
           />
         )}

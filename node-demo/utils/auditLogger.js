@@ -21,11 +21,15 @@ async function logActivity(userId, action, ipAddress, additionalData = null) {
     }
 }
 function getIpAddress(req) {
-    return req.headers['x-forwarded-for']?.split(',')[0] || 
-           req.connection.remoteAddress || 
-           req.socket.remoteAddress || 
-           req.ip || 
-           'Unknown';
+    let ip =
+        req.headers['x-forwarded-for']?.split(',')[0] ||
+        req.socket?.remoteAddress ||
+        req.ip ||
+        '';
+
+    if (!ip) return 'Unknown';
+
+    return ip.replace(/^::ffff:/, '');
 }
 
 function auditLoggingMiddleware(action) {

@@ -1,117 +1,172 @@
+import React, { useState } from "react";
+import * as AdminService from "../../services/AdminService";
+import SupportDesk from "../../components/admin/SupportDesk";
+import TicketModal from "../../components/admin/TicketModal";
+import { toast } from "react-hot-toast";
+import Loader from "../../components/common/Loader.jsx";
+import useDataTable from "../../utils/useDataTable.jsx";
 
-import React, { useState, useEffect } from 'react';
-import * as AdminService from '../../services/AdminService';
-import SupportDesk from '../../components/admin/SupportDesk';
-import TicketModal from '../../components/admin/TicketModal';
-import { toast } from 'react-hot-toast';
+const defaultFilters = {
+  global: { value: "", matchMode: "contains" },
+  full_name: { value: "", matchMode: "contains" },
+  subject: { value: "", matchMode: "contains" }
+};
 
 const Support = () => {
-    const [tickets, setTickets] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedTicket, setSelectedTicket] = useState(null);
-    const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
-    const [replyText, setReplyText] = useState("");
-    const [currentFilter, setCurrentFilter] = useState('All');
-    const [modalLoading, setModalLoading] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [totalTickets, setTotalTickets] = useState(0);
 
-    const fetchTickets = async (status = 'All', page = 1) => {
-        try {
-            const filterStatus = status === 'All' ? '' : status;
-            const data = await AdminService.getTickets(page, 10, filterStatus);
-            if (data.status === "success") {
-                setTickets(data.tickets);
-                setCurrentPage(data.page || page);
-                setTotalPages(data.totalPages || 1);
-                setTotalTickets(data.total || 0);
-            }
-        } catch (err) {
-            console.error(err);
+  const {
+    data: tickets,
+    loading,
+    totalRecords,
+    searchValue,
+    lazyParams,
+    selectedItems,
+    setSelectedItems,
+    handleSearch,
+    handleLazyLoad,
+    handleSelectAll,
+    resetFilters,
+    fetchData
+  } = useDataTable({
+    defaultFilters,
+    fetchFn: AdminService.getTickets
+  });
+
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [replyText, setReplyText] = useState("");
+  const [modalLoading, setModalLoading] = useState(false);
+  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+  const [currentFilter, setCurrentFilter] = useState("All");
+
+
+  const handleFilterChange = (status) => {
+    setCurrentFilter(status);
+
+    handleLazyLoad({
+      ...lazyParams,
+      first: 0,
+      filters: {
+        ...lazyParams.filters,
+        status: {
+          value: status === "All" ? "" : status,
+          matchMode: "equals"
         }
-    };
+      }
+    });
+  };
 
-    const init = async () => {
-        setLoading(true);
-        await fetchTickets(currentFilter, 1);
-        setLoading(false);
+
+  const handleBulkStatusUpdate = async (selectedRows, status) => {
+    try {
+      const ids = selectedRows.map((t) => t.ticket_id);
+
+      await AdminService.bulkUpdateTicketStatus(ids, status);
+
+      toast.success(`${selectedRows.length} tickets ${status.toLowerCase()}`);
+      setSelectedItems([]);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      toast.error("Bulk update failed");
     }
+  };
 
-    useEffect(() => {
-        init();
-    }, [currentFilter]);
 
-    const handlePageChange = async (newPage) => {
-        setLoading(true);
-        await fetchTickets(currentFilter, newPage);
-        setLoading(false);
-    };
+  const handleTicketReply = async () => {
+    if (!replyText.trim()) return;
 
-    const handleTicketReply = async () => {
-        if (!replyText.trim()) return;
+    try {
+      setModalLoading(true);
 
-        try {
-            setModalLoading(true);
-            await AdminService.updateTicketStatus(selectedTicket.ticket_id, "Resolved", replyText);
-            toast.success("Reply sent and ticket resolved");
-            setReplyText("");
-            setIsTicketModalOpen(false);
-            fetchTickets(currentFilter);
-        } catch (err) {
-            console.error(err);
-            toast.error("Failed to send reply");
-        } finally {
-            setModalLoading(false);
-        }
-    };
+      await AdminService.updateTicketStatus(
+        selectedTicket.ticket_id,
+        "Resolved",
+        replyText
+      );
 
-    const handleStatusChange = async (newStatus) => {
-        try {
-            setModalLoading(true);
-            await AdminService.updateTicketStatus(selectedTicket.ticket_id, newStatus, "");
-            toast.success(`Ticket status marked as ${newStatus}`);
-            setSelectedTicket(prev => ({ ...prev, status: newStatus }));
-            fetchTickets(currentFilter);
-        } catch (err) {
-            console.error(err);
-            toast.error("Failed to update status");
-        } finally {
-            setModalLoading(false);
-        }
-    };
+      toast.success("Reply sent and ticket resolved");
 
-    const handleViewTicket = (ticket) => {
-        setSelectedTicket(ticket);
-        setReplyText("");
-        setIsTicketModalOpen(true);
-    };
+      setReplyText("");
+      setIsTicketModalOpen(false);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to send reply");
+    } finally {
+      setModalLoading(false);
+    }
+  };
 
-    return (
-        <>
-            <SupportDesk
-                tickets={tickets}
-                loading={loading}
-                onViewTicket={handleViewTicket}
-                onFilterChange={setCurrentFilter}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-                totalTickets={totalTickets}
-                isLoading={loading}
-            />
-            <TicketModal
-                open={isTicketModalOpen}
-                onClose={() => setIsTicketModalOpen(false)}
-                ticket={selectedTicket}
-                replyText={replyText}
-                setReplyText={setReplyText}
-                onReply={handleTicketReply}
-                onStatusChange={handleStatusChange}
-                loading={modalLoading}
-            />
-        </>
-    );
+
+  const handleStatusChange = async (newStatus) => {
+    try {
+      setModalLoading(true);
+
+      await AdminService.updateTicketStatus(
+        selectedTicket.ticket_id,
+        newStatus,
+        ""
+      );
+
+      toast.success(`Ticket marked as ${newStatus}`);
+
+      setSelectedTicket((prev) => ({
+        ...prev,
+        status: newStatus
+      }));
+
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update status");
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  /* ================= VIEW ================= */
+
+  const handleViewTicket = (ticket) => {
+    setSelectedTicket(ticket);
+    setReplyText("");
+    setIsTicketModalOpen(true);
+  };
+
+  if (loading && !tickets.length) {
+    return <Loader message="Loading support tickets..." />;
+  }
+
+  return (
+    <>
+      <SupportDesk
+        tickets={tickets}
+        loading={loading}
+        onViewTicket={handleViewTicket}
+        onFilterChange={handleFilterChange}
+        onSearch={handleSearch}
+        searchValue={searchValue}
+        totalRecords={totalRecords}
+        onLazy={handleLazyLoad}
+        lazyParams={lazyParams}
+        onSelectAll={handleSelectAll}
+        onBulkStatusUpdate={handleBulkStatusUpdate}
+        selection={selectedItems}
+        onSelectionChange={setSelectedItems}
+        onReload={resetFilters}
+      />
+
+      <TicketModal
+        open={isTicketModalOpen}
+        onClose={() => setIsTicketModalOpen(false)}
+        ticket={selectedTicket}
+        replyText={replyText}
+        setReplyText={setReplyText}
+        onReply={handleTicketReply}
+        onStatusChange={handleStatusChange}
+        loading={modalLoading}
+      />
+    </>
+  );
 };
 
 export default Support;

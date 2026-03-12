@@ -3,21 +3,17 @@ import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import { useShop } from "../context/ShopContext";
 
 const SearchInput = () => {
-    const { setSearchTerm } = useShop();
-    const [search, setSearch] = useState("");
+    const { searchTerm, setSearchTerm } = useShop();
 
     const handleChange = (e) => {
-        const value = e.target.value;
-        setSearch(value);
-        setSearchTerm(value);
+        setSearchTerm(e.target.value);
     };
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
-            setSearchTerm(search.trim());
-            
+            setSearchTerm(searchTerm.trim());
         }
-    };  
+    };
 
     return (
         <div className="relative w-full group">
@@ -28,7 +24,7 @@ const SearchInput = () => {
 
                 <input
                     type="search"
-                    value={search}
+                    value={searchTerm}
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
                     className="bg-transparent outline-none w-full text-base font-medium text-gray-900 placeholder:text-gray-400 placeholder:font-normal"
@@ -36,7 +32,7 @@ const SearchInput = () => {
                 />
 
                 <button
-                    onClick={() => setSearchTerm(search.trim())}
+                    onClick={() => setSearchTerm(searchTerm.trim())}
                     className="h-full bg-gray-900 text-white px-8 font-bold hover:bg-black transition-colors hidden sm:block"
                 >
                     Search

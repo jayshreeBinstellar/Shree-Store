@@ -123,7 +123,7 @@ exports.createCheckoutSession = catchAsync(async (req, res) => {
       throw new Error("Order too large to process via this method. Please reduce cart size.");
     }
 
-    const clientUrl = req.headers.origin || 'http://localhost:3002';
+    const clientUrl = req.headers.origin || 'http://192.168.0.117:3002';
 
     const successUrl = `${clientUrl}/main/payment-success?session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${clientUrl}/main/cart`;
@@ -309,14 +309,14 @@ exports.verifyPayment = catchAsync(async (req, res) => {
   }
 
   try {
-    
+
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.payment_status !== 'paid') {
       return res.status(400).json({ status: "error", message: "Payment not completed" });
     }
 
- 
+
     const result = await processSuccessfulPayment(session);
 
     res.status(200).json({

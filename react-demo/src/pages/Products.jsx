@@ -6,7 +6,7 @@ import { CircularProgress } from "@mui/material";
 import { getProducts, getCategories, getBanners } from "../services/ShopService";
 import { useShop } from "../context/ShopContext";
 
- 
+
 const PAGE_SIZE = 12;
 
 const Products = () => {
@@ -20,6 +20,9 @@ const Products = () => {
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [loading, setLoading] = useState(true);
     const [categoryLoading, setCategoryLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [isLoadMoreLoading, setIsLoadMoreLoading] = useState(false);
 
     // Initial Metadata Fetch
     useEffect(() => {
@@ -59,43 +62,60 @@ const Products = () => {
 
     //   Fetch products based on selected category
 
-    const fetchProducts = useCallback(async (page = 1) => {
+    const fetchProducts = useCallback(async (currentPage = 1, isLoadMore = false) => {
         try {
-            setLoading(true);
-            let query = `page=${page}&limit=${PAGE_SIZE}`;
+            if (isLoadMore) setIsLoadMoreLoading(true);
+            else setLoading(true);
+
+            let query = `page=${currentPage}&limit=${PAGE_SIZE}`;
             if (selectedCategory) {
                 query += `&category=${selectedCategory.slug}`;
             }
+            if (searchTerm) {
+                query += `&search=${encodeURIComponent(searchTerm)}`;
+            }
             const data = await getProducts(query);
 
-            setProductsList(data.products || []);
+            if (data.status === "success") {
+                setProductsList(prev => isLoadMore ? [...prev, ...data.products] : (data.products || []));
+                setTotalPages(data.totalPages || 1);
+            }
         } catch (err) {
             console.error("[Products] Failed to fetch products:", err);
         } finally {
             setLoading(false);
+            setIsLoadMoreLoading(false);
         }
-    }, [selectedCategory]);
+    }, [selectedCategory, searchTerm]);
 
-    // Handle Category Changes
+    // Handle Category or Search Changes
     useEffect(() => {
-        fetchProducts(1);
-    }, [fetchProducts]);
+        const timeoutId = setTimeout(() => {
+            setPage(1);
+            fetchProducts(1, false);
+        }, 500); // Debounce search
+        return () => clearTimeout(timeoutId);
+    }, [selectedCategory, searchTerm, fetchProducts]);
 
-    
-    //  Filter products based on search term
- 
-    const filteredProducts = useMemo(() => {
-        const term = searchTerm?.toLowerCase().trim() || "";
-        if (!term) return productsList;
-
-        return productsList.filter(
-            (product) => product.title?.toLowerCase().includes(term)
-        );
-    }, [searchTerm, productsList]);
+    const handleLoadMore = useCallback(() => {
+        if (page < totalPages) {
+            const nextPage = page + 1;
+            setPage(nextPage);
+            fetchProducts(nextPage, true);
+        }
+    }, [page, totalPages, fetchProducts]);
 
     // Derived UI State
+    const filteredProducts = productsList;
     const showLoading = loading && categoryLoading;
     const bannerVisible = banners.length > 0;
+
+    const scrollToGrid = useCallback(() => {
+        const gridElement = document.getElementById("new-arrivals-grid");
+        if (gridElement) {
+            gridElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    }, []);
 
     if (showLoading) {
         return (
@@ -128,18 +148,19 @@ const Products = () => {
                 {/* Products List */}
                 <section className="space-y-16">
                     <ProductDiscovery
-                        title={selectedCategory ? `${selectedCategory.name} Products` : "Best Sellers"}
+                        title={selectedCategory ? `${selectedCategory.name} Catalog` : "Best Sellers"}
                         subtitle={selectedCategory ? `Browse our ${selectedCategory.name} collection` : "Our most loved fresh items this week"}
-                        products={filteredProducts}
+                        products={selectedCategory ? filteredProducts : filteredProducts.slice(0, 8)}
                         layout={selectedCategory ? "grid" : "slider"}
                         onViewDetails={openDetails}
                         liked={liked}
                         onToggleLike={toggleLike}
+                        onExploreAll={!selectedCategory ? scrollToGrid : null}
                     />
 
                     {!selectedCategory && (
-                        <>
-                            <div className="border-t border-gray-100"></div>
+                        <div id="new-arrivals-grid">
+                            <div className="border-t border-gray-100 mb-16"></div>
                             <ProductDiscovery
                                 title="New Arrivals"
                                 subtitle="Freshly stocked and ready for your cart"
@@ -148,10 +169,35 @@ const Products = () => {
                                 onViewDetails={openDetails}
                                 liked={liked}
                                 onToggleLike={toggleLike}
+                                onExploreAll={null} // Hide button for grid view
                             />
-                        </>
+                        </div>
                     )}
                 </section>
+
+                {/* Load More Controller */}
+                {page < totalPages && (
+                    <div className="mt-20 flex flex-col items-center gap-6">
+                        <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+                        <button
+                            onClick={handleLoadMore}
+                            disabled={isLoadMoreLoading}
+                            className="px-12 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none group flex items-center gap-3"
+                        >
+                            {isLoadMoreLoading ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    loading...
+                                </>
+                            ) : (
+                                <>
+                                    Explore More Products
+                                    <span className="group-hover:translate-y-1 transition-transform">↓</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
+                )}
 
                 {/* Empty State */}
                 {!loading && filteredProducts.length === 0 && (

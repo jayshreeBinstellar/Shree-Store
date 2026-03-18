@@ -1,0 +1,57 @@
+const express = require("express");
+require("dotenv").config();
+const cors = require("cors");
+// const multer = require("multer");
+
+const app = express();
+
+// DEBUG LOGGING MIDDLEWARE - Add this very first
+// app.use((req, res, next) => {
+//   console.log(`[SERVER] Incoming Request: ${req.method} ${req.url}`);
+//   next();
+// });
+
+const paymentController = require('./controller/payment');
+
+// Webhook needs raw body
+app.post('/webhook', express.raw({ type: 'application/json' }), paymentController.webhook);
+app.set('trust proxy', true);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from uploads directory with CORS headers
+app.use('/uploads', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+}, express.static('uploads'));
+
+app.use(cors({
+  origin: function (origin, callback) {
+    callback(null, true);
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Accept"]
+}));
+
+const auth = require('./routes/login');
+const shop = require('./routes/shop');
+const admin = require('./routes/admin');
+
+app.use('/auth', auth);
+app.use('/shop', shop);
+app.use('/admin', admin);
+
+app.use((err, req, res, next) => {
+  console.error("Global Error:", err);
+  console.log(err.stack);
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({ status: "error", message: err.message || "Internal Server Error" });
+});
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

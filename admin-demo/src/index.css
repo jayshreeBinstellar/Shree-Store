@@ -1,0 +1,436 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --font-sans: "Outfit", "Inter", sans-serif;
+    }
+
+    body {
+        @apply bg-[#f8fafc] text-slate-800 font-sans antialiased selection:bg-indigo-500 selection:text-white;
+        margin: 0;
+        display: flex;
+        min-width: 320px;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+}
+
+#root {
+    width: 100%;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3);
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.5);
+    /* Indigo hover */
+}
+
+/* Custom fade animation */
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* PrimeReact Filter Menu Customization */
+.p-column-filter-overlay {
+    background: #ffffff !important;
+    border: 1px solid #f3f4f6 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    padding: 1rem !important;
+}
+
+.p-column-filter-row-items {
+    padding: 0.5rem 0 !important;
+}
+
+.p-column-filter-row-item {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+    padding: 0.5rem 1rem !important;
+    transition: all 0.2s !important;
+    border-radius: 8px !important;
+}
+
+.p-column-filter-row-item:hover {
+    background: #f5f3ff !important;
+    color: #4f46e5 !important;
+}
+
+.p-column-filter-menu-button:hover,
+.p-column-filter-menu-button.p-column-filter-menu-button-open {
+    background: #f5f3ff !important;
+    color: #4f46e5 !important;
+}
+
+.p-column-filter-menu-button:hover,
+.p-datatable .p-datatable-tbody>tr {
+    transition: all 0.25s ease !important;
+    background: transparent !important;
+    color: #334155 !important;
+}
+
+/* Premium row hover effect */
+.p-datatable .p-datatable-tbody>tr:hover {
+    background-color: #f8fafc !important;
+    /* Soft Slate 50 */
+    box-shadow: inset 4px 0 0 0 #4f46e5 !important;
+    /* Indigo left border */
+}
+
+/* Specific styling for the cells when hovered */
+.p-datatable .p-datatable-tbody>tr:hover>td {
+    color: #1e293b !important;
+    /* Darker Slate for contrast */
+}
+
+.p-datatable .p-datatable-tbody>tr>td {
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 1.25rem 1rem !important;
+    font-size: 0.9rem !important;
+}
+.p-datatable-wrapper {
+    max-height: 588px !important;
+}
+
+.p-column-filter-overlay-header {
+    border-bottom: 1px solid #f3f4f6 !important;
+    margin-bottom: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
+.p-column-filter-overlay-footer {
+    border-top: 1px solid #f3f4f6 !important;
+    margin-top: 0.5rem !important;
+    padding-top: 0.5rem !important;
+    display: flex !important;
+    gap: 0.5rem !important;
+}
+
+.p-column-filter-clear-button {
+    background: #fef2f2 !important;
+    color: #ef4444 !important;
+    border: 1px solid #fecaca !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 1rem !important;
+}
+
+.p-column-filter-apply-button {
+    background: #4f46e5 !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 1rem !important;
+    flex: 1 !important;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2) !important;
+}
+
+.p-column-filter-menu-button {
+    width: 2rem !important;
+    height: 2rem !important;
+    border-radius: 8px !important;
+    color: #64748b !important;
+}
+
+.p-column-filter-menu-button.p-column-filter-menu-button-active {
+    background: #f5f3ff !important;
+    color: #4f46e5 !important;
+}
+
+.p-column-filter-constraints {
+    padding: 0 !important;
+}
+
+.p-column-filter-constraint {
+    padding: 0 !important;
+    border: none !important;
+}
+
+.p-column-filter-matchmode-dropdown {
+    margin-bottom: 0.75rem !important;
+    width: 100% !important;
+}
+
+.p-dropdown {
+    border-radius: 8px !important;
+    border: 1px solid #e5e7eb !important;
+    font-size: 12px !important;
+}
+
+.p-inputtext {
+    border-radius: 8px !important;
+    /* border: 1px solid #e5e7eb !important; */
+    font-size: 14px !important;
+    padding: 0.5rem 0.75rem !important;
+}
+
+input.p-column-filter.p-inputtext.p-component {
+    border: 1px solid #e5e7eb !important;
+}
+
+.p-inputtext:focus {
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1) !important;
+    border-color: #4f46e5 !important;
+}
+
+/* Row Filter Specific Improvements */
+.p-column-filter-row .p-column-filter-element {
+    width: 100% !important;
+}
+
+.p-column-filter-row .p-inputtext {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0/50 !important;
+    border-radius: 10px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 0.5rem 0.75rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.p-column-filter-row .p-inputtext:focus {
+    background: #ffffff !important;
+    /* box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important; */
+    /* border-color: #6366f1 !important; */
+}
+
+.p-column-filter-clear-button:hover {   
+    background: #fee2e2 !important;
+}
+
+/* PrimeReact Paginator Customization */
+.p-paginator {
+    background: #ffffff !important;
+    border-top: 1px solid #f1f5f9 !important;
+    padding: 1.5rem !important;
+    justify-content: space-between !important;
+    border-radius: 0 0 2rem 2rem !important;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page {
+    min-width: 2.25rem !important;
+    height: 2.25rem !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: 1px solid transparent !important;
+    margin: 0 2px !important;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+    background: #6366f1 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px -4px rgba(99, 102, 241, 0.4) !important;
+}
+
+.p-paginator .p-paginator-first,
+.p-paginator .p-paginator-prev,
+.p-paginator .p-paginator-next,
+.p-paginator .p-paginator-last {
+    min-width: 2.25rem !important;
+    height: 2.25rem !important;
+    border-radius: 12px !important;
+    color: #64748b !important;
+    transition: all 0.3s !important;
+}
+
+.p-paginator button:not(.p-disabled):not(.p-highlight):hover {
+    background: #f8fafc !important;
+    color: #6366f1 !important;
+}
+
+.p-paginator .p-paginator-current {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #94a3b8 !important;
+    margin-right: auto !important;
+}
+
+.p-paginator .p-rows-per-page-dropdown {
+    height: 2rem !important;
+    border-radius: 8px !important;
+    border: 1px solid #e5e7eb !important;
+    background: #f9fafb !important;
+}
+
+.p-paginator .p-rows-per-page-dropdown .p-inputtext {
+    padding: 0 0.5rem !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #374151 !important;
+}
+
+.p-paginator .p-paginator-icon {
+    font-size: 10px !important;
+}
+
+.p-paginator-bottom.p-paginator.p-component {
+    padding: 0px !important;
+}
+
+.p-dropdown-panel {
+    background: #ffffff !important;
+    border: 1px solid #f3f4f6 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.p-dropdown-panel .p-dropdown-items {
+    padding: 0.5rem !important;
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 8px !important;
+    transition: all 0.2s !important;
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+    background: #f5f3ff !important;
+    color: #4f46e5 !important;
+}
+
+.p-dropdown.p-component.p-inputwrapper.p-inputwrapper-filled {
+    max-height: 38px !important;
+}
+
+span.p-dropdown-label.p-inputtext {
+    align-content: center;
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover {
+    background: #f9fafb !important;
+    color: #4f46e5 !important;
+}
+
+.p-checkbox {
+    position: relative !important;
+    z-index: 20 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.p-checkbox .p-checkbox-box {
+    border: 2px solid #94a3b8 !important;
+    width: 20px !important;
+    height: 20px !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
+.p-checkbox:not(.p-checkbox-disabled) .p-checkbox-box:hover {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+}
+
+.p-checkbox .p-checkbox-box.p-highlight {
+    border-color: #4f46e5 !important;
+    background: #4f46e5 !important;
+}
+
+.p-checkbox:not(.p-checkbox-disabled) .p-checkbox-box.p-highlight:hover {
+    border-color: #4338ca !important;
+    background: #4338ca !important;
+}
+
+.p-checkbox .p-checkbox-box.p-focus {
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2) !important;
+    border-color: #4f46e5 !important;
+}
+
+.p-checkbox .p-checkbox-icon {
+    color: #ffffff !important;
+    font-size: 14px !important;
+    font-weight: bold !important;
+    cursor: pointer !important;
+}
+
+td.p-selection-column,
+th.p-selection-column {
+    position: relative !important;
+    z-index: 0 !important;
+    pointer-events: auto !important;
+    width: 4rem !important;
+    padding-left: 20px !important;
+}
+
+.p-datatable-tbody>tr {
+    cursor: pointer !important;
+}
+
+.p-datatable .p-datatable-header,
+.p-datatable .p-datatable-thead>tr>th,
+.p-paginator {
+    background: transparent !important;
+}
+
+
+span.w-full.p-calendar.p-component.p-inputwrapper.p-calendar-w-btn.p-calendar-w-btn-right {
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+}
+
+.p-calendar .p-inputtext:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+}
+
+body.modal-open {
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+body.modal-open .modal-backdrop {
+  pointer-events: auto !important;
+}
+
+.p-datatable .p-datatable-loading-overlay{
+        background: white !important;
+        opacity: 0.7 !important;
+
+    }

@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import  { ConfirmationProvider }  from "./context/ConfirmationContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Login from "./pages/auth/Login";
@@ -36,6 +37,15 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
+    const [appLoading, setAppLoading] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setAppLoading(false), 2500);
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (appLoading) return <Loader fullScreen message="Initializing Admin Panel..." />;
+
     return (
         <AuthProvider>
             <ConfirmationProvider>

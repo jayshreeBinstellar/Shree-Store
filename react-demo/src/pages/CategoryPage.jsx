@@ -155,29 +155,9 @@ const CategoryPage = ({
                     </section>
                 )}
 
-                {/* Segment Filter */}
-                {segments.length > 0 && (
-                    <div className="flex justify-center mb-16 animate-in slide-in-from-top-4 duration-500">
-                        <div className="bg-gray-50 border border-gray-100 p-2 rounded-[32px] flex gap-2 shadow-sm">
-                            {segments.map((seg) => (
-                                <button
-                                    key={seg.id}
-                                    onClick={() => {
-                                        setActiveSegment(seg.id);
-                                        setVisibleCount(INITIAL_PAGE_SIZE);
-                                    }}
-                                    className={`px-10 py-4 rounded-[24px] font-black text-xs uppercase tracking-widest transition-all ${activeSegment === seg.id ? "bg-indigo-600 text-white shadow-xl shadow-indigo-100 scale-105" : "text-gray-400 hover:text-gray-900 hover:bg-white"}`}
-                                >
-                                    {seg.name}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
                 {/* Structured Sub-categories */}
                 {subCategories?.length > 0 && !searchTerm && (
-                    <section className="space-y-20 mb-20 border-b border-gray-100 pb-20">
+                    <section className="space-y-20 mb-10 border-b border-gray-100 pb-20">
                         {subCategories.map((sub) => {
                             // Filter sections based on active segment
                             if (routeName === "fashion" && activeSegment !== "all") {
@@ -220,6 +200,28 @@ const CategoryPage = ({
                         })}
                     </section>
                 )}
+
+                
+                {/* Segment Filter */}
+                {segments.length > 0 && (
+                    <div className="flex justify-center mb-8 animate-in slide-in-from-top-4 duration-500">
+                        <div className="bg-gray-50 border border-gray-100 p-2 rounded-4xl flex gap-2 shadow-sm">
+                            {segments.map((seg) => (
+                                <button
+                                    key={seg.id}
+                                    onClick={() => {
+                                        setActiveSegment(seg.id);
+                                        setVisibleCount(INITIAL_PAGE_SIZE);
+                                    }}
+                                    className={`px-10 py-4 rounded-3xl font-black text-xs uppercase tracking-widest transition-all ${activeSegment === seg.id ? "bg-indigo-600 text-white shadow-xl shadow-indigo-100 scale-105" : "text-gray-400 hover:text-gray-900 hover:bg-white"}`}
+                                >
+                                    {seg.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
 
                 {/* Comprehensive Grid Section */}
                 <section className="mt-12 space-y-8" id="explore-all-grid">

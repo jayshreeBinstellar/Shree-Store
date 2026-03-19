@@ -56,6 +56,7 @@ const routes = [
         element: <CategoryPage
           routeName="electronics"
           category="laptops"
+          title='electonics'
         />
       },
       {
@@ -64,6 +65,7 @@ const routes = [
         element: <CategoryPage
           routeName="bag"
           category="womens-bags"
+          title='bag'
         />
       },
       {
@@ -72,6 +74,7 @@ const routes = [
         element: <CategoryPage
           routeName="footwear"
           category="mens-shoes"
+          title='footwear'
         />
       },
       {
@@ -80,6 +83,7 @@ const routes = [
         element: <CategoryPage
           routeName="grocery"
           category="groceries"
+          title='grocery'
           subCategories={[
             {
               name: "Vegetables & Fruits",
@@ -102,6 +106,7 @@ const routes = [
         element: <CategoryPage
           routeName="beauty"
           category="beauty"
+          title='beauty'
         />
       },
       {

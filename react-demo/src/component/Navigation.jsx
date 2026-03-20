@@ -84,7 +84,7 @@ const Navigation = () => {
                                     onClick={() => setOpen(false)}
                                     className={({ isActive }) =>
                                         `flex items-center gap-3 py-2 px-3 rounded-md text-sm uppercase transition
-                ${isActive
+                                            ${isActive
                                             ? "bg-indigo-600 text-white"
                                             : "text-gray-700 hover:bg-gray-100"}`
                                     }

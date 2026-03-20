@@ -50,7 +50,7 @@ const UserWishlistTab = ({ wishlist, setWishlist, toggleLike, openDetails }) => 
                 </>
             ) : (
                 <div className="text-center py-20 bg-gray-50 rounded-[30px] border-2 border-dashed border-gray-200">
-                    <HeartIcon className="w-12 h-12 text-gray-200 mx-auto mb-4" />
+                    <HeartIcon className="w-12 h-12 text-gray-200 mx-auto mb-4"/>
                     <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Your wishlist is empty</p>
                 </div>
             )}

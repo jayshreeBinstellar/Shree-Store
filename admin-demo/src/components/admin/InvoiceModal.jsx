@@ -3,6 +3,7 @@ import PrimeDataTable from '../common/PrimeDataTable';
 import Modal from "../common/Modal";
 import { ShoppingBagIcon, PrinterIcon } from "@heroicons/react/24/outline";
 import { getSettings } from "../../services/AdminService";
+import { useSettings } from "../../context/settingContext";
 
 const Row = ({ label, children, negative }) => (
     <div className={`flex justify-between text-sm ${negative ? 'text-rose-600' : 'text-gray-700'}`}>
@@ -14,25 +15,26 @@ const Row = ({ label, children, negative }) => (
 const InvoiceModal = ({ open, onClose, order }) => {
     const [taxRate, setTaxRate] = useState(18); // Default fallback
     const [storeName, setStoreName] = useState('GROCERYPRO');
+    const { settings } = useSettings();
 
-    useEffect(() => {
-        if (open) {
-            const fetchSettings = async () => {
-                try {
-                    const res = await getSettings();
-                    if (res.status === 'success' && res.settings) {
-                        setTaxRate(Number(res.settings.tax_percent));
-                        if (res.settings.store_name) {
-                            setStoreName(res.settings.store_name);
-                        }
-                    }
-                } catch (error) {
-                    console.error("Failed to load invoice settings", error);
-                }
-            };
-            fetchSettings();
-        }
-    }, [open]);
+    // useEffect(() => {
+    //     if (open) {
+    //         const fetchSettings = async () => {
+    //             try {
+    //                 const res = await getSettings();
+    //                 if (res.status === 'success' && res.settings) {
+    //                     setTaxRate(Number(res.settings.tax_percent));
+    //                     if (res.settings.store_name) {
+    //                         setStoreName(res.settings.store_name);
+    //                     }
+    //                 }
+    //             } catch (error) {
+    //                 console.error("Failed to load invoice settings", error);
+    //             }
+    //         };
+    //         fetchSettings();
+    //     }
+    // }, [open]);
 
     return (
         <Modal isOpen={open} onClose={onClose} className="w-[95%] max-w-[820px] rounded-[32px] max-h-[90vh] flex flex-col overflow-hidden">
@@ -56,7 +58,7 @@ const InvoiceModal = ({ open, onClose, order }) => {
                             <ShoppingBagIcon className="h-7 w-7 text-white" />
                         </div>
                         <h2 className="text-2xl font-black tracking-tight uppercase">
-                            {storeName}
+                            {settings?.store_name}
                         </h2>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">
 
@@ -90,9 +92,9 @@ const InvoiceModal = ({ open, onClose, order }) => {
                         <span
                             className={`inline-block px-4 py-1 rounded-full text-[11px] font-black uppercase
               ${order?.status === 'paid'
-                                        ? 'bg-emerald-50 text-emerald-600'
-                                        : 'bg-gray-100 text-gray-600'
-                                    }`}
+                                    ? 'bg-emerald-50 text-emerald-600'
+                                    : 'bg-gray-100 text-gray-600'
+                                }`}
                         >
                             {order?.status === 'paid'
                                 ? `paid • ${order?.payment_method || 'Stripe'}`
@@ -113,7 +115,8 @@ const InvoiceModal = ({ open, onClose, order }) => {
                         value={order?.items || []}
                         rows={10}
                         columns={[
-                            { header: 'Item', body: item => (
+                            {
+                                header: 'Item', body: item => (
                                     <div>
                                         <p className="font-semibold text-gray-900">{item.title}</p>
                                         {item.discount > 0 && (
@@ -127,9 +130,11 @@ const InvoiceModal = ({ open, onClose, order }) => {
                                             </div>
                                         )}
                                     </div>
-                                ) },
+                                )
+                            },
                             { field: 'quantity', header: 'Qty', sortable: true, style: { textAlign: 'center' } },
-                            { header: 'Amount', body: item => (
+                            {
+                                header: 'Amount', body: item => (
                                     <div className="text-right">
                                         <p className="font-bold text-gray-900">
                                             ${((item.effective_price || item.price) * item.quantity).toFixed(2)}
@@ -138,7 +143,8 @@ const InvoiceModal = ({ open, onClose, order }) => {
                                             ${Number(item.effective_price || item.price).toFixed(2)} / ea
                                         </p>
                                     </div>
-                                ), style: { textAlign: 'right' } },
+                                ), style: { textAlign: 'right' }
+                            },
                         ]}
                     />
                 </div>
@@ -181,7 +187,7 @@ const InvoiceModal = ({ open, onClose, order }) => {
                             : 'Free'}
                     </Row>
 
-                    <Row label={`Tax (${taxRate}%)`}>
+                    <Row label={`Tax (${settings?.tax_percent}%)`}>
                         ${Number(order?.tax_amount).toFixed(2)}
                     </Row>
 

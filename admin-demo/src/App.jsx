@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import  { ConfirmationProvider }  from "./context/ConfirmationContext";
+import { ConfirmationProvider } from "./context/ConfirmationContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Login from "./pages/auth/Login";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -26,6 +26,7 @@ import Profile from "./pages/auth/Profile";
 import { Toaster } from "react-hot-toast";
 import Loader from "./components/common/Loader";
 import ChangePassword from "./pages/auth/ChangePassword";
+import { SettingProvider } from "./context/settingContext";
 
 const ProtectedRoute = ({ children }) => {
     const { token, isAdmin, loading } = useAuth();
@@ -48,41 +49,43 @@ function App() {
 
     return (
         <AuthProvider>
-            <ConfirmationProvider>
-            <Toaster position="top-right" />
-            <Router>
-                <Routes>
-                    {/* Public Auth Routes */}
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/verify-otp" element={<VerifyOTP />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
+            <SettingProvider>
+                <ConfirmationProvider>
+                    <Toaster position="top-right" />
+                    <Router>
+                        <Routes>
+                            {/* Public Auth Routes */}
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/forgot-password" element={<ForgotPassword />} />
+                            <Route path="/verify-otp" element={<VerifyOTP />} />
+                            <Route path="/reset-password" element={<ResetPassword />} />
 
-                    {/* Protected Admin Routes */}
-                    <Route path="/" element={
-                        <ProtectedRoute>
-                            <Layout />
-                        </ProtectedRoute>
-                    }>
-                        <Route index element={<Dashboard />} />
-                        <Route path="orders" element={<Orders />} />
-                        <Route path="products" element={<Products />} />
-                        <Route path="customers" element={<Customers />} />
-                        <Route path="categories" element={<Categories />} />
-                        <Route path="banners" element={<Banners />} />
-                        <Route path="coupons" element={<Coupons />} />
-                        <Route path="reviews" element={<Reviews />} />
-                        <Route path="shipping" element={<Shipping />} />
-                        <Route path="payments" element={<Payments />} />
-                        <Route path="support" element={<Support />} />
-                        <Route path="logs" element={<Logs />} />
-                        <Route path="settings" element={<Settings />} />
-                        <Route path="profile" element={<Profile />} />
-                        <Route path="change-password" element={<ChangePassword/>}/>
-                    </Route>
-                </Routes>
-            </Router>
-            </ConfirmationProvider>
+                            {/* Protected Admin Routes */}
+                            <Route path="/" element={
+                                <ProtectedRoute>
+                                    <Layout />
+                                </ProtectedRoute>
+                            }>
+                                <Route index element={<Dashboard />} />
+                                <Route path="orders" element={<Orders />} />
+                                <Route path="products" element={<Products />} />
+                                <Route path="customers" element={<Customers />} />
+                                <Route path="categories" element={<Categories />} />
+                                <Route path="banners" element={<Banners />} />
+                                <Route path="coupons" element={<Coupons />} />
+                                <Route path="reviews" element={<Reviews />} />
+                                <Route path="shipping" element={<Shipping />} />
+                                <Route path="payments" element={<Payments />} />
+                                <Route path="support" element={<Support />} />
+                                <Route path="logs" element={<Logs />} />
+                                <Route path="settings" element={<Settings />} />
+                                <Route path="profile" element={<Profile />} />
+                                <Route path="change-password" element={<ChangePassword />} />
+                            </Route>
+                        </Routes>
+                    </Router>
+                </ConfirmationProvider>
+            </SettingProvider>
         </AuthProvider>
     );
 }

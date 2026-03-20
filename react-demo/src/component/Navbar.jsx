@@ -25,6 +25,13 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleSearch = (query) => {
+     console.log("serach", query);
+     
+  }
+
+  
+
   return (
     <div className={`sticky top-0 z-100 transition-all duration-300 ${scrolled ? "bg-white/80 backdrop-blur-xl shadow-lg py-1" : "bg-white py-2"
       }`}>
@@ -47,7 +54,7 @@ const Navbar = () => {
 
             {/* SEARCH */}
             <div className="flex-1 max-w-2xl hidden md:block">
-              <SearchInput />
+              <SearchInput  onSearch = {handleSearch} />
             </div>
 
             {/* ACTIONS */}
@@ -94,6 +101,7 @@ const Navbar = () => {
                   {cartCount > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 h-5 w-5 bg-red-500 text-white rounded-full text-[9px] font-black flex items-center justify-center border-2 border-white shadow-md">
                       {cartCount}
+                      {console.log(cartCount,"count")}
                     </span>
                   )}
                 </div>

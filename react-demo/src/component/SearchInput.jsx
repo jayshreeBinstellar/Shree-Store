@@ -38,11 +38,11 @@ const SearchInput = ({ onSearch }) => {
             </div>
 
             {/* Quick stats/tag mockups for style */}
-            <div className="absolute -bottom-6 left-2 flex gap-4 opacity-0 group-focus-within:opacity-100 transition-opacity">
+            {/* <div className="absolute -bottom-6 left-2 flex gap-4 opacity-0 group-focus-within:opacity-100 transition-opacity">
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter cursor-pointer hover:text-indigo-600">Laptops</span>
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter cursor-pointer hover:text-indigo-600">Fresh Fruits</span>
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter cursor-pointer hover:text-indigo-600">Shoes</span>
-            </div>
+            </div> */}
         </div>
     );
 };

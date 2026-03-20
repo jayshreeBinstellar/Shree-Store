@@ -19,9 +19,10 @@ import {
 import { useConfirm } from '../../context/ConfirmationContext';
 
 import { NavLink } from "react-router-dom";
-import { getSettings, logout } from "../../services/AdminService";
+import { logout } from "../../services/AdminService";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useSettings } from "../../context/settingContext";
 
 
 /* ---------------- Sidebar Item ---------------- */
@@ -111,7 +112,7 @@ const Sidebar = () => {
     const [storeName, setStoreName] = useState("GROCERYPRO");
     const auth = useAuth();
     const navigate = useNavigate();
-
+    const { settings } = useSettings();
     const confirm = useConfirm();
 
     const handleLogout = async () => {
@@ -128,21 +129,23 @@ const Sidebar = () => {
         navigate('/login');
     };
 
-    useEffect(() => {
-        const loadSettings = async () => {
-            try {
-                const res = await getSettings();
+    // useEffect(() => {
+    //     const loadSettings = async () => {
+    //         try {
+    //             const res = await getSettings();
 
-                if (res?.status === "success" && res?.settings?.store_name) {
-                    setStoreName(res.settings.store_name);
-                }
-            } catch (err) {
-                console.error("Sidebar settings error:", err);
-            }
-        };
+    //             if (res?.status === "success" && res?.settings?.store_name) {
+    //                 setStoreName(res.settings.store_name);
+    //             }
+    //         } catch (err) {
+    //             console.error("Sidebar settings error:", err);
+    //         }
+    //     };
 
-        loadSettings();
-    }, []);
+    //     loadSettings();
+    // }, []);
+
+
 
     return (
         <aside className="w-[280px] bg-white flex flex-col h-screen sticky top-0 border-r border-slate-200 shadow-sm z-40 shrink-0">
@@ -155,7 +158,7 @@ const Sidebar = () => {
 
                 <div className="flex flex-col">
                     <span className="text-[17px] font-black text-slate-800 uppercase">
-                        {storeName}
+                        {settings?.store_name}
                     </span>
                     <span className="text-[9px] font-black text-indigo-500 uppercase tracking-[0.2em]">
                         Admin Center

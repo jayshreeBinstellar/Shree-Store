@@ -30,6 +30,7 @@ const routes = [
         element: <CategoryPage
           routeName="fashion"
           category={['mens-shirts', 'mens-shoes', 'mens-watches', 'womens-dresses', 'womens-shoes', 'womens-watches', 'womens-jewellery', 'tops', 'womens-bags', 'sunglasses']}
+          title='fashion'
           subCategories={[
             {
               name: "Men's Collection",
